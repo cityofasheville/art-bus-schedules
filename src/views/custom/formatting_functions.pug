@@ -1,0 +1,164 @@
+-
+  function formatFrequencyWarning(frequencies) {
+    let warning = 'Trip times shown below are an example only. ';
+    frequencies.forEach((frequency, idx) => {
+      if (idx === 0) {
+        warning += 'This route runs every ';
+      } else {
+        warning += ' and ';
+      }
+      warning += `${frequency.headway_min} minutes between ${frequency.start_formatted_time} and ${frequency.end_formatted_time}`;
+    });
+    warning += '.';
+    return warning;
+  }
+
+  function getAgencyTimetableGroups(timetablePages, agencies) {
+    const agencyIds = [];
+    for (const timetablePage of timetablePages) {
+      agencyIds.push(...timetablePage.agency_ids);
+    }
+
+    const uniqueAgencyIds = _.uniq(_.compact(agencyIds));
+
+    if (uniqueAgencyIds.length === 0) {
+      return [{
+        agency: _.first(agencies),
+        timetablePages
+      }];
+    }
+
+    return _.orderBy(uniqueAgencyIds.map(agencyId => {
+      return {
+        agency: agencies.find(agency => agency.agency_id === agencyId) || _.first(agencies),
+        timetablePages: timetablePages.filter(timetablePage => timetablePage.agency_ids.includes(agencyId))
+      };
+    }), timetableGroup => timetableGroup.agency.agency_name.toLowerCase());
+  }
+
+  function prepareMapData(timetablePage, config) {
+    const routeData = {}
+    const stopData = {}
+    const geojsons = {}
+
+    for (const timetable of timetablePage.consolidatedTimetables) {
+      const minifiedGeojson = {
+        type: 'FeatureCollection',
+        features: []
+      }
+
+      for (const feature of timetable.geojson.features) {
+        if (feature.geometry.type.toLowerCase() === 'point') {
+          for (const route of feature.properties.routes) {
+            routeData[route.route_id] = route
+          }
+
+          stopData[feature.properties.stop_id] = {
+            stop_id: feature.properties.stop_id,
+            stop_code: feature.properties.stop_code,
+            stop_name: feature.properties.stop_name,
+            parent_station: feature.properties.parent_station,
+            stop_lat: feature.geometry.coordinates[1],
+            stop_lon: feature.geometry.coordinates[0],
+          }
+
+          feature.properties = {
+            route_ids: feature.properties.routes.map(route => route.route_id),
+            stop_id: feature.properties.stop_id,
+            parent_station: feature.properties.parent_station,
+          }
+        } else if (feature.geometry.type.toLowerCase() === 'linestring') {
+          feature.properties = {
+            route_color: feature.properties.route_color
+          }
+        } else if (feature.geometry.type.toLowerCase() === 'multilinestring') {
+          feature.properties = {
+            route_color: feature.properties.route_color
+          }
+        }
+        minifiedGeojson.features.push(feature)
+      }
+
+      geojsons[formatHtmlId(timetable.timetable_id)] = minifiedGeojson
+    }
+
+    const gtfsRealtimeUrls = {}
+
+    if (config.hasGtfsRealtimeVehiclePositions) {
+      gtfsRealtimeUrls.realtimeVehiclePositions = config.agencies.find(agency => agency.realtimeVehiclePositions?.url)?.realtimeVehiclePositions
+    }
+
+    if (config.hasGtfsRealtimeTripUpdates) {
+      gtfsRealtimeUrls.realtimeTripUpdates = config.agencies.find(agency => agency.realtimeTripUpdates?.url)?.realtimeTripUpdates
+    }
+
+    if (config.hasGtfsRealtimeAlerts) {
+      gtfsRealtimeUrls.realtimeAlerts = config.agencies.find(agency => agency.realtimeAlerts?.url)?.realtimeAlerts
+    }
+
+    return {
+      gtfsRealtimeUrls,
+      mapStyleUrl: config.mapStyleUrl,
+      pageData: {
+        routeIds: _.uniq(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes.map(route => route.route_id))),
+        tripIds: _.uniq(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.orderedTrips.map(trip => trip.trip_id))),
+        stopIds: Object.keys(stopData),
+        geojsons,
+      },
+      routeData,
+      stopData,
+    }
+  }
+
+  function getRouteColorsAsCss(route) {
+    if (route && route.route_color) {
+      return `background: #${route.route_color}; color: #${route.route_text_color ?? 'ffffff'};`
+    }
+
+    return ''
+  }
+
+  function formatTripName(trip, index, timetable) {
+    let tripName;
+    if (timetable.routes.length > 1) {
+      tripName = trip.route_short_name;
+    } else if (timetable.orientation === 'horizontal') {
+      // Only add this to horizontal timetables.
+      if (trip.trip_short_name) {
+        tripName = trip.trip_short_name;
+      } else {
+        tripName = `Run #${index + 1}`;
+      }
+    }
+
+    if (timetableHasDifferentDays(timetable)) {
+      tripName += ` ${trip.dayList}`;
+    }
+
+    return tripName;
+  }
+
+  function formatListForDisplay(list) {
+    return new Intl.ListFormat('en-US', {
+      style: 'long',
+      type: 'conjunction',
+    }).format(list);
+  }
+
+  function sortTimetablePages(timetablePages) {
+    return _.sortBy(timetablePages, [
+      timetablePage => {
+        // First sort numerically by route_short_name, removing leading non-digits
+        const firstRoute = timetablePage.consolidatedTimetables?.[0]?.routes?.[0];
+        if (!firstRoute?.route_short_name) {
+          return 0;
+        }
+
+        return Number.parseInt(firstRoute.route_short_name.replace(/^\D+/g, ''), 10) || 0;
+      },
+      timetablePage => {
+        // Then sort by route_short_name alphabetically
+        return timetablePage.consolidatedTimetables?.[0]?.routes?.[0]?.route_short_name ?? '';
+      }
+    ]);
+  }
