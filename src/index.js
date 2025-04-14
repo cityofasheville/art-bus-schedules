@@ -22,11 +22,7 @@ const query1 = `INSERT INTO timetables
                     (
                       SELECT DISTINCT ca.service_description,r.route_id,d.direction_id,c.start_date,c.end_date,c.monday,c.tuesday,c.wednesday,c.thursday
                                     ,c.friday,c.saturday,c.sunday,NULL AS start_time,NULL AS start_timestamp,NULL AS end_time,NULL AS end_timestamp
-                                    ,CASE
-                                        WHEN ca.service_description LIKE '%Saturday%' THEN CONCAT(d.direction,', ', 'Saturday')
-                                        WHEN ca.service_description LIKE '%Sunday%' THEN CONCAT(d.direction,', ', 'Sunday')
-                                        WHEN ca.service_description LIKE '%Weekday%' THEN CONCAT(d.direction,', ', 'Weekday')
-                                    END AS timetable_label
+                                    ,d.direction AS timetable_label
                                     ,NULL AS service_notes
                                     ,'vertical' AS orientation
                                     ,r.route_short_name AS timetable_page_id

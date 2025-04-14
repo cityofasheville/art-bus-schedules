@@ -5,13 +5,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "start",
+    "start": "cd src && node local.js",
     "build": "cd src && node index.js",
     "clean": "rm -rf build && rm -rf node_modules/"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^5.1.0",
     "gtfs-to-html": "^2.10.10"
   }
 }
