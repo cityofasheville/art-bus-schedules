@@ -29,12 +29,6 @@ include formatting_functions.pug
               include timetable_note_symbol.pug
           if timetable.service_notes !== null
             .timetable-service-notes= timetable.service_notes
-          .timetable-radio-menu 
-            div(class="btn-group btn-group-two" role="group" aria-label="Timetable Type")
-              input(class="btn-check" type="radio" name="timetableType166" autocomplete="off" id="timepoints_only" value="timepoints_only" checked="checked")
-              label(class="btn btn-sm btn-outline-primary" for="timepoints_only") Timepoint Stops
-              input(class="btn-check" type="radio" name="timetableType166" autocomplete="off" id="all_stops" value="all_stops")
-              label(class="btn btn-sm btn-outline-primary" for="all_stops") All Stops
             
       if timetable.orientation === 'horizontal'
         include timetable_horizontal.pug

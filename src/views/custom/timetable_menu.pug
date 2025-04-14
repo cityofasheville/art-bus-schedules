@@ -46,3 +46,12 @@ if timetablePage.consolidatedTimetables.length > 1
             label(class=idx === 0 ? 'btn-blue' : 'btn-gray')
               input.hidden(type="radio" name="dayList" autocomplete="off" value=dayList checked=(idx === 0))
               span= dayList
+      div 
+        #timepoint_selector 
+          h3 Stops
+          label(class="btn-blue")
+            input.hidden(type="radio" name="timepoints" autocomplete="off" value="timepoints_only" checked=true)
+            span= "Timepoint Stops"
+          label(class="btn-gray")
+            input.hidden(type="radio" name="timepoints" autocomplete="off" value="all_stops" checked=false)
+            span= "All Stops"
