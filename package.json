@@ -1,7 +1,7 @@
 {
-  "name": "gtfs-parser",
+  "name": "art-bus-schedules",
   "version": "1.0.0",
-  "description": "Parse gtfs data",
+  "description": "Generate ART Bus Schedule HTML pages based of GTFS data",
   "main": "index.js",
   "type": "module",
   "scripts": {
