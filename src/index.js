@@ -2,6 +2,7 @@
 import { importGtfs } from 'gtfs';
 import gtfsToHtml from 'gtfs-to-html';
 import fs, { readFile } from 'fs/promises';
+import path from 'path';
 import Database from 'better-sqlite3';
 
 function runQuery(db,query) {
@@ -10,8 +11,38 @@ function runQuery(db,query) {
   return result
 }
 
+async function processFiles(sourceFolder) {
+  try {
+    const files = await fs.readdir(sourceFolder);
+
+    for (const file of files) {
+      const filePath = path.join(sourceFolder, file);
+      const stats = await fs.stat(filePath);
+
+      if (stats.isFile()) {
+        const fileBaseName = path.parse(file).name;
+        const newFolderName = path.join(sourceFolder,'..', fileBaseName);
+        const newFilePath = path.join(newFolderName, 'index.html');
+
+        // Create the new folder if it doesn't exist
+        await fs.mkdir(newFolderName, { recursive: true });
+
+        // Move and rename the file
+        await fs.rename(filePath, newFilePath);
+
+        console.log(`Processed: ${file} -> ${newFilePath}`);
+      }
+    }
+
+    console.log('File processing complete.');
+  } catch (err) {
+    console.error('An error occurred:', err);
+  }
+}
+
 const url = 'https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip';
 const dbPath = './tmp/gtfs.db';
+const htmlSourceFolder = '../build/20250322-20250731'
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
@@ -72,3 +103,6 @@ try {
 db.close();
 
 await fs.rm('./tmp', { recursive: true, force: true });
+await fs.copyFile('./views/custom/favicon.ico', '../build/favicon.ico')
+
+await processFiles(htmlSourceFolder);
