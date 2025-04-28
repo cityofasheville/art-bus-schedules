@@ -11,7 +11,7 @@
   "outputFormat": "html",
   "showMap": true,
   "showOnlyTimepoint": false,
-  "useParentStation": true,
+  "useParentStation": false,
   "verbose": true,
   "sqlitePath": "./tmp/gtfs.db",
   "skipImport": true,
