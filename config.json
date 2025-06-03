@@ -2,7 +2,13 @@
   "agencies": [
     {
       "agencyKey": "ARTtransit",
-      "url": "https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip"
+      "url": "https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip",
+      "realtimeTripUpdates": {
+        "url": "https://frid6fyw9j.execute-api.us-east-1.amazonaws.com/tripupdates"
+      },
+      "realtimeVehiclePositions": {
+        "url": "https://frid6fyw9j.execute-api.us-east-1.amazonaws.com/vehiclepositions"
+      }
     }
   ],
   "linkStopUrls": true,
@@ -13,8 +19,8 @@
   "showOnlyTimepoint": false,
   "useParentStation": true,
   "verbose": true,
-  "sqlitePath": "./tmp/gtfs.db",
+  "sqlitePath": "src/tmp/gtfs.db",
   "skipImport": true,
-  "outputPath": "../build/",
-  "templatePath": "views/custom/"
+  "outputPath": "build/",
+  "templatePath": "src/views/custom/"
 }

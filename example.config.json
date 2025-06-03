@@ -4,7 +4,7 @@
       "url": "https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip"
     }
   ],
-  "sqlitePath": "./tmp/gtfs.db",
+  "sqlitePath": "src/tmp/gtfs.db",
   "allowEmptyTimetables": false,
   "beautify": false,
   "coordinatePrecision": 5,
@@ -35,7 +35,7 @@
   "noServiceText": "No service at this stop",
   "outputFormat": "html",
   "overwriteExistingFiles": true,
-  "outputPath": "../build/",
+  "outputPath": "build/",
   "requestDropoffSymbol": "†",
   "requestDropoffText": "Must request drop off",
   "requestPickupSymbol": "***",
@@ -52,7 +52,7 @@
   "showStoptimesForRequestStops": true,
   "skipImport": false,
   "sortingAlgorithm": "common",
-  "templatePath": "views/custom/",
+  "templatePath": "src/views/custom/",
   "timeFormat": "h:mma",
   "useParentStation": true,
   "verbose": true,

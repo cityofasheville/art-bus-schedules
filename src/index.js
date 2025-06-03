@@ -40,9 +40,14 @@ async function processFiles(sourceFolder) {
   }
 }
 
-const url = 'https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip';
-const dbPath = './tmp/gtfs.db';
-const htmlSourceFolder = '../build/20250322-20250731'
+const config = JSON.parse(
+  await readFile(new URL('../config.json', import.meta.url))
+);
+const url = config.agencies[0].url;
+const dbPath = config.sqlitePath;
+const templatePath = config.templatePath;
+const buildPath = config.outputPath;
+const htmlSourceFolder = buildPath + '20250527-20250731'
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
@@ -70,8 +75,7 @@ const query1 = `INSERT INTO timetables
 const query2 = `INSERT INTO timetable_pages (timetable_page_id)
                 SELECT DISTINCT route_short_name
                 FROM routes`;
-
-await fs.mkdir('./tmp');
+await fs.mkdir('./src/tmp');
 const db = new Database(dbPath);
 
 await importGtfs({
@@ -89,10 +93,6 @@ const ttablePagesResult = runQuery(db,query2);
 console.log('Timtables inserted', ttableResult.changes);
 console.log('Timtable Pages inserted', ttablePagesResult.changes);
 
-const config = JSON.parse(
-  await readFile(new URL('../config.json', import.meta.url))
-);
-
 try {
   await gtfsToHtml(config);
   // console.log('Timetables generated successfully');
@@ -102,7 +102,7 @@ try {
 
 db.close();
 
-await fs.rm('./tmp', { recursive: true, force: true });
-await fs.copyFile('./views/custom/favicon.ico', '../build/favicon.ico')
+await fs.rm('./src/tmp', { recursive: true, force: true });
+await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico')
 
 await processFiles(htmlSourceFolder);

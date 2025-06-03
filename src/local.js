@@ -6,7 +6,7 @@ const app = express();
 
 // Define the port the server will listen on
 const port = 3000;
-const __dirname = '../build';
+const __dirname = './build';
 
 // Serve static files from the 'build' directory
 app.use(express.static(__dirname));
