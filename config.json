@@ -4,10 +4,10 @@
       "agencyKey": "ARTtransit",
       "url": "https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip",
       "realtimeTripUpdates": {
-        "url": "https://jgy8r4z932.execute-api.us-east-1.amazonaws.com/tripupdates"
+        "url": "https://art-realtime-api.ashevillenc.gov/tripupdates"
       },
       "realtimeVehiclePositions": {
-        "url": "https://jgy8r4z932.execute-api.us-east-1.amazonaws.com/vehiclepositions"
+        "url": "https://art-realtime-api.ashevillenc.gov/vehiclepositions"
       }
     }
   ],
