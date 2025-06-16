@@ -47,7 +47,6 @@ const url = config.agencies[0].url;
 const dbPath = config.sqlitePath;
 const templatePath = config.templatePath;
 const buildPath = config.outputPath;
-const htmlSourceFolder = buildPath + '20250527-20250731'
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
@@ -71,10 +70,15 @@ const query1 = `INSERT INTO timetables
                       LEFT JOIN   directions AS d ON d.route_id=t.route_id AND d.direction_id=t.direction_id
                       INNER JOIN  calendar AS c ON c.service_id=t.service_id
                       INNER JOIN  calendar_attributes ca ON ca.service_id =c.service_id
+                      WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date  
                     ) ttbls`;
 const query2 = `INSERT INTO timetable_pages (timetable_page_id)
                 SELECT DISTINCT route_short_name
                 FROM routes`;
+const query3 = `SELECT DISTINCT CONCAT(c.start_date,'-',c.end_date) AS relativePath
+                FROM calendar c
+                WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date`;
+
 await fs.mkdir('./src/tmp');
 const db = new Database(dbPath);
 
@@ -89,6 +93,7 @@ await importGtfs({
 
 const ttableResult = runQuery(db,query1);
 const ttablePagesResult = runQuery(db,query2);
+const folderPath = db.prepare(query3).get();
 
 console.log('Timtables inserted', ttableResult.changes);
 console.log('Timtable Pages inserted', ttablePagesResult.changes);
@@ -105,4 +110,5 @@ db.close();
 await fs.rm('./src/tmp', { recursive: true, force: true });
 await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico')
 
+const htmlSourceFolder = buildPath + folderPath.relativePath
 await processFiles(htmlSourceFolder);
