@@ -8,48 +8,28 @@ function showSelectedTimetable() {
   }
 
   jQuery('#day_list_selector input[name="dayList"]').each((index, element) => {
-    jQuery(element)
-      .parents('label')
-      .toggleClass('btn-blue', jQuery(element).is(':checked'));
-    jQuery(element)
-      .parents('label')
-      .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
+    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
   });
 
-  jQuery('#direction_name_selector input[name="directionId"]').each(
-    (index, element) => {
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-blue', jQuery(element).is(':checked'));
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-    },
-  );
+  jQuery('#direction_name_selector input[name="directionId"]').each((index, element) => {
+    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
+    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+  });
 
-  jQuery('#timepoint_selector input[name="timepoints"]').each(
-    (index, element) => {
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-blue', jQuery(element).is(':checked'));
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-    },
-  );
+  jQuery('#timepoint_selector input[name="timepoints"]').each((index, element) => {
+    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
+    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+  });
 
-  const dayList = jQuery(
-    '#day_list_selector input[name="dayList"]:checked',
-  ).val();
+  const dayList = jQuery('#day_list_selector input[name="dayList"]:checked').val();
 
-  const directionId = jQuery(
-    '#direction_name_selector input[name="directionId"]:checked',
-  ).val();
+  const directionId = jQuery('#direction_name_selector input[name="directionId"]:checked').val();
 
   jQuery('.timetable').hide();
 
   const id = jQuery(
-    `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`,
+    `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`
   ).data('timetable-id');
 
   showTimetable(id);
@@ -63,7 +43,9 @@ function showTimetable(id) {
 function hideTimepointColumns() {
   const timetables = document.querySelectorAll('.timetable');
 
-  timetables.forEach(table => {
+  timetables.forEach((table) => {
+    table.dataset.stops = 'timepoints-only';
+
     const colgroup = table.querySelector('colgroup');
     if (!colgroup) {
       console.warn('colgroup not found in a .timetable table.');
@@ -79,7 +61,7 @@ function hideTimepointColumns() {
       }
     });
 
-    columnsToHideIndices.forEach(index => {
+    columnsToHideIndices.forEach((index) => {
       if (colElements[index]) {
         colElements[index].style.display = 'none';
       }
@@ -91,16 +73,16 @@ function hideTimepointColumns() {
 
     if (theadRow) {
       const headerCells = theadRow.querySelectorAll('th');
-      columnsToHideIndices.forEach(index => {
+      columnsToHideIndices.forEach((index) => {
         if (headerCells[index]) {
           headerCells[index].style.display = 'none';
         }
       });
     }
 
-    tbodyRows.forEach(row => {
+    tbodyRows.forEach((row) => {
       const cells = row.querySelectorAll('td');
-      columnsToHideIndices.forEach(index => {
+      columnsToHideIndices.forEach((index) => {
         if (cells[index]) {
           cells[index].style.display = 'none';
         }
@@ -112,7 +94,9 @@ function hideTimepointColumns() {
 function showAllTimepoints() {
   const timetables = document.querySelectorAll('.timetable');
 
-  timetables.forEach(table => {
+  timetables.forEach((table) => {
+    table.dataset.stops = 'all-stops';
+
     const colgroup = table.querySelector('colgroup');
     if (!colgroup) return;
 
@@ -132,7 +116,7 @@ function showAllTimepoints() {
       }
 
       // Handle body cells
-      tbodyRows.forEach(row => {
+      tbodyRows.forEach((row) => {
         const cells = row.querySelectorAll('td');
         if (cells[index]) {
           cells[index].style.display = '';
@@ -155,15 +139,23 @@ jQuery(() => {
   });
 
   const isTimepoint = jQuery('#timepoint_selector input[name="timepoints"]:checked').val();
+  // const timetableMain = jQuery('.timetable-main');
 
   jQuery('#timepoint_selector input[name="timepoints"]').change(() => {
-    if (jQuery('#timepoint_selector input[name="timepoints"]:checked').val() === 'timepoints_only'){
+    if (
+      jQuery('#timepoint_selector input[name="timepoints"]:checked').val() === 'timepoints_only'
+    ) {
       showSelectedTimetable();
       hideTimepointColumns();
+      // if (timetableMain) {
+      //   timetableMain.attr('data-stops', 'timepoints-only');
+      // }
     } else {
       showSelectedTimetable();
       showAllTimepoints();
+      // if (timetableMain) {
+      //   timetableMain.attr('data-stops', 'all-stops');
+      // }
     }
   });
-
 });
