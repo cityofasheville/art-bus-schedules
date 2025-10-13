@@ -27,6 +27,7 @@ function showSelectedTimetable() {
   const directionId = jQuery('#direction_name_selector input[name="directionId"]:checked').val();
 
   jQuery('.timetable').hide();
+  jQuery('.coa-timetable-map-container').hide();
 
   const id = jQuery(
     `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`
@@ -37,6 +38,7 @@ function showSelectedTimetable() {
 
 function showTimetable(id) {
   jQuery(`#timetable_id_${id}`).show();
+  jQuery(`#coa_map_container_${id}`).show();
   toggleMap(id);
 }
 

@@ -10,8 +10,9 @@ function formatRouteTextColor(route) {
 }
 
 function formatRoute(route) {
-  const html = route.route_url
-    ? jQuery('<a>').attr('href', route.route_url)
+  // const html = route.route_url ? jQuery('<a>').attr('href', route.route_url) : jQuery('<div>');
+  const html = route.route_short_name
+    ? jQuery('<a>').attr('href', `/${route.route_short_name}`)
     : jQuery('<div>');
 
   html.addClass('map-route-item');
@@ -24,13 +25,13 @@ function formatRoute(route) {
         .addClass('route-color-swatch')
         .css('backgroundColor', formatRouteColor(route))
         .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? ''),
+        .text(route.route_short_name ?? '')
     );
   }
   routeItemDivs.push(
     jQuery('<div>')
       .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
+      .text(route.route_long_name ?? `Route ${route.route_short_name}`)
   );
 
   html.append(routeItemDivs);
@@ -45,9 +46,7 @@ function formatRoutePopup(features) {
     jQuery('<div>').addClass('popup-title').text('Routes').appendTo(html);
   }
 
-  jQuery(html).append(
-    features.map((feature) => formatRoute(feature.properties)),
-  );
+  jQuery(html).append(features.map((feature) => formatRoute(feature.properties)));
 
   return html.prop('outerHTML');
 }
@@ -56,10 +55,7 @@ function formatStopPopup(feature) {
   const routes = JSON.parse(feature.properties.routes);
   const html = jQuery('<div>');
 
-  jQuery('<div>')
-    .addClass('popup-title')
-    .text(feature.properties.stop_name)
-    .appendTo(html);
+  jQuery('<div>').addClass('popup-title').text(feature.properties.stop_name).appendTo(html);
 
   if (feature.properties.stop_code ?? false) {
     jQuery('<div>')
@@ -75,14 +71,14 @@ function formatStopPopup(feature) {
   jQuery(html).append(
     jQuery('<div>')
       .addClass('route-list')
-      .html(routes.map((route) => formatRoute(route))),
+      .html(routes.map((route) => formatRoute(route)))
   );
 
   jQuery('<a>')
     .addClass('btn-blue btn-sm')
     .prop(
       'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
+      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`
     )
     .prop('target', '_blank')
     .prop('rel', 'noopener noreferrer')
@@ -137,6 +133,9 @@ function createSystemMap() {
   for (const feature of geojson.features) {
     routes[feature.properties.route_id] = feature.properties;
   }
+
+  map._systemBounds = bounds;
+  map._manualHighlight = false;
 
   map.scrollZoom.disable();
   map.addControl(new maplibregl.NavigationControl());
@@ -196,9 +195,9 @@ function addGeocoder(map, bounds) {
       {
         maplibregl,
         zoom: 12,
-      },
+      }
     ),
-    'top-left',
+    'top-left'
   );
 }
 
@@ -222,7 +221,7 @@ function disablePointsOfInterest(map) {
 function addMapLayers(map, geojson, defaultRouteColor, lineLayout) {
   const layers = map.getStyle().layers;
   const firstLabelLayerId = layers.find(
-    (layer) => layer.type === 'symbol' && layer.id.includes('label'),
+    (layer) => layer.type === 'symbol' && layer.id.includes('label')
   )?.id;
 
   addRouteLineShadow(map, geojson, lineLayout, firstLabelLayerId);
@@ -230,13 +229,7 @@ function addMapLayers(map, geojson, defaultRouteColor, lineLayout) {
   addRouteLineOutline(map, geojson, lineLayout, firstLabelLayerId);
   addHighlightedRouteLineOutline(map, geojson, lineLayout, firstLabelLayerId);
   addRouteLine(map, geojson, defaultRouteColor, lineLayout, firstLabelLayerId);
-  addHighlightedRouteLine(
-    map,
-    geojson,
-    defaultRouteColor,
-    lineLayout,
-    firstLabelLayerId,
-  );
+  addHighlightedRouteLine(map, geojson, defaultRouteColor, lineLayout, firstLabelLayerId);
   addStops(map, geojson);
   addHighlightedStops(map, geojson);
   addRouteLabels(map, geojson);
@@ -274,16 +267,11 @@ function addRouteLineShadow(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
-function addHighlightedRouteLineShadow(
-  map,
-  geojson,
-  lineLayout,
-  firstSymbolId,
-) {
+function addHighlightedRouteLineShadow(map, geojson, lineLayout, firstSymbolId) {
   map.addLayer(
     {
       id: 'highlighted-route-line-shadows',
@@ -310,7 +298,7 @@ function addHighlightedRouteLineShadow(
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
@@ -334,16 +322,11 @@ function addRouteLineOutline(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['has', 'route_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
-function addHighlightedRouteLineOutline(
-  map,
-  geojson,
-  lineLayout,
-  firstSymbolId,
-) {
+function addHighlightedRouteLineOutline(map, geojson, lineLayout, firstSymbolId) {
   map.addLayer(
     {
       id: 'highlighted-route-outlines',
@@ -363,17 +346,11 @@ function addHighlightedRouteLineOutline(
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
-function addRouteLine(
-  map,
-  geojson,
-  defaultRouteColor,
-  lineLayout,
-  firstSymbolId,
-) {
+function addRouteLine(map, geojson, defaultRouteColor, lineLayout, firstSymbolId) {
   map.addLayer(
     {
       id: 'routes',
@@ -393,17 +370,11 @@ function addRouteLine(
       layout: lineLayout,
       filter: ['has', 'route_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
-function addHighlightedRouteLine(
-  map,
-  geojson,
-  defaultRouteColor,
-  lineLayout,
-  firstSymbolId,
-) {
+function addHighlightedRouteLine(map, geojson, defaultRouteColor, lineLayout, firstSymbolId) {
   map.addLayer(
     {
       id: 'highlighted-routes',
@@ -423,7 +394,7 @@ function addHighlightedRouteLine(
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
@@ -444,15 +415,7 @@ function addStops(map, geojson) {
       'circle-stroke-color': '#3F4A5C',
       'circle-stroke-width': 2,
       'circle-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 13.5, 1],
-      'circle-stroke-opacity': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        13,
-        0,
-        13.5,
-        1,
-      ],
+      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 13.5, 1],
     },
     filter: ['has', 'stop_id'],
   });
@@ -475,15 +438,7 @@ function addHighlightedStops(map, geojson) {
       'circle-stroke-width': 2,
       'circle-stroke-color': '#3f4a5c',
       'circle-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 13.5, 1],
-      'circle-stroke-opacity': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        13,
-        0,
-        13.5,
-        1,
-      ],
+      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 13.5, 1],
     },
     filter: ['==', 'stop_id', ''],
   });
@@ -515,21 +470,21 @@ function setupEventListeners(map, routes) {
 }
 
 function handleMouseMove(event, map, routes) {
+  if (map._manualHighlight) {
+    // Do not change highlight on hover if manual highlight is active (i.e. from a .zoom-to click)
+    return;
+  }
   const features = map.queryRenderedFeatures(event.point, {
     layers: ['routes', 'route-outlines', 'stops-highlighted', 'stops'],
   });
   if (features.length > 0) {
     map.getCanvas().style.cursor = 'pointer';
-    highlightRoutes(
-      map,
-      _.compact(_.uniq(features.map((feature) => feature.properties.route_id))),
-    );
+    highlightRoutes(map, _.compact(_.uniq(features.map((feature) => feature.properties.route_id))));
 
     if (features.some((feature) => feature.layer.id === 'stops')) {
       highlightStop(
         map,
-        features.find((feature) => feature.layer.id === 'stops').properties
-          .stop_id,
+        features.find((feature) => feature.layer.id === 'stops').properties.stop_id
       );
     }
   } else {
@@ -571,13 +526,10 @@ function showStopPopup(map, feature) {
 function showRoutePopup(map, features, lngLat) {
   const routes = _.orderBy(
     _.uniqBy(features, (feature) => feature.properties.route_short_name),
-    (feature) => Number.parseInt(feature.properties.route_short_name, 10),
+    (feature) => Number.parseInt(feature.properties.route_short_name, 10)
   );
 
-  new maplibregl.Popup()
-    .setLngLat(lngLat)
-    .setHTML(formatRoutePopup(routes))
-    .addTo(map);
+  new maplibregl.Popup().setLngLat(lngLat).setHTML(formatRoutePopup(routes)).addTo(map);
 }
 
 function highlightStop(map, stopId) {
@@ -605,13 +557,9 @@ function highlightRoutes(map, routeIds, zoom) {
     ['in', ['get', 'route_id'], ['literal', routeIds]],
   ]);
 
-  map.setFilter('route-labels', [
-    'in',
-    ['get', 'route_id'],
-    ['literal', routeIds],
-  ]);
+  map.setFilter('route-labels', ['in', ['get', 'route_id'], ['literal', routeIds]]);
 
-  const routeLineOpacity = 0.4;
+  const routeLineOpacity = 0.15;
 
   map.setPaintProperty('routes', 'line-opacity', routeLineOpacity);
   map.setPaintProperty('route-outlines', 'line-opacity', routeLineOpacity);
@@ -619,35 +567,35 @@ function highlightRoutes(map, routeIds, zoom) {
 
   if (zoom) {
     const data = map.querySourceFeatures('routes');
-    if (data) {
-      const highlightedFeatures = data.filter((feature) =>
-        routeIds.includes(feature.properties.route_id),
+    let highlightedFeatures = [];
+
+    if (geojson && geojson.features.length > 0) {
+      highlightedFeatures = geojson.features.filter((feature) =>
+        routeIds.includes(feature.properties.route_id)
       );
-      if (highlightedFeatures.length > 0) {
-        const zoomBounds = getBounds({
-          type: 'FeatureCollection',
-          features: highlightedFeatures,
-        });
-        map.fitBounds(zoomBounds, {
-          padding: 20,
-        });
-      }
+    } else if (data) {
+      highlightedFeatures = data.filter((feature) =>
+        routeIds.includes(feature.properties.route_id)
+      );
+    }
+
+    if (highlightedFeatures.length > 0) {
+      console.log('highlightRoutes fit to highlighted features');
+      const zoomBounds = getBounds({
+        type: 'FeatureCollection',
+        features: highlightedFeatures,
+      });
+      map.fitBounds(zoomBounds, {
+        padding: 48,
+      });
     }
   }
 }
 
 function unHighlightRoutes(map, zoom) {
   map.setFilter('highlighted-routes', ['==', ['get', 'route_id'], 'none']);
-  map.setFilter('highlighted-route-outlines', [
-    '==',
-    ['get', 'route_id'],
-    'none',
-  ]);
-  map.setFilter('highlighted-route-line-shadows', [
-    '==',
-    ['get', 'route_id'],
-    'none',
-  ]);
+  map.setFilter('highlighted-route-outlines', ['==', ['get', 'route_id'], 'none']);
+  map.setFilter('highlighted-route-line-shadows', ['==', ['get', 'route_id'], 'none']);
 
   map.setFilter('route-labels', ['has', 'route_short_name']);
 
@@ -660,29 +608,52 @@ function unHighlightRoutes(map, zoom) {
   if (zoom) {
     const data = map.querySourceFeatures('routes');
     if (data) {
-      map.fitBounds(
-        getBounds({
+      if (zoom && map._systemBounds) {
+        console.log('highlightRoutes fit to system bounds');
+        map.fitBounds(map._systemBounds, {
+          padding: 20,
+        });
+      } else {
+        console.log('highlightRoutes fit to highlighted features');
+        const zoomBounds = getBounds({
           type: 'FeatureCollection',
-          features: data,
-        }),
-      );
+          features: highlightedFeatures,
+        });
+        map.fitBounds(zoomBounds, {
+          padding: 48,
+        });
+      }
     }
   }
 }
 
 function setupTableHoverListeners(map) {
   jQuery(() => {
-    jQuery('.overview-list a').hover((event) => {
-      const routeIdString = jQuery(event.target).data('route-ids');
+    jQuery('.overview-list button.zoom-to').click((event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const routeIdString = jQuery(event.currentTarget).data('route-ids');
       if (routeIdString) {
         const routeIds = routeIdString.toString().split(',');
+        unHighlightRoutes(map, true);
+        map._manualHighlight = true;
         highlightRoutes(map, routeIds, true);
       }
     });
 
-    jQuery('.overview-list').hover(
+    jQuery(document).on('keydown', function (event) {
+      if (event.key === 'Escape') {
+        map._manualHighlight = false;
+        unHighlightRoutes(map, true);
+      }
+    });
+
+    jQuery('.overview-list').click(
       () => {},
-      () => unHighlightRoutes(map, true),
+      () => {
+        map._manualHighlight = false;
+        unHighlightRoutes(map, true);
+      }
     );
   });
 }

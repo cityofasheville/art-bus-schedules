@@ -40,7 +40,7 @@ a:hover {
 /* Overview styles */
 
 .timetable-overview {
-  height: 100vh;
+  height: calc(100vh - 150px);
   align-items: stretch;
 }
 
@@ -70,16 +70,40 @@ a:hover {
   }
 }
 
+.coa-timetable-page-link-item {
+  list-style: none;
+  border-bottom: 1px solid rgb(226 232 240);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
 .timetable-overview a.timetable-page-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid rgb(226 232 240);
+  /* border-bottom: 1px solid rgb(226 232 240); */
   text-decoration: none;
   padding: 0.5rem;
 }
 
-.timetable-overview a.timetable-page-link:hover {
+button.zoom-to {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+/* .timetable-overview a.timetable-page-link:hover {
+  background-color: rgb(241 245 249);
+  text-decoration: none;
+} */
+
+.timetable-overview li.coa-timetable-page-link-item:hover {
   background-color: rgb(241 245 249);
   text-decoration: none;
 }

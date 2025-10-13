@@ -8,4 +8,15 @@ html(lang="en")
     block extraHeader
 
   body
+    header.main-header
+      .header-layout
+        if config.logo_url
+          .logo
+            a(href="/")
+              img(src=`${config.logo_url}` alt=`${config.wordpress.title || 'Transit '} logo`)
+        .nav-items
+          a(href="https://www.ashevillenc.gov/service/plan-your-trip/") Plan Your Trip
+          a(href="https://www.ashevillenc.gov/service/transit-fares-passes/") Fares and Passes
+          a(href="https://www.ashevillenc.gov/service/general-bus-policies/") Policies and Tips
+          a(href="https://www.ashevillenc.gov/service/bus-policies/") Bikes and Buses
     block content

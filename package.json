@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/local.js",
+    "start": "node src/index.js && node src/local.js",
     "build": "node src/index.js",
     "clean": "rm -rf build && rm -rf node_modules/"
   },

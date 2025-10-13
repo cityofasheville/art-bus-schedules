@@ -5,10 +5,10 @@ import fs, { readFile } from 'fs/promises';
 import path from 'path';
 import Database from 'better-sqlite3';
 
-function runQuery(db,query) {
+function runQuery(db, query) {
   const prep = db.prepare(query);
   const result = prep.run();
-  return result
+  return result;
 }
 
 async function processFiles(sourceFolder) {
@@ -21,7 +21,7 @@ async function processFiles(sourceFolder) {
 
       if (stats.isFile()) {
         const fileBaseName = path.parse(file).name;
-        const newFolderName = path.join(sourceFolder,'..', fileBaseName);
+        const newFolderName = path.join(sourceFolder, '..', fileBaseName);
         const newFilePath = path.join(newFolderName, 'index.html');
 
         // Create the new folder if it doesn't exist
@@ -40,13 +40,33 @@ async function processFiles(sourceFolder) {
   }
 }
 
-const config = JSON.parse(
-  await readFile(new URL('../config.json', import.meta.url))
-);
+/**
+ * Fetches content from the WordPress API
+ */
+async function getWordPressData() {
+  const defaultData = null;
+
+  try {
+    // Replace with the actual WordPress API fetch logic
+    // This is just a placeholder example to show how to inject data into the config
+    return {
+      title: 'Title from WP',
+      content: '<p>Content from <b>WP</b>, including HTML if we like</p>',
+    };
+  } catch (error) {
+    console.error('Failed to fetch data from WordPress API:', error.message);
+    return defaultData;
+  }
+}
+
+const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url)));
 const url = config.agencies[0].url;
 const dbPath = config.sqlitePath;
 const templatePath = config.templatePath;
 const buildPath = config.outputPath;
+config.wordpress = await getWordPressData();
+config.logo_url = '/art-logo.png';
+
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
@@ -85,14 +105,14 @@ const db = new Database(dbPath);
 await importGtfs({
   agencies: [
     {
-        url: url
+      url: url,
     },
   ],
   sqlitePath: dbPath,
 });
 
-const ttableResult = runQuery(db,query1);
-const ttablePagesResult = runQuery(db,query2);
+const ttableResult = runQuery(db, query1);
+const ttablePagesResult = runQuery(db, query2);
 const folderPath = db.prepare(query3).get();
 
 console.log('Timtables inserted', ttableResult.changes);
@@ -108,7 +128,8 @@ try {
 db.close();
 
 await fs.rm('./src/tmp', { recursive: true, force: true });
-await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico')
+await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
+await fs.copyFile(templatePath + 'art-logo.png', buildPath + 'art-logo.png');
 
-const htmlSourceFolder = buildPath + folderPath.relativePath
+const htmlSourceFolder = buildPath + folderPath.relativePath;
 await processFiles(htmlSourceFolder);
