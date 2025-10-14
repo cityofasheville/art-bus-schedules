@@ -6,13 +6,13 @@ include formatting_functions.pug
   else
     .overview-list
       each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
-        h1= `${formatListForDisplay(agencies.map((agency) => agency.agency_name))} Routes`
+        h1.text-decoration-line-through= `${formatListForDisplay(agencies.map((agency) => agency.agency_name))} Routes`
         //- h2= config.wordpress.title
         //- div!= config.wordpress.content
         each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
           if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
             li.coa-timetable-page-link-item
-              a.timetable-page-link(href=`${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
+              a.timetable-page-link(href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                 - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                 each route in timetableRouteList
                   .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''

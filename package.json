@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js && node src/local.js",
     "build": "node src/index.js",
-    "clean": "rm -rf build && rm -rf node_modules/"
+    "clean": "rm -rf build && rm -rf node_modules/",
+    "tw": "npx @tailwindcss/cli -i ./src/views/custom/css/tw-input.css -o ./src/views/custom/css/tw-output.css --watch"
   },
   "author": "",
   "license": "ISC",

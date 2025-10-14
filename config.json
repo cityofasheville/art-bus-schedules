@@ -11,6 +11,16 @@
       }
     }
   ],
+  "customPages": [
+    {
+      "template": "customhome_full.pug",
+      "output": "customhome/index.html"
+    },
+    {
+      "template": "about_full.pug",
+      "output": "about/index.html"
+    }
+  ],
   "linkStopUrls": true,
   "menuType": "radio",
   "noHead": false,
@@ -22,5 +32,9 @@
   "sqlitePath": "src/tmp/gtfs.db",
   "skipImport": true,
   "outputPath": "build/",
-  "templatePath": "src/views/custom/"
+  "templatePath": "src/views/custom/",
+  "cssPath": "/css/",
+  "jsPath": "/js/",
+  "customHomePagePath": "customhome/",
+  "systemMapPagePath": "map/"
 }

@@ -1,6 +1,7 @@
 // Using better-sqlite3 to open database
 import { importGtfs } from 'gtfs';
 import gtfsToHtml from 'gtfs-to-html';
+import pug from 'pug';
 import fs, { readFile } from 'fs/promises';
 import path from 'path';
 import Database from 'better-sqlite3';
@@ -11,13 +12,27 @@ function runQuery(db, query) {
   return result;
 }
 
-async function processFiles(sourceFolder) {
+async function processFiles({
+  sourceFolder = null,
+  defaultMapPagePath = null,
+  customHomePagePath = null,
+  systemMapPagePath = null,
+} = {}) {
+  if (!sourceFolder) {
+    console.error('No source folder provided for processing.');
+    return;
+  }
+
   try {
     const files = await fs.readdir(sourceFolder);
+
+    console.log('Processing source folder:', sourceFolder);
 
     for (const file of files) {
       const filePath = path.join(sourceFolder, file);
       const stats = await fs.stat(filePath);
+
+      console.log('Processing file:', filePath);
 
       if (stats.isFile()) {
         const fileBaseName = path.parse(file).name;
@@ -32,6 +47,24 @@ async function processFiles(sourceFolder) {
 
         console.log(`Processed: ${file} -> ${newFilePath}`);
       }
+    }
+
+    if (defaultMapPagePath) {
+      const mapSrc = path.join(defaultMapPagePath, 'index.html');
+      const mapDestDir = systemMapPagePath;
+      const mapDest = path.join(mapDestDir, 'index.html');
+      console.log('Moving map page from', mapSrc, 'to', mapDest);
+      console.log('Ensuring directory exists:', mapDestDir);
+      await fs.mkdir(mapDestDir, { recursive: true });
+      await fs.rename(mapSrc, mapDest);
+      console.log(`Moved map page: ${mapSrc} -> ${mapDest}`);
+    }
+
+    if (customHomePagePath) {
+      const customHomeSrc = path.join(customHomePagePath, 'index.html');
+      const customHomeDest = path.join(defaultMapPagePath, 'index.html');
+      await fs.rename(customHomeSrc, customHomeDest);
+      console.log(`Moved custom home page: ${customHomeSrc} -> ${customHomeDest}`);
     }
 
     console.log('File processing complete.');
@@ -123,13 +156,36 @@ try {
   // console.log('Timetables generated successfully');
 } catch (err) {
   console.error('Generation failed:', err);
+  await fs.rm('./src/tmp', { recursive: true, force: true });
 }
 
 db.close();
+
+for (const page of config.customPages) {
+  const templatePath = path.join(config.templatePath, page.template);
+  const outputPath = path.join(config.outputPath, page.output);
+
+  const html = pug.renderFile(templatePath, { config });
+
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+
+  await fs.writeFile(outputPath, html);
+}
 
 await fs.rm('./src/tmp', { recursive: true, force: true });
 await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
 await fs.copyFile(templatePath + 'art-logo.png', buildPath + 'art-logo.png');
 
-const htmlSourceFolder = buildPath + folderPath.relativePath;
-await processFiles(htmlSourceFolder);
+// const htmlSourceFolder = buildPath + folderPath.relativePath;
+// const defaultHomePagePath = buildPath;
+// const customHomePagePath = buildPath + config.customHomePagePath;
+// const systemMapPagePath = buildPath + config.systemMapPagePath;
+
+console.log('Build path:', buildPath);
+
+await processFiles({
+  sourceFolder: buildPath + folderPath.relativePath,
+  defaultMapPagePath: buildPath,
+  systemMapPagePath: buildPath + config.systemMapPagePath,
+  customHomePagePath: buildPath + config.customHomePagePath,
+});
