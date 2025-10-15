@@ -77,19 +77,35 @@ async function processFiles({
  * Fetches content from the WordPress API
  */
 async function getWordPressData() {
-  const defaultData = null;
+  let defaultData = null;
+  let returnedData = {};
 
   try {
-    // Replace with the actual WordPress API fetch logic
-    // This is just a placeholder example to show how to inject data into the config
-    return {
-      title: 'Title from WP',
-      content: '<p>Content from <b>WP</b>, including HTML if we like</p>',
-    };
+    const planYourTripResponse = await fetch(
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468'
+    );
+    const faresAndPassesResponse = await fetch(
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424'
+    );
+    if (!planYourTripResponse.ok) {
+      throw new Error(`HTTP error fetching Plan Your Trip! status: ${planYourTripResponse.status}`);
+    }
+    if (!faresAndPassesResponse.ok) {
+      throw new Error(
+        `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`
+      );
+    }
+    const planYourTripData = await planYourTripResponse.json();
+    const faresAndPassesData = await faresAndPassesResponse.json();
+    returnedData.planYourTrip = planYourTripData;
+    returnedData.faresAndPasses = faresAndPassesData;
+    returnedData.title = 'HC title';
+    returnedData.content = 'HC content';
   } catch (error) {
     console.error('Failed to fetch data from WordPress API:', error.message);
     return defaultData;
   }
+  return returnedData;
 }
 
 const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url)));
@@ -99,6 +115,8 @@ const templatePath = config.templatePath;
 const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
 config.logo_url = '/art-logo.png';
+
+// console.log('Config loaded:', config);
 
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id

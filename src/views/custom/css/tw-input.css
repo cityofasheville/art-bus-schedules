@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.entry-content td {
+  @apply border-r border-black border;
+  /* Add right border for internal columns */
+}
+
+.entry-content th {
+  @apply border-b border-black border;
+  /* Optional: if you want borders for header cells as well */
+}
+
+.entry-content ul {
+  @apply my-6 list-disc pl-10
+}
+
+.entry-content li {
+  @apply my-4
+}
+
+.entry-content blockquote {
+  @apply px-4 italic
+}
+
+.entry-content h1 {
+  @apply my-6 text-3xl
+}
+
+.entry-content h2 {
+  @apply my-6 text-2xl
+}
+
+.entry-content h3 {
+  @apply my-6 text-xl
+}
+
+.entry-content h4 {
+  @apply my-6 text-lg
+}
+
+.entry-content h5 {
+  @apply my-6 text-lg
+}
+
+.entry-content h6 {
+  @apply my-6 text-lg
+}
+
+
+.entry-content p,
+.entry-content pre,
+.entry-content figure,
+.entry-content img,
+.entry-content hr {
+  @apply my-6;
+}
+
+.entry-content figcaption {
+  @apply text-sm text-gray-600;
+}
+
+.entry-content img.alignleft {
+  @apply float-left mr-4 md:mr-6 lg:mr-8;
+}
+
+.entry-content img.alignright {
+  @apply float-right ml-4 md:ml-6 lg:ml-8;
+}
+
+.entry-content img.aligncenter {
+  @apply block mx-auto;
+}
+
+.entry-content img {
+  @apply max-w-full h-auto;
+}
+
+/* Optional: Style the caption */
+.entry-content figcaption {
+  @apply text-sm text-gray-500 mt-2;
+  /* Example Tailwind classes */
+}

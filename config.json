@@ -17,8 +17,12 @@
       "output": "customhome/index.html"
     },
     {
-      "template": "about_full.pug",
-      "output": "about/index.html"
+      "template": "planyourtrip_full.pug",
+      "output": "plan-your-trip/index.html"
+    },
+    {
+      "template": "faresandpasses_full.pug",
+      "output": "fares-and-passes/index.html"
     }
   ],
   "linkStopUrls": true,
