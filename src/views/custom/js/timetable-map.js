@@ -9,6 +9,9 @@ let tripUpdates;
 let vehiclePopup;
 let gtfsRealtimeInterval;
 
+console.log('Timetable map script loaded');
+console.log('TRIP IDS', tripIds);
+
 function formatRouteColor(route) {
   return route.route_color || '#000000';
 }
@@ -505,7 +508,7 @@ async function fetchGtfsRealtime(url, headers) {
   return obj.entity;
 }
 
-async function updateArrivals() {
+async function updateArrivals({ withMap = true } = {}) {
   const realtimeVehiclePositions = gtfsRealtimeUrls?.realtimeVehiclePositions;
   const realtimeTripUpdates = gtfsRealtimeUrls?.realtimeTripUpdates;
 
@@ -563,42 +566,49 @@ async function updateArrivals() {
       return tripIds.includes(tripUpdate.trip_update.trip.trip_id);
     });
 
-    for (const vehiclePosition of vehiclePositions) {
-      const vehicleId = vehiclePosition.vehicle.vehicle.id;
+    if (withMap) {
+      for (const vehiclePosition of vehiclePositions) {
+        const vehicleId = vehiclePosition.vehicle.vehicle.id;
 
-      let vehicleTripUpdate = tripUpdates?.find(
-        (tripUpdate) => tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id
-      );
+        let vehicleTripUpdate = tripUpdates?.find(
+          (tripUpdate) =>
+            tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id
+        );
 
-      if (!vehicleTripUpdate) {
-        vehicleTripUpdate = tripUpdates?.find(
-          (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
+        if (!vehicleTripUpdate) {
+          vehicleTripUpdate = tripUpdates?.find(
+            (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
+          );
+        }
+
+        let vehicleMarker = vehicleMarkers[vehicleId];
+
+        if (vehicleMarker === undefined) {
+          // If not on map, add it
+          addVehicleMarker(vehiclePosition, vehicleTripUpdate);
+        } else {
+          // Otherwise update location
+          updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTripUpdate);
+        }
+
+        const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
+        attachVehicleMarkerClickHandler(
+          vehiclePosition,
+          vehicleTripUpdate,
+          maps[visibleTimetableId]
         );
       }
 
-      let vehicleMarker = vehicleMarkers[vehicleId];
-
-      if (vehicleMarker === undefined) {
-        // If not on map, add it
-        addVehicleMarker(vehiclePosition, vehicleTripUpdate);
-      } else {
-        // Otherwise update location
-        updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTripUpdate);
-      }
-
-      const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
-      attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[visibleTimetableId]);
-    }
-
-    // Remove vehicles not in the feed
-    for (const vehicleId of Object.keys(vehicleMarkers)) {
-      if (
-        !vehiclePositions.find(
-          (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
-        )
-      ) {
-        vehicleMarkers[vehicleId].remove();
-        delete vehicleMarkers[vehicleId];
+      // Remove vehicles not in the feed
+      for (const vehicleId of Object.keys(vehicleMarkers)) {
+        if (
+          !vehiclePositions.find(
+            (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
+          )
+        ) {
+          vehicleMarkers[vehicleId].remove();
+          delete vehicleMarkers[vehicleId];
+        }
       }
     }
   } catch (error) {
@@ -814,7 +824,7 @@ function addHighlightedStops(map, geojson) {
     type: 'circle',
     source: { type: 'geojson', data: geojson },
     paint: {
-      'circle-color': '#f8f8b9',
+      'circle-color': '#ffff00',
       'circle-radius': {
         base: 1.75,
         stops: [
@@ -868,6 +878,11 @@ function handleClick(event, map) {
 }
 
 function showStopPopup(map, feature) {
+  console.log('popup feature', feature);
+  console.log('popup map', map._container.id.split('_id_').pop());
+  console.log('feature stop data', stopData[feature.properties.stop_id]);
+  // highlightStop(map, id, [feature.properties.stop_id.toString()]);
+
   new maplibregl.Popup()
     .setLngLat(feature.geometry.coordinates)
     .setHTML(getStopPopupHtml(feature, stopData[feature.properties.stop_id]))
@@ -1003,4 +1018,129 @@ function createMaps() {
       updateArrivals();
     }, arrivalUpdateInterval);
   }
+}
+
+function augmentArrivalInfo(arrival, stop_id) {
+  let augmentedArrival = { ...arrival };
+
+  if (stopData[stop_id]) {
+    augmentedArrival.stop_name = stopData[stop_id].stop_name;
+  }
+
+  if (tripData[arrival.trip_id]) {
+    let thisRouteId = tripData[arrival.trip_id].route_id;
+    if (routeData[thisRouteId]) {
+      augmentedArrival.route_long_name = routeData[thisRouteId].route_long_name;
+      augmentedArrival.route_short_name = routeData[thisRouteId].route_short_name;
+      augmentedArrival.route_color = routeData[thisRouteId].route_color;
+      augmentedArrival.route_text_color = routeData[thisRouteId].route_text_color;
+      let direction_info = directions.filter((dir) => {
+        return dir.route_id === thisRouteId && dir.direction_id === arrival.direction_id;
+      });
+      if (direction_info.length > 0) {
+        augmentedArrival.direction_name = direction_info[0].direction;
+      }
+    }
+  }
+
+  augmentedArrival.time_from_now = Math.round((arrival.time - Date.now() / 1000) / 60);
+
+  return augmentedArrival;
+}
+
+function groupArrivalsByRouteAndDirection(arrivals) {
+  const groups = {};
+  arrivals.forEach((a) => {
+    const groupKey = `${a.route_short_name || 'Unknown'} ${a.direction_name || ''}`.trim();
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(a);
+  });
+  return groups;
+}
+
+async function handleStopSelection(event) {
+  console.log('Handling stop selection: ', event.target.value);
+  const stop_id = event.target.value;
+  const thisStop = stopData[stop_id];
+
+  if (!thisStop) {
+    $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
+    return;
+  }
+
+  // TODO: prepare immutable stop, route, trip, etc datastructures and then derive smaller datastructures for the selected stop
+  // this should make the lookups faster
+
+  await updateArrivals({
+    withMap: false,
+  });
+
+  const arrivals = getUpcomingArrivalsForStop(stop_id);
+
+  const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
+  const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
+
+  let html = '';
+  if (augmentedArrivals.length === 0) {
+    html = '<div class="no-arrivals">No upcoming arrivals for this stop.</div>';
+  } else {
+    html = `<div class="arrivals-header mb-4">${thisStop.stop_name} (${thisStop.stop_code})</div>`;
+    for (const groupKey in groupedArrivals) {
+      html += `<div class="arrivals-row flex items-center gap-4 py-3">`;
+      html += `<span class="route-color-swatch-large" style="background-color: #${groupedArrivals[groupKey][0].route_color};color: #${groupedArrivals[groupKey][0].route_text_color};">${groupedArrivals[groupKey][0].route_short_name}</span>`;
+      html += `<span class="direction text-gray-700 text-sm">${
+        groupedArrivals[groupKey][0].direction_name || ''
+      }</span>`;
+
+      groupedArrivals[groupKey].forEach((a) => {
+        html += `
+            <span>
+            <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
+            <span class="text-xs text-gray-500">
+                        (${new Date(a.time * 1000).toLocaleTimeString({
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          timeStyle: 'short',
+                        })})
+            </span>
+            </span>
+          </li>
+        `;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  $('#results-container').html(html);
+}
+
+function getUpcomingArrivalsForStop(stop_id) {
+  const arrivals = [];
+  if (!tripUpdates) return arrivals;
+
+  for (const tripUpdate of tripUpdates) {
+    const stopTimeUpdates = tripUpdate.trip_update.stop_time_update.filter(
+      (stopTimeUpdate) =>
+        stopTimeUpdate.stop_id === stop_id &&
+        (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
+        stopTimeUpdate.schedule_relationship !== 3
+    );
+
+    for (const update of stopTimeUpdates) {
+      const time = update.departure ? update.departure.time : update.arrival.time;
+      const delay = update.departure ? update.departure.delay : update.arrival.delay;
+      arrivals.push({
+        trip_id: tripUpdate.trip_update.trip.trip_id,
+        time,
+        delay,
+        direction_id: tripUpdate.trip_update.trip.direction_id,
+      });
+    }
+  }
+
+  arrivals.sort((a, b) => a.time - b.time);
+  return arrivals;
 }

@@ -26,8 +26,6 @@ async function processFiles({
   try {
     const files = await fs.readdir(sourceFolder);
 
-    console.log('Processing source folder:', sourceFolder);
-
     for (const file of files) {
       const filePath = path.join(sourceFolder, file);
       const stats = await fs.stat(filePath);
@@ -53,8 +51,6 @@ async function processFiles({
       const mapSrc = path.join(defaultMapPagePath, 'index.html');
       const mapDestDir = systemMapPagePath;
       const mapDest = path.join(mapDestDir, 'index.html');
-      console.log('Moving map page from', mapSrc, 'to', mapDest);
-      console.log('Ensuring directory exists:', mapDestDir);
       await fs.mkdir(mapDestDir, { recursive: true });
       await fs.rename(mapSrc, mapDest);
       console.log(`Moved map page: ${mapSrc} -> ${mapDest}`);
@@ -116,8 +112,6 @@ const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
 config.logo_url = '/art-logo.png';
 
-// console.log('Config loaded:', config);
-
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
@@ -166,6 +160,24 @@ const ttableResult = runQuery(db, query1);
 const ttablePagesResult = runQuery(db, query2);
 const folderPath = db.prepare(query3).get();
 
+const stops = db.prepare('SELECT * FROM stops').all();
+const routes = db.prepare('SELECT * FROM routes').all();
+const timetables = db.prepare('SELECT * FROM timetables').all();
+const trips = db.prepare('SELECT * FROM trips').all();
+const directions = db.prepare('SELECT * FROM directions').all();
+
+// Build a timetablePage-like object
+const timetablePage = {
+  consolidatedTimetables: timetables, // You may want to group/filter these
+  stops,
+  routes,
+  trips,
+  directions,
+  // Add other properties as needed
+};
+
+config.timetablePage = timetablePage;
+
 console.log('Timtables inserted', ttableResult.changes);
 console.log('Timtable Pages inserted', ttablePagesResult.changes);
 
@@ -183,7 +195,10 @@ for (const page of config.customPages) {
   const templatePath = path.join(config.templatePath, page.template);
   const outputPath = path.join(config.outputPath, page.output);
 
-  const html = pug.renderFile(templatePath, { config });
+  const html = pug.renderFile(templatePath, {
+    config,
+    timetablePage, // Now available in your template
+  });
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
@@ -198,8 +213,6 @@ await fs.copyFile(templatePath + 'art-logo.png', buildPath + 'art-logo.png');
 // const defaultHomePagePath = buildPath;
 // const customHomePagePath = buildPath + config.customHomePagePath;
 // const systemMapPagePath = buildPath + config.systemMapPagePath;
-
-console.log('Build path:', buildPath);
 
 await processFiles({
   sourceFolder: buildPath + folderPath.relativePath,

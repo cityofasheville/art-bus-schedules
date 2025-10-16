@@ -114,6 +114,7 @@ button.zoom-to {
   color: rgb(30 41 59);
 }
 
+/* 
 .timetable-overview .route-color-swatch {
   min-width: 29px;
   height: 29px;
@@ -143,7 +144,7 @@ button.zoom-to {
   flex-shrink: 0;
   font-weight: bold;
   color: white;
-}
+} */
 
 .timetable-overview .btn-blue {
   color: rgb(255 255 255);

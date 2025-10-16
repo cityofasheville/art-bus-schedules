@@ -1,3 +1,52 @@
-h1.h4="Custom Home page"
-  span.badge.bg-secondary="Some badge"
-p.border-bottom.bg-light="This is a custom home page."
+include formatting_functions.pug
+
+.max-w-screen-lg.mx-auto.my-6
+  h1.text-2xl.my-6="Custom Home page"
+  p.mb-6="Pick a stop to see real time departures"
+  select#stop-select-dropdown.border.p-2.mb-6(onchange="handleStopSelection(event)")
+    option(value="") Select a stop
+    each stop in config.timetablePage.stops
+      option(value=stop.stop_id)= stop.stop_name
+
+#results-container.max-w-screen-lg.mx-auto.my-6.border.p-4 
+
+script.
+    window.config = !{JSON.stringify(config)};
+    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions};
+    const directions = window.config.timetablePage.directions;
+    const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
+    const routeData = window.config.timetablePage.routes.reduce((accumulator, route) => {
+      accumulator[route.route_id] = {
+        route_id: route.route_id,
+        route_short_name: route.route_short_name,
+        route_long_name: route.route_long_name,
+        route_desc: route.route_desc,
+        route_color: route.route_color,
+        route_text_color: route.route_text_color
+      };
+      return accumulator;
+    }, {});
+    const tripIds = window.config.timetablePage.trips.map(trip => trip.trip_id);
+    const tripData = window.config.timetablePage.trips.reduce((accumulator, trip) => {
+      accumulator[trip.trip_id] = {
+        trip_id: trip.trip_id,
+        route_id: trip.route_id,
+        trip_headsign: trip.trip_headsign,
+        direction_id: trip.direction_id
+      };
+      return accumulator;
+    }, {});
+    const stopData = window.config.timetablePage.stops.reduce((accumulator, stop) => {
+      accumulator[stop.stop_id] = {
+        stop_id: stop.stop_id,
+        stop_code: stop.stop_code,
+        stop_name: stop.stop_name,
+        stop_lat: stop.stop_lat,
+        stop_lon: stop.stop_lon
+      };
+      return accumulator;
+    }, {});
+    console.log('Data:', window.config);
+    $(document).ready(function() {
+      $('#stop-select-dropdown').select2();
+    });
