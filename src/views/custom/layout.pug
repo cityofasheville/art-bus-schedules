@@ -10,7 +10,7 @@ html(lang="en")
       link(rel="stylesheet" href=`/css/global.css`)
       link(rel="stylesheet" href=`/css/tw-output.css`)
 
-  body
+  body.h-screen
     header.main-header
       .header-layout
         if config.logo_url
@@ -18,7 +18,6 @@ html(lang="en")
             a(href="/")
               img(src=`${config.logo_url}` alt=`${config.wordpress.title || 'Transit '} logo`)
         .nav-items
-          a(href="https://www.ashevillenc.gov/service/transit-fares-passes/") Fares and Passes
           a(href="/map/") System Map
           a(href="/fares-and-passes/") Fares and Passes
           a(href="/plan-your-trip/") Plan Your Trip

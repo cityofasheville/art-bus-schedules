@@ -31,13 +31,38 @@ if timetablePage.consolidatedTimetables.length > 1
 
   if config.menuType === 'radio'
     .timetable-radio-menu
+      -const uniqueDirectionTimetablesC = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
+      div.grid.grid-cols-4.gap-4
+        #direction_name_selector
+          h3 CoA Service Direction
+          each timetable, idx in uniqueDirectionTimetablesC
+            .block
+              input(type="radio" name="directionId" value=timetable.direction_id)
+              label(for=timetable.direction_id)=`${timetable.direction_name}`
+        #day_list_selector
+          h3 Day of Week
+          each dayList, idx in timetablePage.dayLists
+            .block
+              input(type="radio" name="dayList" value=dayList )
+              label(for=dayList)= dayList
+        #timepoint_selector 
+          h3 Stops
+          .block
+            input(type="radio" name="timepoints" value="timepoints_only" checked=true)
+            label(for="timepoints_only") Timepoint Stops
+          .block
+            input(type="radio" name="timepoints" value="all_stops" checked=false)
+            label(for="all_stops") All Stops
+             
+  if config.menuType === 'radiooo'
+    .timetable-radio-menu
       -const uniqueDirectionTimetables = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
       div(hidden=uniqueDirectionTimetables.length <= 1)
         #direction_name_selector
           h3 Service Direction
           each timetable, idx in uniqueDirectionTimetables
             label(class=idx === 0 ? 'btn-blue' : 'btn-gray')
-              input.hidden(type="radio" name="directionId" autocomplete="off" value=timetable.direction_id checked=(idx === 0))
+              input.hidden(type="radio" name="directionId" autocomplete="off" value=timetable.direction_id )
               span= timetable.direction_name || timetable.timetable_label
       div(hidden=timetablePage.dayLists.length <= 1)
         #day_list_selector

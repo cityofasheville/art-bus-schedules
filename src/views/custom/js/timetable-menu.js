@@ -29,6 +29,8 @@ function showSelectedTimetable() {
   jQuery('.timetable').hide();
   jQuery('.coa-timetable-map-container').hide();
 
+  console.log(`Showing timetable for day list: ${dayList}, direction ID: ${directionId}`);
+
   const id = jQuery(
     `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`
   ).data('timetable-id');

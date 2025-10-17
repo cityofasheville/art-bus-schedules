@@ -84,3 +84,19 @@ include formatting_functions.pug
         console.log('Trip IDs on Page:', tripIds);
         console.log('Stop IDs on Page:', stopIds);
         createMaps();
+        $(document).ready(function() {
+          const initialTimetable = getUrlParam('timetable_id');
+          const initialDirection = getUrlParam('direction_id');
+          const initialDayList = getUrlParam('day_list');
+          if (initialTimetable) {
+            jQuery('.timetable').hide();
+            jQuery('.coa-timetable-map-container').hide();
+            showTimetable(initialTimetable);
+          } 
+          if (initialDirection) {
+            jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
+          }
+          if (initialDayList) {
+            jQuery('input[name="dayList"][value="' + initialDayList + '"]').prop('checked', true);
+          }
+        });

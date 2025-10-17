@@ -9,8 +9,7 @@ let tripUpdates;
 let vehiclePopup;
 let gtfsRealtimeInterval;
 
-console.log('Timetable map script loaded');
-console.log('TRIP IDS', tripIds);
+console.log('timetable-map script loaded');
 
 function formatRouteColor(route) {
   return route.route_color || '#000000';
@@ -1022,6 +1021,7 @@ function createMaps() {
 
 function augmentArrivalInfo(arrival, stop_id) {
   let augmentedArrival = { ...arrival };
+  let today_day_of_week = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
   if (stopData[stop_id]) {
     augmentedArrival.stop_name = stopData[stop_id].stop_name;
@@ -1039,6 +1039,25 @@ function augmentArrivalInfo(arrival, stop_id) {
       });
       if (direction_info.length > 0) {
         augmentedArrival.direction_name = direction_info[0].direction;
+        augmentedArrival.direction_id = direction_info[0].direction_id;
+        let timetableId = 0;
+        let matching_timetable = timetableData.filter((tt) => {
+          return (
+            tt.route_id === thisRouteId &&
+            tt.direction_id === arrival.direction_id &&
+            tt[today_day_of_week] === 1
+          );
+        });
+        if (matching_timetable.length > 0) {
+          augmentedArrival.timetable_id = matching_timetable[0].timetable_id;
+          let default_timetable_day = 'Mon-Fri';
+          if (matching_timetable[0].saturday === 1 && matching_timetable[0].sunday !== 1) {
+            default_timetable_day = 'Sat';
+          } else if (matching_timetable[0].saturday !== 1 && matching_timetable[0].sunday === 1) {
+            default_timetable_day = 'Sun';
+          }
+          augmentedArrival.timetable_day = default_timetable_day;
+        }
       }
     }
   }
@@ -1060,10 +1079,35 @@ function groupArrivalsByRouteAndDirection(arrivals) {
   return groups;
 }
 
-async function handleStopSelection(event) {
-  console.log('Handling stop selection: ', event.target.value);
+function handleReloadArrivals(event) {
+  const stop_id = event.currentTarget.getAttribute('data-stopid');
+  setUrlParam('stop_id', stop_id);
+  fetchRealtimeDeparturesForStop(stop_id);
+}
+
+function handleStopSelection(event) {
   const stop_id = event.target.value;
+  setUrlParam('stop_id', stop_id);
+  fetchRealtimeDeparturesForStop(stop_id);
+}
+
+function setUrlParam(paramName, paramValue) {
+  const url = new URL(window.location);
+  url.searchParams.set(paramName, paramValue);
+  window.history.replaceState({}, '', url);
+}
+
+function getUrlParam(paramName) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(paramName);
+}
+
+async function fetchRealtimeDeparturesForStop(stop_id) {
+  // console.log('trip data', tripData);
+  // console.log('Handling stop selection: ', event.target.value);
+  // const stop_id = event.target.value;
   const thisStop = stopData[stop_id];
+  $('#results-container').html('Loading upcoming arrivals...');
 
   if (!thisStop) {
     $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
@@ -1082,35 +1126,62 @@ async function handleStopSelection(event) {
   const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
   const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
 
+  const timeUpdated = new Date();
+  const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
+    timeStyle: 'short',
+  });
+
+  console.log('augmentedArrivals', augmentedArrivals);
+
   let html = '';
   if (augmentedArrivals.length === 0) {
     html = '<div class="no-arrivals">No upcoming arrivals for this stop.</div>';
   } else {
-    html = `<div class="arrivals-header mb-4">${thisStop.stop_name} (${thisStop.stop_code})</div>`;
+    html = ``;
+    html += `<div class="w-full flex items-start justify-between gap-4">
+    <div>
+        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${thisStop.stop_name} (${thisStop.stop_code})</h2>
+        <div class="text-sm text-gray-600">As of ${formattedTimeUpdated}</div>
+    </div>
+    <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
+    </div>`;
+    html += `<table class="w-full arrivals-table my-4">`;
+    html += `<thead><tr><th class="w-[82px] text-left pl-2 pr-6">Route</th><th class="w-[150px] text-left pr-6">Direction</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+    html += `<tbody>`;
     for (const groupKey in groupedArrivals) {
-      html += `<div class="arrivals-row flex items-center gap-4 py-3">`;
-      html += `<span class="route-color-swatch-large" style="background-color: #${groupedArrivals[groupKey][0].route_color};color: #${groupedArrivals[groupKey][0].route_text_color};">${groupedArrivals[groupKey][0].route_short_name}</span>`;
-      html += `<span class="direction text-gray-700 text-sm">${
+      html += `<tr class="odd:bg-white even:bg-slate-100">`;
+      html += `<td class="align-middle pl-2 pr-6 py-2">
+        <div class="flex items-center justify-items-center px-0">
+          <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${groupedArrivals[groupKey][0].direction_id}&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${groupedArrivals[groupKey][0].timetable_id}">
+          <span class="route-color-swatch-large" style="background-color: #${groupedArrivals[groupKey][0].route_color};color: #${groupedArrivals[groupKey][0].route_text_color};">${groupedArrivals[groupKey][0].route_short_name}</span>
+          </a>
+        </div>
+      </td>`;
+      html += `<td class="align-middle pr-6 py-2"><span class="direction text-gray-700 text-sm">${
         groupedArrivals[groupKey][0].direction_name || ''
-      }</span>`;
+      }</span></td>`;
+      html += `<td class="align-middle py-2">
+      <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
 
       groupedArrivals[groupKey].forEach((a) => {
+        const dateWithoutSecond = new Date(a.time * 1000);
+        const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
+          timeStyle: 'short',
+        });
         html += `
-            <span>
+            <span class="w-24 text-center">
             <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
             <span class="text-xs text-gray-500">
-                        (${new Date(a.time * 1000).toLocaleTimeString({
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          timeStyle: 'short',
-                        })})
+                        (${formattedTime})
             </span>
             </span>
-          </li>
         `;
       });
-      html += `</div>`;
+      html += `</div></td>`;
+      html += `</tr>`;
     }
+    html += `<tbody>`;
+    html += `</table>`;
     html += `</div>`;
   }
 
