@@ -1146,37 +1146,67 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
     </div>`;
     html += `<table class="w-full arrivals-table my-4">`;
-    html += `<thead><tr><th class="w-[82px] text-left pl-2 pr-6">Route</th><th class="w-[150px] text-left pr-6">Direction</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+    html += `<thead><tr><th class="w-[150px] text-left pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
     html += `<tbody>`;
     for (const groupKey in groupedArrivals) {
       html += `<tr class="odd:bg-white even:bg-slate-100">`;
-      html += `<td class="align-middle pl-2 pr-6 py-2">
+      html += `<td class="align-middle pl-2 pr-3 py-2">
         <div class="flex items-center justify-items-center px-0">
-          <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${groupedArrivals[groupKey][0].direction_id}&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${groupedArrivals[groupKey][0].timetable_id}">
-          <span class="route-color-swatch-large" style="background-color: #${groupedArrivals[groupKey][0].route_color};color: #${groupedArrivals[groupKey][0].route_text_color};">${groupedArrivals[groupKey][0].route_short_name}</span>
+          <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
+        groupedArrivals[groupKey][0].direction_id
+      }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
+        groupedArrivals[groupKey][0].timetable_id
+      }" class="mx-auto text-center">
+          <span class="block route-color-swatch-large" style="background-color: #${
+            groupedArrivals[groupKey][0].route_color
+          };color: #${groupedArrivals[groupKey][0].route_text_color};">${
+        groupedArrivals[groupKey][0].route_short_name
+      }</span>
+          <span class="block direction text-gray-700 text-sm">${
+            groupedArrivals[groupKey][0].direction_name || ''
+          }</span>
           </a>
         </div>
       </td>`;
-      html += `<td class="align-middle pr-6 py-2"><span class="direction text-gray-700 text-sm">${
-        groupedArrivals[groupKey][0].direction_name || ''
-      }</span></td>`;
       html += `<td class="align-middle py-2">
       <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
 
-      groupedArrivals[groupKey].forEach((a) => {
-        const dateWithoutSecond = new Date(a.time * 1000);
+      let arrivalsProcessed = 0;
+      for (const arrival of groupedArrivals[groupKey]) {
+        const dateWithoutSecond = new Date(arrival.time * 1000);
         const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
           timeStyle: 'short',
         });
         html += `
-            <span class="w-24 text-center">
-            <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
+            <span class="w-24 text-center ${
+              arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
+            } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
+            <span class="text-2xl text-gray-700">${arrival.time_from_now}</span> min<br />
             <span class="text-xs text-gray-500">
                         (${formattedTime})
             </span>
             </span>
         `;
-      });
+        arrivalsProcessed += 1;
+        // if (arrivalsProcessed >= 2) {
+        //   break;
+        // }
+      }
+
+      // groupedArrivals[groupKey].forEach((a) => {
+      //   const dateWithoutSecond = new Date(a.time * 1000);
+      //   const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
+      //     timeStyle: 'short',
+      //   });
+      //   html += `
+      //       <span class="w-24 text-center">
+      //       <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
+      //       <span class="text-xs text-gray-500">
+      //                   (${formattedTime})
+      //       </span>
+      //       </span>
+      //   `;
+      // });
       html += `</div></td>`;
       html += `</tr>`;
     }

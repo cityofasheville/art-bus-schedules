@@ -559,7 +559,7 @@ function highlightRoutes(map, routeIds, zoom) {
 
   map.setFilter('route-labels', ['in', ['get', 'route_id'], ['literal', routeIds]]);
 
-  const routeLineOpacity = 0.15;
+  const routeLineOpacity = 0.3;
 
   map.setPaintProperty('routes', 'line-opacity', routeLineOpacity);
   map.setPaintProperty('route-outlines', 'line-opacity', routeLineOpacity);

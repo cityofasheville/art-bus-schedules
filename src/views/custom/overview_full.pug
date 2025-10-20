@@ -2,7 +2,7 @@ extends layout
 block content
   include overview.pug
 
-block extraHeader
+block append extraHeader
   if config.showMap
     script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
     script(src="https://unpkg.com/lodash@4.17.21/lodash.min.js" crossorigin="anonymous")

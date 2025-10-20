@@ -40,8 +40,14 @@ a:hover {
 /* Overview styles */
 
 .timetable-overview {
-  height: calc(100vh - 150px);
-  align-items: stretch;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .timetable-overview {
+    height: calc(100vh - 10rem);
+    align-items: stretch;
+  }
 }
 
 @media (min-width: 768px) {
@@ -186,10 +192,10 @@ button.zoom-to {
 
 /* Map Styles */
 
-.overview-map {
+/* .overview-map {
   height: 100%;
   width: 100%;
-}
+} */
 
 .overview-map .maplibregl-popup-content .popup-title {
   margin: 0 20px 5px 0;
@@ -226,4 +232,9 @@ button.zoom-to {
 
 .overview-map .maplibregl-popup-content .maplibregl-popup-close-button {
   padding: 0 5px;
+}
+
+.maplibregl-ctrl-geocoder {
+  min-width: 180px;
+  width: unset
 }

@@ -1,0 +1,108 @@
+nav#main-nav(class="h-40 relative border-b-4 border-art-blue" aria-label="Main Navigation")
+  div(class="flex lg:items-center lg:justify-between w-full border-b border-white/15 mb-2")
+    #header-logo(class="w-full lg:w-auto text-center sm:text-left")
+      a(href="/")
+        img(class="inline-block", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
+        h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
+
+  div(class="lg:hidden w-full flex items-center justify-center py-2")
+    button#hamburger.w-full.text-art-blue.font-semibold.align-middle(aria-expanded="false")
+      i.bi.bi-list.text-2xl(aria-hidden="true")
+      i.bi.bi-dash-lg.text-2xl(aria-hidden="true")
+      span(class="inline-block text-xl pl-2 self-center")="Menu"
+
+  div#top-menu-container(class="nav-items hidden lg:block w-full lg:w-auto bg-aux-gray lg:bg-transparent absolute lg:relative z-50 p-4 lg:p-0")
+    ul#menu-main-site-navigation(class="flex flex-col lg:flex-row lg:justify-start")
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="#") About
+          button#submenu-145.dropdown-toggle(
+            class="text-xl pd-5 pl-2 pr-5 lg:pr-2 xl:pr-2 hover:bg-blue/85 flex items-center"
+            type="button"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="parent-145"
+            data-dropdown-id="parent-145"
+          )
+            i(class="bi bi-plus", aria-hidden="true")
+            i(class="bi bi-dash", aria-hidden="true")
+            span.sr-only="show submenu for About"
+        ul#parent-145.dropdown-menu.submenu(
+          class="z-30 lg:rounded-b-sm lg:border-b lg:border-r lg:border-l lg:border-ar-blue hidden relative lg:absolute lg:top-14 bg-aux-gray text-ar-slate size-max"
+          aria-labelledby="submenu-145"
+        )
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#debris/") Storm Debris
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#economic-recovery/") Economic Recovery
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#housing/") Housing
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#infrastructure/") Infrastructure
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#natural-and-cultural-resources/") Natural and Cultural Resources
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="/map/") System Map
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="/fares-and-passes/") Fares and Passes
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-custom menu-item-object-custom")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="/plan-your-trip/") Plan Your Trip
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="") Dropdown Menu
+          button#submenu-62.dropdown-toggle(
+            class="text-xl pd-5 pl-2 pr-5 lg:pr-2 xl:pr-2 hover:bg-blue/85 flex items-center"
+            type="button"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="parent-62"
+            data-dropdown-id="parent-62"
+          )
+            i(class="bi bi-plus", aria-hidden="true")
+            i(class="bi bi-dash", aria-hidden="true")
+            span.sr-only show submenu for Dropdown Menu
+        ul#parent-62.dropdown-menu.submenu(
+          class="z-30 lg:rounded-b-sm lg:border-b lg:border-r lg:border-l lg:border-ar-blue relative lg:absolute lg:top-14 bg-aux-gray text-ar-slate size-max hidden"
+          aria-labelledby="submenu-62"
+        )
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#documents/") Documents & Media
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#faq/") FAQ
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#economic-revitalization/") Economic Revitalization
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+          li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+            div(class="flex flex-row group border-b border-gray-400")
+              a(class="py-3 self-center text-dark hover ease-in-out px-7 w-full hocus:underline", href="#housing/") Housing
+              div(class="absolute left-0 top-0 h-full opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 bg-ar-tan w-[6px]")
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="#") News
+
+      li(class="relative flex flex-col lg:my-0 menu-item menu-item-type-post_type menu-item-object-page")
+        div(class="flex flex-row mr-6 group")
+          a(class="py-3 self-center text-dark hover ease-in-out hocus:underline", href="#") Contact

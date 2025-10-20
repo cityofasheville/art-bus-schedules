@@ -5,6 +5,26 @@
 
 @layer base {
 
+  .nav-items a {
+    @apply no-underline text-art-blue font-semibold px-4 py-2 hocus:bg-art-blue hocus:text-white;
+  }
+
+  .dropdown-toggle[aria-expanded="false"] i.bi-dash {
+    display: none;
+  }
+
+  .dropdown-toggle[aria-expanded="true"] i.bi-plus {
+    display: none;
+  }
+
+  #hamburger[aria-expanded="false"] i.bi-dash-lg {
+    display: none;
+  }
+
+  #hamburger[aria-expanded="true"] i.bi-list {
+    display: none;
+  }
+
   .text-link a {
     @apply text-art-green underline hover:no-underline hover:text-art-blue focus:no-underline focus:text-art-blue underline-offset-4;
   }
@@ -14,17 +34,30 @@
   }
 
   .btn-sm {
-    @apply inline-block px-2 py-1 text-sm;
+    @apply flex items-center justify-center px-2 py-1 text-sm;
   }
 
   .btn-art-green {
-    @apply inline-block px-4 py-2 text-white bg-art-green focus:bg-art-blue hover:bg-art-blue border border-art-blue hover:border-art-green focus:border-transparent rounded-md shadow-sm;
+    @apply flex items-center justify-center px-4 py-2 text-white bg-art-green hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
   }
 
-  .btn-art-blue {
-    @apply inline-block px-4 py-2 text-ar-slate bg-art-blue focus:bg-art-green hover:bg-art-green border border-transparent rounded-md shadow-sm;
+  .btn-blue {
+    @apply flex items-center justify-center px-4 py-2 text-aux-gray bg-art-blue hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
   }
 
+  .btn-gray {
+    @apply flex items-center justify-center px-4 py-2 text-slate-900 bg-aux-gray hocus:bg-slate-300 border border-slate-500 rounded-md shadow-sm;
+  }
+
+  .btn-group>*:not(:last-child) {
+    @apply rounded-r-none;
+    /* @apply border-r-0; */
+  }
+
+  .btn-group>*:not(:first-child) {
+    @apply rounded-l-none;
+    @apply border-l-0;
+  }
 
   .entry-content td {
     @apply border-r border-black border;

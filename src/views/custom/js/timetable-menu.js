@@ -131,6 +131,20 @@ function showAllTimepoints() {
 }
 
 jQuery(() => {
+  console.log('Timetable menu JS loaded, initializing...');
+
+  const initialDirection = getUrlParam('direction_id');
+  const initialDayList = getUrlParam('day_list');
+
+  if (initialDirection) {
+    console.log('Setting initial direction to', initialDirection);
+    jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
+  }
+  if (initialDayList) {
+    console.log('Setting initial day list to', initialDayList);
+    jQuery('input[name="dayList"][value="' + initialDayList + '"]').prop('checked', true);
+  }
+
   showSelectedTimetable();
   hideTimepointColumns();
 

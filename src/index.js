@@ -78,10 +78,13 @@ async function getWordPressData() {
 
   try {
     const planYourTripResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468'
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'
     );
     const faresAndPassesResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424'
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'
+    );
+    const transitConnectResponse = await fetch(
+      'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'
     );
     if (!planYourTripResponse.ok) {
       throw new Error(`HTTP error fetching Plan Your Trip! status: ${planYourTripResponse.status}`);
@@ -91,10 +94,17 @@ async function getWordPressData() {
         `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`
       );
     }
+    if (!transitConnectResponse.ok) {
+      throw new Error(
+        `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`
+      );
+    }
     const planYourTripData = await planYourTripResponse.json();
     const faresAndPassesData = await faresAndPassesResponse.json();
+    const transitConnectData = await transitConnectResponse.json();
     returnedData.planYourTrip = planYourTripData;
     returnedData.faresAndPasses = faresAndPassesData;
+    returnedData.transitConnect = transitConnectData.acf;
     returnedData.title = 'HC title';
     returnedData.content = 'HC content';
   } catch (error) {
@@ -111,6 +121,7 @@ const templatePath = config.templatePath;
 const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
 config.logo_url = '/art-logo.png';
+config.webpageTitle = 'ART Transit System';
 
 const query1 = `INSERT INTO timetables 
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id

@@ -25,6 +25,7 @@
       "output": "fares-and-passes/index.html"
     }
   ],
+  "webpageTitle": "ART Transit System",
   "linkStopUrls": true,
   "menuType": "radio",
   "noHead": false,

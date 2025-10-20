@@ -200,16 +200,16 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
   }
 }
 
-.timetable-page .timetable-radio-menu label {
+/* .timetable-page .timetable-radio-menu label {
   width: 100%;
   margin-bottom: 0.5rem;
-}
+} */
 
 .timetable-page .menu-type-radio .timetable {
   display: none;
 }
 
-.timetable-page .btn-blue {
+/* .timetable-page .btn-blue {
   color: rgb(255 255 255);
   padding: 0.75rem 1.5rem;
   background-color: rgb(37 99 235);
@@ -241,7 +241,7 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
 .timetable-page .btn-gray:hover {
   background-color: rgb(201, 206, 213);
   text-decoration: none;
-}
+} */
 
 .timetable-page .btn-sm {
   padding: 0.25rem 1rem;
