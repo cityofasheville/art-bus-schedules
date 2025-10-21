@@ -9,15 +9,19 @@
     @apply no-underline text-art-blue font-semibold px-4 py-2 hocus:bg-art-blue hocus:text-white;
   }
 
-  .dropdown-toggle[aria-expanded="false"] i.bi-dash {
+  .nav-items a:has(+ button.dropdown-toggle) {
+    @apply pr-0;
+  }
+
+  .dropdown-toggle[aria-expanded="false"] i.bi-chevron-up {
     display: none;
   }
 
-  .dropdown-toggle[aria-expanded="true"] i.bi-plus {
+  .dropdown-toggle[aria-expanded="true"] i.bi-chevron-down {
     display: none;
   }
 
-  #hamburger[aria-expanded="false"] i.bi-dash-lg {
+  #hamburger[aria-expanded="false"] i.bi-x-lg {
     display: none;
   }
 
@@ -57,6 +61,10 @@
   .btn-group>*:not(:first-child) {
     @apply rounded-l-none;
     @apply border-l-0;
+  }
+
+  label:has(input:focus) {
+    @apply bg-art-green font-semibold;
   }
 
   .entry-content td {
@@ -138,5 +146,9 @@
   .entry-content figcaption {
     @apply text-sm text-gray-500 mt-2;
     /* Example Tailwind classes */
+  }
+
+  .full-height-minus-nav {
+    height: calc(100vh - 9rem);
   }
 }

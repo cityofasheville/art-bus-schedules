@@ -26,7 +26,7 @@ div(class="timetable-overview flex flex-col-reverse md:flex-row")
                 //-     .timetable-page-label= timetablePage.timetable_page_label
                 //-     .badge-gray= timetablePage.dayList
                 button.zoom-to(data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
-                  i.bi.bi-search
+                  i.bi.bi-zoom-in(aria-hidden="true")
     if config.showMap
       div#system_map(class="overview-map h-100 w-100 md:flex-1 h-96 md:h-auto")
 

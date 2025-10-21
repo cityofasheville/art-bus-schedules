@@ -1146,7 +1146,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
     </div>`;
     html += `<table class="w-full arrivals-table my-4">`;
-    html += `<thead><tr><th class="w-[150px] text-left pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+    html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
     html += `<tbody>`;
     for (const groupKey in groupedArrivals) {
       html += `<tr class="odd:bg-white even:bg-slate-100">`;
@@ -1157,7 +1157,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
       }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
         groupedArrivals[groupKey][0].timetable_id
       }" class="mx-auto text-center">
-          <span class="block route-color-swatch-large" style="background-color: #${
+          <span class="route-color-swatch-large" style="background-color: #${
             groupedArrivals[groupKey][0].route_color
           };color: #${groupedArrivals[groupKey][0].route_text_color};">${
         groupedArrivals[groupKey][0].route_short_name

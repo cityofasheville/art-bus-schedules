@@ -36,24 +36,24 @@ if timetablePage.consolidatedTimetables.length > 1
         legend="CoA Service Direction"
         div(class=`w-full grid grid-cols-${uniqueDirectionTimetablesC.length} btn-group`)
           each timetable, idx in uniqueDirectionTimetablesC
-            label.btn-gray.text-center.cursor-pointer(for=`radio_dir_${timetable.direction_id}`)
-              input.sr-only(type="radio" name="directionId" value=timetable.direction_id id=`radio_dir_${timetable.direction_id}`)
+            label.relative.btn-gray.text-center.cursor-pointer(for=`radio_dir_${timetable.direction_id}`)
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="directionId" value=timetable.direction_id id=`radio_dir_${timetable.direction_id}`)
               span=timetable.direction_name
       fieldset#day_list_selector.p-4.border.shadow-md
         legend="Day of Week"
         div(class=`w-full grid grid-cols-${timetablePage.dayLists.length} btn-group`)
           each dayList, idx in timetablePage.dayLists
-            label.btn-gray.text-center.cursor-pointer(for=`radio_day_${dayList}`)
-              input.sr-only(type="radio" name="dayList" value=dayList id=`radio_day_${dayList}`)
+            label.relative.btn-gray.text-center.cursor-pointer(for=`radio_day_${dayList}`)
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="dayList" value=dayList id=`radio_day_${dayList}`)
               span=dayList
       fieldset#timepoint_selector.p-4.border.shadow-md
         legend="Stops"
         div(class=`w-full grid grid-cols-2 btn-group`)
-          label.btn-gray.text-center.cursor-pointer(for="radio_timepoints_only")
-            input.sr-only(type="radio" name="timepoints" value="timepoints_only" checked=true id="radio_timepoints_only")
+          label.relative.btn-gray.text-center.cursor-pointer(for="radio_timepoints_only")
+            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="timepoints_only" checked=true id="radio_timepoints_only")
             span= "Timepoints Only"
-          label.btn-gray.text-center.cursor-pointer(for="radio_all_stops")
-            input.sr-only(type="radio" name="timepoints" value="all_stops" checked=false id="radio_all_stops")
+          label.relative.btn-gray.text-center.cursor-pointer(for="radio_all_stops")
+            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="all_stops" checked=false id="radio_all_stops")
             span= "All Stops"
 
              

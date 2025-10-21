@@ -136,14 +136,49 @@ jQuery(() => {
   const initialDirection = getUrlParam('direction_id');
   const initialDayList = getUrlParam('day_list');
 
-  if (initialDirection) {
-    console.log('Setting initial direction to', initialDirection);
-    jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
+  const today_day_of_week = new Date().getDay();
+
+  let default_timetable_day;
+  let default_direction_id = 0;
+
+  if (today_day_of_week === 6) {
+    default_timetable_day = 'Sat';
+  } else if (today_day_of_week === 0) {
+    default_timetable_day = 'Sun';
+  } else {
+    default_timetable_day = 'Mon-Fri';
   }
+
+  const this_route_direction_ids = [
+    ...new Set(
+      jQuery('input[name="directionId"]')
+        .map((_, el) => jQuery(el).val())
+        .get()
+    ),
+  ];
+
+  if (this_route_direction_ids.length > 0) {
+    default_direction_id = this_route_direction_ids[0];
+  }
+
+  if (initialDirection) {
+    console.log('Setting initial direction to: ', initialDirection);
+    jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
+  } else {
+    console.log('Setting initial direction to default: ', 0);
+    jQuery('input[name="directionId"][value="' + default_direction_id + '"]').prop('checked', true);
+  }
+
   if (initialDayList) {
     console.log('Setting initial day list to', initialDayList);
     jQuery('input[name="dayList"][value="' + initialDayList + '"]').prop('checked', true);
+  } else {
+    console.log(`Setting initial day list to ${default_timetable_day}`);
+    jQuery(`input[name="dayList"][value="${default_timetable_day}"]`).prop('checked', true);
   }
+
+  console.log(`Setting initial stops to timepopints only view`);
+  jQuery(`input[name="timepoints"][value="timepoints_only"]`).prop('checked', true);
 
   showSelectedTimetable();
   hideTimepointColumns();
@@ -156,7 +191,7 @@ jQuery(() => {
     showSelectedTimetable();
   });
 
-  const isTimepoint = jQuery('#timepoint_selector input[name="timepoints"]:checked').val();
+  // const isTimepoint = jQuery('#timepoint_selector input[name="timepoints"]:checked').val();
   // const timetableMain = jQuery('.timetable-main');
 
   jQuery('#timepoint_selector input[name="timepoints"]').change(() => {

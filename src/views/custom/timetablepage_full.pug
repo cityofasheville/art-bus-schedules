@@ -3,8 +3,6 @@ block content
   include timetablepage.pug
 
 block append extraHeader
-  script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
-
 
   if ((config.hasGtfsRealtimeVehiclePositions || config.hasGtfsRealtimeTripUpdates) && config.showMap) || config.hasGtfsRealtimeAlerts
     script(src=`/js/pbf.js`)
@@ -23,6 +21,4 @@ block append extraHeader
     script(src=`/js/timetable-menu.js`)
     
   link(rel="stylesheet" href=`/css/timetable_styles.css`)
-  link(rel="stylesheet" href=`/css/global.css`)
-  link(rel="stylesheet" href=`/css/tw-output.css`)
 

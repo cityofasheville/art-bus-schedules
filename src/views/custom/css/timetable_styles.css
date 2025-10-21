@@ -127,7 +127,7 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
   color: rgb(75 85 99);
 }
 
-.timetable-page .sr-only {
+/* .timetable-page .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -137,7 +137,7 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
+} */
 
 .timetable-page .hidden {
   display: none;
