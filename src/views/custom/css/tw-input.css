@@ -6,7 +6,7 @@
 @layer base {
 
   .nav-items a {
-    @apply no-underline text-art-blue font-semibold px-4 py-2 hocus:bg-art-blue hocus:text-white;
+    @apply no-underline text-art-blue font-semibold px-4 py-2 border-t-4 border-transparent hocus:border-art-blue;
   }
 
   .nav-items a:has(+ button.dropdown-toggle) {
@@ -65,6 +65,10 @@
 
   label:has(input:focus) {
     @apply bg-art-green font-semibold;
+  }
+
+  fieldset:has(input:focus) {
+    @apply border-art-blue;
   }
 
   .entry-content td {
@@ -151,4 +155,5 @@
   .full-height-minus-nav {
     height: calc(100vh - 9rem);
   }
+
 }

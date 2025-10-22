@@ -14,10 +14,10 @@ html(lang="en")
       link(rel="stylesheet" href=`/css/tw-output.css`)
 
   body(class="h-screen")
-    div(class="relative")
-      a(href="#main_content" class="absolute left-0 top-0 sr-only focus:not-sr-only") Skip to main content
-    div(class="")
-      include navigation.pug
+    //- div(class="relative")
+    a(href="#main_content" class="absolute left-0 top-0 sr-only focus:not-sr-only") Skip to main content
+    //- div(class="")
+    include navigation.pug
     //- header.main-header
     //-   .header-layout
     //-     if config.logo_url
@@ -30,8 +30,8 @@ html(lang="en")
     //-       a(href="/plan-your-trip/") Plan Your Trip
 
 
-    main#main_content
-      block content 
+    //- main#main_content(class="h-100")
+    block content 
 
     script.
       document.addEventListener('DOMContentLoaded', () => {

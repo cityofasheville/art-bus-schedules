@@ -43,10 +43,20 @@ a:hover {
   height: auto;
 }
 
+/* This is the route list element under the map on the system map page */
+.timetable-overview .overview-list {
+  height: calc(100vh - 32rem);
+}
+
+
 @media (min-width: 768px) {
   .timetable-overview {
     height: calc(100vh - 10rem);
     align-items: stretch;
+  }
+
+  .timetable-overview .overview-list {
+    height: auto;
   }
 }
 

@@ -555,6 +555,8 @@ video {
 }
 
 .nav-items a {
+  border-top-width: 4px;
+  border-color: transparent;
   padding-left: 1rem;
   padding-right: 1rem;
   padding-top: 0.5rem;
@@ -566,17 +568,13 @@ video {
 }
 
 .nav-items a:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 94 173 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  --tw-border-opacity: 1;
+  border-color: rgb(0 94 173 / var(--tw-border-opacity, 1));
 }
 
 .nav-items a:focus {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 94 173 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  --tw-border-opacity: 1;
+  border-color: rgb(0 94 173 / var(--tw-border-opacity, 1));
 }
 
 .nav-items a:has(+ button.dropdown-toggle) {
@@ -728,6 +726,11 @@ label:has(input:focus) {
   --tw-bg-opacity: 1;
   background-color: rgb(81 172 60 / var(--tw-bg-opacity, 1));
   font-weight: 600;
+}
+
+fieldset:has(input:focus) {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 94 173 / var(--tw-border-opacity, 1));
 }
 
 .entry-content td {
@@ -1167,6 +1170,11 @@ label:has(input:focus) {
   border-radius: 0.25rem;
 }
 
+.rounded-t-sm {
+  border-top-left-radius: 0.125rem;
+  border-top-right-radius: 0.125rem;
+}
+
 .border {
   border-width: 1px;
 }
@@ -1234,11 +1242,6 @@ label:has(input:focus) {
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .py-6 {
@@ -1321,6 +1324,11 @@ label:has(input:focus) {
 .text-gray-700 {
   --tw-text-opacity: 1;
   color: rgb(55 65 81 / var(--tw-text-opacity, 1));
+}
+
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
 .opacity-0 {

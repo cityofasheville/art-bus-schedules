@@ -4,14 +4,15 @@ include formatting_functions.pug
   img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
   div(class="w-full px-4")
-    div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-4 my-12")
-      h1.text-2xl.mt-0.mb-4="Real-time Departures"
-      p.mb-4="Select a stop to see real time departure information"
-      select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-        option(value="") Select a stop
-        each stop in config.timetablePage.stops
-          option(value=stop.stop_id)= stop.stop_name
-      output#results-container.max-w-screen-lg.mx-auto.block.py-6 
+    div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
+      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")="Real-time Departures"
+      div(class="p-4")
+        p.mb-4="Select a stop to see real time departure information"
+        select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+          option(value="") Select a stop
+          each stop in config.timetablePage.stops
+            option(value=stop.stop_id)= stop.stop_name
+        output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
   footer
     p!=config.wordpress.transitConnect.what_we_do
