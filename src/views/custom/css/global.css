@@ -68,3 +68,27 @@
   font-weight: bold;
   color: white;
 }
+
+@media screen and (max-width: 360px) {
+  .select2-container {
+    max-width: 270px !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .select2-container {
+    max-width: 360px !important;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .select2-container {
+    max-width: 500px !important;
+  }
+}
+
+@media screen and (min-width: 641px) {
+  .select2-container {
+    max-width: none;
+  }
+}

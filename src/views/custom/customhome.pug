@@ -11,7 +11,7 @@ include formatting_functions.pug
         select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
           option(value="") Select a stop
           each stop in config.timetablePage.stops
-            option(value=stop.stop_id)= stop.stop_name
+            option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
   footer

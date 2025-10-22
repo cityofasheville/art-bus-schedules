@@ -4,10 +4,14 @@ include formatting_functions.pug
 .timetable-page(class=`menu-type-${config.menuType}`)
   if config.showRouteTitle
     - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-    h1
-      each route in timetableRouteList
-        .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
-      div= timetablePage.timetable_page_label
+    div(class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4")
+      h1(class="inline-block")
+        each route in timetableRouteList
+          .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+        div= timetablePage.timetable_page_label
+      div(class="inline-block")
+        each route in timetableRouteList
+          a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Brochure`
     if config.effectiveDate
       .effective-date= `Effective ${config.effectiveDate}`
 
@@ -78,10 +82,10 @@ include formatting_functions.pug
   if config.showMap
     script.
         const timetablePageFromServer = !{JSON.stringify(timetablePage)};
-        //- console.log('GTFS data from server', timetablePageFromServer);
+        console.log('GTFS data from server', timetablePageFromServer);
         const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
         //- console.log('GTFS Realtime URLs:', gtfsRealtimeUrls);
-        //- console.log('Route Data:', routeData);
+        console.log('Route Data:', routeData);
         //- console.log('Stop Data:', stopData);
         //- console.log('Route IDs on Page:', routeIds);
         //- console.log('Trip IDs on Page:', tripIds);
