@@ -5,9 +5,28 @@
 
 @layer base {
 
-  .nav-items a {
-    @apply no-underline text-art-blue font-semibold px-4 py-2 border-t-4 border-transparent hocus:border-art-blue;
+  .nav-items a,
+  .nav-items button {
+    @apply no-underline hocus:no-underline text-art-blue font-semibold;
   }
+
+  /* .nav-items a.top-level {
+    @apply hocus:border-transparent lg:hocus:border-aux-green;
+  } */
+
+  /* .nav-items .nav-link-container {
+    @apply border-l-8 border-transparent
+  } */
+
+  /* .nav-items .nav-link-container:has(a:focus),
+  .nav-items .nav-link-container:has(a:hover) {
+    @apply border-art-blue lg:border-transparent;
+  }
+
+  .nav-items .subnav-link-container:has(a:focus),
+  .nav-items .subnav-link-container:has(a:hover) {
+    @apply border-art-blue;
+  } */
 
   .nav-items a:has(+ button.dropdown-toggle) {
     @apply pr-0;
@@ -30,11 +49,11 @@
   }
 
   .text-link a {
-    @apply text-art-green underline hover:no-underline hover:text-art-blue focus:no-underline focus:text-art-blue underline-offset-4;
+    @apply text-slate-800 underline hover:no-underline hover:text-art-blue focus:no-underline focus:text-art-blue underline-offset-4;
   }
 
   .text-link-no-decoration {
-    @apply text-art-green no-underline hover:underline hover:text-art-blue focus:underline focus:text-art-blue;
+    @apply text-slate-800 no-underline hover:underline hover:text-art-blue focus:underline focus:text-art-blue;
   }
 
   .btn-sm {
@@ -50,7 +69,7 @@
   }
 
   .btn-gray {
-    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-slate-900 bg-aux-gray hocus:bg-slate-300 border border-slate-500 rounded-md shadow-sm;
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-slate-800 bg-aux-gray hocus:bg-slate-300 border border-slate-500 rounded-md shadow-sm;
   }
 
   .btn-group>*:not(:last-child) {

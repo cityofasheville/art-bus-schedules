@@ -120,7 +120,7 @@ const dbPath = config.sqlitePath;
 const templatePath = config.templatePath;
 const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
-config.logo_url = '/art-logo.png';
+config.logo_url = '/art-logo-blue-small.png';
 config.webpageTitle = 'ART Transit System';
 
 const query1 = `INSERT INTO timetables 
@@ -218,7 +218,15 @@ for (const page of config.customPages) {
 
 await fs.rm('./src/tmp', { recursive: true, force: true });
 await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
-await fs.copyFile(templatePath + 'art-logo.png', buildPath + 'art-logo.png');
+await fs.copyFile(templatePath + 'art-logo-blue-small.png', buildPath + 'art-logo-blue-small.png');
+await fs.copyFile(
+  templatePath + 'art-logo-white-small.png',
+  buildPath + 'art-logo-white-small.png'
+);
+await fs.copyFile(
+  templatePath + 'art-logo-green-small.png',
+  buildPath + 'art-logo-green-small.png'
+);
 
 // const htmlSourceFolder = buildPath + folderPath.relativePath;
 // const defaultHomePagePath = buildPath;
