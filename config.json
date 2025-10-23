@@ -11,6 +11,21 @@
       }
     }
   ],
+  "customPages": [
+    {
+      "template": "customhome_full.pug",
+      "output": "customhome/index.html"
+    },
+    {
+      "template": "planyourtrip_full.pug",
+      "output": "plan-your-trip/index.html"
+    },
+    {
+      "template": "faresandpasses_full.pug",
+      "output": "fares-and-passes/index.html"
+    }
+  ],
+  "webpageTitle": "ART Transit System",
   "linkStopUrls": true,
   "menuType": "radio",
   "noHead": false,
@@ -22,5 +37,9 @@
   "sqlitePath": "src/tmp/gtfs.db",
   "skipImport": true,
   "outputPath": "build/",
-  "templatePath": "src/views/custom/"
+  "templatePath": "src/views/custom/",
+  "cssPath": "/css/",
+  "jsPath": "/js/",
+  "customHomePagePath": "customhome/",
+  "systemMapPagePath": "map/"
 }

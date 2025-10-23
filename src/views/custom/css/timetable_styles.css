@@ -44,6 +44,14 @@ a:hover {
 
 /* Timetable Styles */
 
+div[data-stops='all-stops'] th[data-is-timepoint='true'] {
+  background-color: salmon;
+}
+
+div[data-stops='all-stops'] col[data-is-timepoint='true'] {
+  border: 2px solid orange;
+}
+
 .timetable-page {
   margin-left: 1rem;
   margin-right: 1rem;
@@ -119,7 +127,7 @@ a:hover {
   color: rgb(75 85 99);
 }
 
-.timetable-page .sr-only {
+/* .timetable-page .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -129,7 +137,7 @@ a:hover {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
+} */
 
 .timetable-page .hidden {
   display: none;
@@ -192,16 +200,16 @@ a:hover {
   }
 }
 
-.timetable-page .timetable-radio-menu label {
+/* .timetable-page .timetable-radio-menu label {
   width: 100%;
   margin-bottom: 0.5rem;
-}
+} */
 
 .timetable-page .menu-type-radio .timetable {
   display: none;
 }
 
-.timetable-page .btn-blue {
+/* .timetable-page .btn-blue {
   color: rgb(255 255 255);
   padding: 0.75rem 1.5rem;
   background-color: rgb(37 99 235);
@@ -233,7 +241,7 @@ a:hover {
 .timetable-page .btn-gray:hover {
   background-color: rgb(201, 206, 213);
   text-decoration: none;
-}
+} */
 
 .timetable-page .btn-sm {
   padding: 0.25rem 1rem;
@@ -349,49 +357,49 @@ a:hover {
   padding: 0;
 }
 
-.timetable-page .timetable table > thead > tr > th,
-.timetable-page .timetable table > tbody > tr > th,
-.timetable-page .timetable table > tfoot > tr > th,
-.timetable-page .timetable table > thead > tr > td,
-.timetable-page .timetable table > tbody > tr > td,
-.timetable-page .timetable table > tfoot > tr > td {
+.timetable-page .timetable table>thead>tr>th,
+.timetable-page .timetable table>tbody>tr>th,
+.timetable-page .timetable table>tfoot>tr>th,
+.timetable-page .timetable table>thead>tr>td,
+.timetable-page .timetable table>tbody>tr>td,
+.timetable-page .timetable table>tfoot>tr>td {
   padding: 8px;
   line-height: 1.4;
   vertical-align: top;
   border: 1px solid #dddddd;
 }
 
-.timetable-page .timetable table > thead > tr > th {
+.timetable-page .timetable table>thead>tr>th {
   vertical-align: top;
   border-bottom: 2px solid #dddddd;
 }
 
-.timetable-page .timetable table > caption + thead > tr:first-child > th,
-.timetable-page .timetable table > colgroup + thead > tr:first-child > th,
-.timetable-page .timetable table > thead:first-child > tr:first-child > th,
-.timetable-page .timetable table > caption + thead > tr:first-child > td,
-.timetable-page .timetable table > colgroup + thead > tr:first-child > td,
-.timetable-page .timetable table > thead:first-child > tr:first-child > td {
+.timetable-page .timetable table>caption+thead>tr:first-child>th,
+.timetable-page .timetable table>colgroup+thead>tr:first-child>th,
+.timetable-page .timetable table>thead:first-child>tr:first-child>th,
+.timetable-page .timetable table>caption+thead>tr:first-child>td,
+.timetable-page .timetable table>colgroup+thead>tr:first-child>td,
+.timetable-page .timetable table>thead:first-child>tr:first-child>td {
   border-top: 0;
 }
 
-.timetable-page .timetable table > tbody + tbody {
+.timetable-page .timetable table>tbody+tbody {
   border-top: 2px solid #dddddd;
 }
 
-.timetable-page .timetable table > thead > tr > th,
-.timetable-page .timetable table > thead > tr > td {
+.timetable-page .timetable table>thead>tr>th,
+.timetable-page .timetable table>thead>tr>td {
   border-bottom-width: 2px;
 }
 
-.timetable-page .timetable table > tbody > tr:nth-of-type(odd) {
+.timetable-page .timetable table>tbody>tr:nth-of-type(odd) {
   background-color: #f9f9f9;
 }
 
-.timetable-page .timetable table > tbody > tr.highlighted,
-.timetable-page .timetable table > tbody > tr.highlighted > th,
-.timetable-page .timetable table > tbody .stop-time.highlighted,
-.timetable-page .timetable table > thead .stop-header.highlighted {
+.timetable-page .timetable table>tbody>tr.highlighted,
+.timetable-page .timetable table>tbody>tr.highlighted>th,
+.timetable-page .timetable table>tbody .stop-time.highlighted,
+.timetable-page .timetable table>thead .stop-header.highlighted {
   background-color: #f8f8b9;
 }
 
@@ -490,11 +498,7 @@ a:hover {
   text-decoration: none;
 }
 
-.timetable-page
-  .map
-  .maplibregl-popup-content
-  a.map-route-item
-  .underline-hover:hover {
+.timetable-page .map .maplibregl-popup-content a.map-route-item .underline-hover:hover {
   text-decoration: underline;
 }
 
@@ -510,31 +514,21 @@ a:hover {
   padding-top: 5px;
 }
 
-.timetable-page
-  .map
-  .maplibregl-popup-content
-  .upcoming-stops div:nth-child(1) {
+.timetable-page .map .maplibregl-popup-content .upcoming-stops div:nth-child(1) {
   font-weight: bold;
   border-bottom: 1px solid #dddddd;
   padding-bottom: 3px;
   margin-bottom: -3px;
 }
 
-.timetable-page
-  .map
-  .maplibregl-popup-content
-  .upcoming-stops div:nth-child(2) {
+.timetable-page .map .maplibregl-popup-content .upcoming-stops div:nth-child(2) {
   font-weight: bold;
   border-bottom: 1px solid #dddddd;
   padding-bottom: 3px;
   margin-bottom: -3px;
 }
 
-.timetable-page
-  .map
-  .maplibregl-popup-content
-  .upcoming-stops
-  div:nth-child(2n-1) {
+.timetable-page .map .maplibregl-popup-content .upcoming-stops div:nth-child(2n-1) {
   text-align: right;
   font-weight: bold;
 }
@@ -734,16 +728,16 @@ a:hover {
     margin-bottom: 0;
   }
 
-  .timetable-page .timetable table > thead > tr > th,
-  .timetable-page .timetable table > tbody > tr > th,
-  .timetable-page .timetable table > tfoot > tr > th {
+  .timetable-page .timetable table>thead>tr>th,
+  .timetable-page .timetable table>tbody>tr>th,
+  .timetable-page .timetable table>tfoot>tr>th {
     padding: 3px 5px;
     line-height: 1.3;
   }
 
-  .timetable-page .timetable table > thead > tr > td,
-  .timetable-page .timetable table > tbody > tr > td,
-  .timetable-page .timetable table > tfoot > tr > td {
+  .timetable-page .timetable table>thead>tr>td,
+  .timetable-page .timetable table>tbody>tr>td,
+  .timetable-page .timetable table>tfoot>tr>td {
     padding: 3px 5px;
     line-height: 1;
   }

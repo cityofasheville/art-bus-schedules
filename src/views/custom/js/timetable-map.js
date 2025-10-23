@@ -9,6 +9,8 @@ let tripUpdates;
 let vehiclePopup;
 let gtfsRealtimeInterval;
 
+console.log('timetable-map script loaded');
+
 function formatRouteColor(route) {
   return route.route_color || '#000000';
 }
@@ -49,14 +51,13 @@ function formatSpeed(mph) {
 }
 
 function formatSeconds(seconds) {
-  return seconds < 60
-    ? Math.floor(seconds) + ' sec'
-    : Math.floor(seconds / 60) + ' min';
+  return seconds < 60 ? Math.floor(seconds) + ' sec' : Math.floor(seconds / 60) + ' min';
 }
 
 function formatRoute(route) {
-  const html = route.route_url
-    ? jQuery('<a>').attr('href', route.route_url)
+  // const html = route.route_url ? jQuery('<a>').attr('href', route.route_url) : jQuery('<div>');
+  const html = route.route_short_name
+    ? jQuery('<a>').attr('href', `/${route.route_short_name}`)
     : jQuery('<div>');
 
   html.addClass('map-route-item');
@@ -70,13 +71,13 @@ function formatRoute(route) {
         .addClass('route-color-swatch')
         .css('backgroundColor', formatRouteColor(route))
         .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? ''),
+        .text(route.route_short_name ?? '')
     );
   }
   routeItemDivs.push(
     jQuery('<div>')
       .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
+      .text(route.route_long_name ?? `Route ${route.route_short_name}`)
   );
 
   html.append(routeItemDivs);
@@ -106,18 +107,14 @@ function getStopPopupHtml(feature, stop) {
     };
 
     for (const tripUpdate of tripUpdates) {
-      const stopTimeUpdatesForStop =
-        tripUpdate.trip_update.stop_time_update.filter(
-          (stopTimeUpdate) =>
-            stopTimeUpdate.stop_id === stop.stop_id &&
-            (stopTimeUpdate.departure !== null ||
-              stopTimeUpdate.arrival !== null) &&
-            stopTimeUpdate.schedule_relationship !== 3,
-        );
+      const stopTimeUpdatesForStop = tripUpdate.trip_update.stop_time_update.filter(
+        (stopTimeUpdate) =>
+          stopTimeUpdate.stop_id === stop.stop_id &&
+          (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
+          stopTimeUpdate.schedule_relationship !== 3
+      );
       if (stopTimeUpdatesForStop.length > 0) {
-        stopTimeUpdates[tripUpdate.trip_update.trip.direction_id].push(
-          ...stopTimeUpdatesForStop,
-        );
+        stopTimeUpdates[tripUpdate.trip_update.trip.direction_id].push(...stopTimeUpdatesForStop);
       }
     }
 
@@ -134,25 +131,21 @@ function getStopPopupHtml(feature, stop) {
     });
 
     if (stopTimeUpdates['0'].length > 0 || stopTimeUpdates['1'].length > 0) {
-      jQuery('<div>')
-        .addClass('popup-label')
-        .text('Upcoming Departures:')
-        .appendTo(html);
+      jQuery('<div>').addClass('popup-label').text('Upcoming Departures:').appendTo(html);
 
       for (const direction of ['0', '1']) {
         if (stopTimeUpdates[direction].length > 0) {
-          const directionName = jQuery(
-            `.timetable[data-direction-id="${direction}"]`,
-          ).data('direction-name');
-          const departureTimes = stopTimeUpdates[direction].map(
-            (stopTimeUpdate) =>
-              Math.round(
-                ((stopTimeUpdate.departure
-                  ? stopTimeUpdate.departure.time
-                  : stopTimeUpdate.arrival.time) -
-                  Date.now() / 1000) /
-                  60,
-              ),
+          const directionName = jQuery(`.timetable[data-direction-id="${direction}"]`).data(
+            'direction-name'
+          );
+          const departureTimes = stopTimeUpdates[direction].map((stopTimeUpdate) =>
+            Math.round(
+              ((stopTimeUpdate.departure
+                ? stopTimeUpdate.departure.time
+                : stopTimeUpdate.arrival.time) -
+                Date.now() / 1000) /
+                60
+            )
           );
 
           // Only use the next 4 departures
@@ -174,14 +167,14 @@ function getStopPopupHtml(feature, stop) {
   jQuery(html).append(
     jQuery('<div>')
       .addClass('route-list')
-      .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
+      .html(routeIds.map((routeId) => formatRoute(routeData[routeId])))
   );
 
   jQuery('<a>')
     .addClass('btn-blue btn-sm')
     .prop(
       'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
+      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`
     )
     .prop('target', '_blank')
     .prop('rel', 'noopener noreferrer')
@@ -221,7 +214,7 @@ function secondsInFuture(dateString) {
     dateString.substring(6, 8), // Day
     dateString.substring(9, 11), // Hours
     dateString.substring(12, 14), // Minutes
-    dateString.substring(15, 17), // Seconds
+    dateString.substring(15, 17) // Seconds
   );
 
   const now = new Date();
@@ -250,7 +243,9 @@ function formatMovingText(vehiclePosition) {
     movingText += degToCompass(vehiclePosition.vehicle.position.bearing);
   }
   if (vehiclePosition.vehicle.position.speed) {
-    movingText += ` at ${formatSpeed(metersPerSecondToMph(vehiclePosition.vehicle.position.speed))}`;
+    movingText += ` at ${formatSpeed(
+      metersPerSecondToMph(vehiclePosition.vehicle.position.speed)
+    )}`;
   }
 
   return movingText;
@@ -262,17 +257,12 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
   });
 
   const lastUpdated = new Date(vehiclePosition.vehicle.timestamp * 1000);
-  const directionName = jQuery(
-    '.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id,
-  )
+  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
     .parents('.timetable')
     .data('direction-name');
 
   if (directionName) {
-    jQuery('<div>')
-      .addClass('popup-title')
-      .text(`Vehicle: ${directionName}`)
-      .appendTo(html);
+    jQuery('<div>').addClass('popup-title').text(`Vehicle: ${directionName}`).appendTo(html);
   }
 
   const movingText = formatMovingText(vehiclePosition);
@@ -284,11 +274,9 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
   const numberOfArrivalsToShow = 5;
   const nextArrivals = [];
   if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
-    for (const stoptimeUpdate of vehicleTripUpdate.trip_update
-      .stop_time_update) {
+    for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
       if (stoptimeUpdate.arrival) {
-        const secondsToArrival =
-          stoptimeUpdate.arrival.time - Date.now() / 1000;
+        const secondsToArrival = stoptimeUpdate.arrival.time - Date.now() / 1000;
         const stopName = stopData[stoptimeUpdate.stop_id]?.stop_name;
 
         // Don't show arrivals in the past or non-timepoints
@@ -310,10 +298,7 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
   if (nextArrivals.length > 0) {
     jQuery('<div>')
       .addClass('upcoming-stops')
-      .append([
-        jQuery('<div>').text('Time'),
-        jQuery('<div>').text('Upcoming Stop'),
-      ])
+      .append([jQuery('<div>').text('Time'), jQuery('<div>').text('Upcoming Stop')])
       .append(
         nextArrivals.flatMap((arrival) => {
           let delay = '';
@@ -328,7 +313,7 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
             jQuery('<div>').text(formatSeconds(arrival.secondsToArrival)),
             jQuery('<div>').text(`${arrival.stopName} ${delay}`),
           ];
-        }),
+        })
       )
       .appendTo(html);
   }
@@ -351,12 +336,8 @@ function getVehicleBearing(vehiclePosition, vehicleTripUpdate) {
   }
 
   // Else try to calculate bearing from next stop
-  if (
-    vehicleTripUpdate &&
-    vehicleTripUpdate?.trip_update?.stop_time_update?.length > 0
-  ) {
-    const nextStopTimeUpdate =
-      vehicleTripUpdate.trip_update.stop_time_update[0];
+  if (vehicleTripUpdate && vehicleTripUpdate?.trip_update?.stop_time_update?.length > 0) {
+    const nextStopTimeUpdate = vehicleTripUpdate.trip_update.stop_time_update[0];
     const nextStop = stopData[nextStopTimeUpdate.stop_id];
 
     if (nextStop && nextStop.stop_lat && nextStop.stop_lon) {
@@ -368,8 +349,7 @@ function getVehicleBearing(vehiclePosition, vehicleTripUpdate) {
 
       const y = Math.sin(lon2 - lon1) * Math.cos(lat2);
       const x =
-        Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
+        Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1);
       let bearing = (Math.atan2(y, x) * 180) / Math.PI;
       bearing = (bearing + 360) % 360;
 
@@ -390,11 +370,7 @@ function getVehicleDirectionArrow(vehiclePosition, vehicleTripUpdate) {
   }
 }
 
-function attachVehicleMarkerClickHandler(
-  vehiclePosition,
-  vehicleTripUpdate,
-  map,
-) {
+function attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, map) {
   const coordinates = [
     vehiclePosition.vehicle.position.longitude,
     vehiclePosition.vehicle.position.latitude,
@@ -404,14 +380,9 @@ function attachVehicleMarkerClickHandler(
 
   vehicleMarker
     .getElement()
-    .removeEventListener(
-      'click',
-      vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id],
-    );
+    .removeEventListener('click', vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id]);
 
-  vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id] = (
-    event,
-  ) => {
+  vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id] = (event) => {
     event.stopPropagation();
     if (vehiclePopup.isOpen()) {
       vehiclePopup.remove();
@@ -425,10 +396,7 @@ function attachVehicleMarkerClickHandler(
 
   vehicleMarker
     .getElement()
-    .addEventListener(
-      'click',
-      vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id],
-    );
+    .addEventListener('click', vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id]);
 }
 
 function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
@@ -438,10 +406,7 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
 
   const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
 
-  const vehicleDirectionArrow = getVehicleDirectionArrow(
-    vehiclePosition,
-    vehicleTripUpdate,
-  );
+  const vehicleDirectionArrow = getVehicleDirectionArrow(vehiclePosition, vehicleTripUpdate);
 
   // Create a DOM element for each marker
   const el = document.createElement('div');
@@ -486,10 +451,8 @@ function animateVehicleMarker(vehicleMarker, vehiclePosition) {
     const elapsedTime = timestamp - startTime;
     const progress = elapsedTime / duration;
     const safeProgress = Math.min(progress.toFixed(2), 1);
-    const newLongitude =
-      previousCoordinates[0] + safeProgress * longitudeDifference;
-    const newLatitude =
-      previousCoordinates[1] + safeProgress * latitudeDifference;
+    const newLongitude = previousCoordinates[0] + safeProgress * longitudeDifference;
+    const newLatitude = previousCoordinates[1] + safeProgress * latitudeDifference;
 
     vehicleMarker.setLngLat([newLongitude, newLatitude]);
 
@@ -513,15 +476,8 @@ function animateVehicleMarker(vehicleMarker, vehiclePosition) {
   requestAnimationFrame(animation);
 }
 
-function updateVehicleMarkerLocation(
-  vehicleMarker,
-  vehiclePosition,
-  vehicleTripUpdate,
-) {
-  const vehicleDirectionArrow = getVehicleDirectionArrow(
-    vehiclePosition,
-    vehicleTripUpdate,
-  );
+function updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTripUpdate) {
+  const vehicleDirectionArrow = getVehicleDirectionArrow(vehiclePosition, vehicleTripUpdate);
 
   if (vehicleDirectionArrow) {
     vehicleMarker.getElement().innerHTML = vehicleDirectionArrow;
@@ -551,7 +507,7 @@ async function fetchGtfsRealtime(url, headers) {
   return obj.entity;
 }
 
-async function updateArrivals() {
+async function updateArrivals({ withMap = true } = {}) {
   const realtimeVehiclePositions = gtfsRealtimeUrls?.realtimeVehiclePositions;
   const realtimeTripUpdates = gtfsRealtimeUrls?.realtimeTripUpdates;
 
@@ -561,10 +517,7 @@ async function updateArrivals() {
 
   try {
     const [latestVehiclePositions, latestTripUpdates] = await Promise.all([
-      fetchGtfsRealtime(
-        realtimeVehiclePositions?.url,
-        realtimeVehiclePositions?.headers,
-      ),
+      fetchGtfsRealtime(realtimeVehiclePositions?.url, realtimeVehiclePositions?.headers),
       fetchGtfsRealtime(realtimeTripUpdates?.url, realtimeTripUpdates?.headers),
     ]);
 
@@ -588,7 +541,7 @@ async function updateArrivals() {
       // Hide vehicles which show up 15 minutes or more before their trip start times
       if (
         secondsInFuture(
-          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`,
+          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`
         ) >
         15 * 60
       ) {
@@ -605,64 +558,56 @@ async function updateArrivals() {
     });
 
     tripUpdates = latestTripUpdates.filter((tripUpdate) => {
-      if (
-        !tripUpdate ||
-        !tripUpdate.trip_update ||
-        !tripUpdate.trip_update.trip
-      ) {
+      if (!tripUpdate || !tripUpdate.trip_update || !tripUpdate.trip_update.trip) {
         return false;
       }
 
       return tripIds.includes(tripUpdate.trip_update.trip.trip_id);
     });
 
-    for (const vehiclePosition of vehiclePositions) {
-      const vehicleId = vehiclePosition.vehicle.vehicle.id;
+    if (withMap) {
+      for (const vehiclePosition of vehiclePositions) {
+        const vehicleId = vehiclePosition.vehicle.vehicle.id;
 
-      let vehicleTripUpdate = tripUpdates?.find(
-        (tripUpdate) =>
-          tripUpdate.trip_update.trip.trip_id ===
-          vehiclePosition.vehicle.trip.trip_id,
-      );
-
-      if (!vehicleTripUpdate) {
-        vehicleTripUpdate = tripUpdates?.find(
-          (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId,
+        let vehicleTripUpdate = tripUpdates?.find(
+          (tripUpdate) =>
+            tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id
         );
-      }
 
-      let vehicleMarker = vehicleMarkers[vehicleId];
+        if (!vehicleTripUpdate) {
+          vehicleTripUpdate = tripUpdates?.find(
+            (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
+          );
+        }
 
-      if (vehicleMarker === undefined) {
-        // If not on map, add it
-        addVehicleMarker(vehiclePosition, vehicleTripUpdate);
-      } else {
-        // Otherwise update location
-        updateVehicleMarkerLocation(
-          vehicleMarker,
+        let vehicleMarker = vehicleMarkers[vehicleId];
+
+        if (vehicleMarker === undefined) {
+          // If not on map, add it
+          addVehicleMarker(vehiclePosition, vehicleTripUpdate);
+        } else {
+          // Otherwise update location
+          updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTripUpdate);
+        }
+
+        const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
+        attachVehicleMarkerClickHandler(
           vehiclePosition,
           vehicleTripUpdate,
+          maps[visibleTimetableId]
         );
       }
 
-      const visibleTimetableId =
-        jQuery('.timetable:visible').data('timetable-id');
-      attachVehicleMarkerClickHandler(
-        vehiclePosition,
-        vehicleTripUpdate,
-        maps[visibleTimetableId],
-      );
-    }
-
-    // Remove vehicles not in the feed
-    for (const vehicleId of Object.keys(vehicleMarkers)) {
-      if (
-        !vehiclePositions.find(
-          (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId,
-        )
-      ) {
-        vehicleMarkers[vehicleId].remove();
-        delete vehicleMarkers[vehicleId];
+      // Remove vehicles not in the feed
+      for (const vehicleId of Object.keys(vehicleMarkers)) {
+        if (
+          !vehiclePositions.find(
+            (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
+          )
+        ) {
+          vehicleMarkers[vehicleId].remove();
+          delete vehicleMarkers[vehicleId];
+        }
       }
     }
   } catch (error) {
@@ -673,23 +618,24 @@ async function updateArrivals() {
 function toggleMap(id) {
   if (maps[id]) {
     // Resize the map to fit the visible area
+    console.log('Resizing map for timetable id', id);
     maps[id].resize();
+
+    const geojson = geojsons[id];
+    const bounds = getBounds(geojson);
+    fitMapToBounds(maps[id], bounds);
 
     // Update vehicle markers to use the current visible map
     for (const [vehicleId, vehicleMarker] of Object.entries(vehicleMarkers)) {
       const vehiclePosition = vehiclePositions.find(
-        (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId,
+        (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
       );
 
       const vehicleTripUpdate = tripUpdates.find(
-        (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId,
+        (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
       );
 
-      attachVehicleMarkerClickHandler(
-        vehiclePosition,
-        vehicleTripUpdate,
-        maps[id],
-      );
+      attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[id]);
 
       // Move marker to the current visible map
       vehicleMarker.addTo(maps[id]);
@@ -712,6 +658,10 @@ function createMap(id) {
   }
 
   const bounds = getBounds(geojson);
+
+  console.log('Creating map for timetable id', id);
+  console.log('Map bounds:', bounds.toArray());
+
   const map = new maplibregl.Map({
     container: `map_timetable_id_${id}`,
     style: mapStyleUrl,
@@ -737,6 +687,7 @@ function createMap(id) {
 }
 
 function fitMapToBounds(map, bounds) {
+  console.log('Fitting map to bounds:', bounds.toArray());
   map.fitBounds(bounds, {
     padding: { top: 40, bottom: 40, left: 20, right: 40 },
     duration: 0,
@@ -756,7 +707,7 @@ function disablePointsOfInterest(map) {
 function addMapLayers(map, geojson, defaultRouteColor, lineLayout) {
   const layers = map.getStyle().layers;
   const firstLabelLayerId = layers.find(
-    (layer) => layer.type === 'symbol' && layer.id.includes('label'),
+    (layer) => layer.type === 'symbol' && layer.id.includes('label')
   )?.id;
 
   addRouteLineShadow(map, geojson, lineLayout, firstLabelLayerId);
@@ -793,7 +744,7 @@ function addRouteLineShadow(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
@@ -817,17 +768,11 @@ function addRouteLineOutline(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
-function addRouteLine(
-  map,
-  geojson,
-  defaultRouteColor,
-  lineLayout,
-  firstSymbolId,
-) {
+function addRouteLine(map, geojson, defaultRouteColor, lineLayout, firstSymbolId) {
   map.addLayer(
     {
       id: 'route-line',
@@ -847,7 +792,7 @@ function addRouteLine(
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId,
+    firstSymbolId
   );
 }
 
@@ -878,7 +823,7 @@ function addHighlightedStops(map, geojson) {
     type: 'circle',
     source: { type: 'geojson', data: geojson },
     paint: {
-      'circle-color': '#f8f8b9',
+      'circle-color': '#ffff00',
       'circle-radius': {
         base: 1.75,
         stops: [
@@ -932,6 +877,11 @@ function handleClick(event, map) {
 }
 
 function showStopPopup(map, feature) {
+  console.log('popup feature', feature);
+  console.log('popup map', map._container.id.split('_id_').pop());
+  console.log('feature stop data', stopData[feature.properties.stop_id]);
+  // highlightStop(map, id, [feature.properties.stop_id.toString()]);
+
   new maplibregl.Popup()
     .setLngLat(feature.geometry.coordinates)
     .setHTML(getStopPopupHtml(feature, stopData[feature.properties.stop_id]))
@@ -968,16 +918,11 @@ function highlightVerticalTimetableStops(id, stopIds) {
   const table = jQuery(`#timetable_id_${id} table`);
   const columnIndexes = [];
   const stopIdSelectors = stopIds
-    .map(
-      (stopId) =>
-        `#timetable_id_${id} table colgroup col[data-stop-id="${stopId}"]`,
-    )
+    .map((stopId) => `#timetable_id_${id} table colgroup col[data-stop-id="${stopId}"]`)
     .join(',');
 
   jQuery(stopIdSelectors).each((index, col) => {
-    columnIndexes.push(
-      jQuery(`#timetable_id_${id} table colgroup col`).index(col),
-    );
+    columnIndexes.push(jQuery(`#timetable_id_${id} table colgroup col`).index(col));
   });
 
   table.find('.stop-time, thead .stop-header').removeClass('highlighted');
@@ -1026,7 +971,7 @@ function setupTableHoverListeners(id, map) {
         highlightStop(map, id, [stopId.toString()]);
       }
     },
-    () => unHighlightStop(map, id),
+    () => unHighlightStop(map, id)
   );
 }
 
@@ -1046,10 +991,7 @@ function createMaps() {
   }
 
   // GTFS-Realtime Vehicle Positions
-  if (
-    !gtfsRealtimeInterval &&
-    gtfsRealtimeUrls?.realtimeVehiclePositions?.url
-  ) {
+  if (!gtfsRealtimeInterval && gtfsRealtimeUrls?.realtimeVehiclePositions?.url) {
     // Popup for realtime vehicle locations
     const markerHeight = 20;
     const markerRadius = 10;
@@ -1062,14 +1004,8 @@ function createMaps() {
         'top-left': [0, 0],
         'top-right': [0, 0],
         bottom: [0, -markerHeight],
-        'bottom-left': [
-          linearOffset,
-          (markerHeight - markerRadius + linearOffset) * -1,
-        ],
-        'bottom-right': [
-          -linearOffset,
-          (markerHeight - markerRadius + linearOffset) * -1,
-        ],
+        'bottom-left': [linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+        'bottom-right': [-linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
         left: [markerRadius, (markerHeight - markerRadius) * -1],
         right: [-markerRadius, (markerHeight - markerRadius) * -1],
       },
@@ -1081,4 +1017,231 @@ function createMaps() {
       updateArrivals();
     }, arrivalUpdateInterval);
   }
+}
+
+function augmentArrivalInfo(arrival, stop_id) {
+  let augmentedArrival = { ...arrival };
+  let today_day_of_week = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+  if (stopData[stop_id]) {
+    augmentedArrival.stop_name = stopData[stop_id].stop_name;
+  }
+
+  if (tripData[arrival.trip_id]) {
+    let thisRouteId = tripData[arrival.trip_id].route_id;
+    if (routeData[thisRouteId]) {
+      augmentedArrival.route_long_name = routeData[thisRouteId].route_long_name;
+      augmentedArrival.route_short_name = routeData[thisRouteId].route_short_name;
+      augmentedArrival.route_color = routeData[thisRouteId].route_color;
+      augmentedArrival.route_text_color = routeData[thisRouteId].route_text_color;
+      let direction_info = directions.filter((dir) => {
+        return dir.route_id === thisRouteId && dir.direction_id === arrival.direction_id;
+      });
+      if (direction_info.length > 0) {
+        augmentedArrival.direction_name = direction_info[0].direction;
+        augmentedArrival.direction_id = direction_info[0].direction_id;
+        let timetableId = 0;
+        let matching_timetable = timetableData.filter((tt) => {
+          return (
+            tt.route_id === thisRouteId &&
+            tt.direction_id === arrival.direction_id &&
+            tt[today_day_of_week] === 1
+          );
+        });
+        if (matching_timetable.length > 0) {
+          augmentedArrival.timetable_id = matching_timetable[0].timetable_id;
+          let default_timetable_day = 'Mon-Fri';
+          if (matching_timetable[0].saturday === 1 && matching_timetable[0].sunday !== 1) {
+            default_timetable_day = 'Sat';
+          } else if (matching_timetable[0].saturday !== 1 && matching_timetable[0].sunday === 1) {
+            default_timetable_day = 'Sun';
+          }
+          augmentedArrival.timetable_day = default_timetable_day;
+        }
+      }
+    }
+  }
+
+  augmentedArrival.time_from_now = Math.round((arrival.time - Date.now() / 1000) / 60);
+
+  return augmentedArrival;
+}
+
+function groupArrivalsByRouteAndDirection(arrivals) {
+  const groups = {};
+  arrivals.forEach((a) => {
+    const groupKey = `${a.route_short_name || 'Unknown'} ${a.direction_name || ''}`.trim();
+    if (!groups[groupKey]) {
+      groups[groupKey] = [];
+    }
+    groups[groupKey].push(a);
+  });
+  return groups;
+}
+
+function handleReloadArrivals(event) {
+  const stop_id = event.currentTarget.getAttribute('data-stopid');
+  setUrlParam('stop_id', stop_id);
+  fetchRealtimeDeparturesForStop(stop_id);
+}
+
+function handleStopSelection(event) {
+  const stop_id = event.target.value;
+  setUrlParam('stop_id', stop_id);
+  fetchRealtimeDeparturesForStop(stop_id);
+}
+
+function setUrlParam(paramName, paramValue) {
+  const url = new URL(window.location);
+  url.searchParams.set(paramName, paramValue);
+  window.history.replaceState({}, '', url);
+}
+
+function getUrlParam(paramName) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(paramName);
+}
+
+async function fetchRealtimeDeparturesForStop(stop_id) {
+  // console.log('trip data', tripData);
+  // console.log('Handling stop selection: ', event.target.value);
+  // const stop_id = event.target.value;
+  const thisStop = stopData[stop_id];
+  $('#results-container').html('Loading upcoming arrivals...');
+
+  if (!thisStop) {
+    $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
+    return;
+  }
+
+  // TODO: prepare immutable stop, route, trip, etc datastructures and then derive smaller datastructures for the selected stop
+  // this should make the lookups faster
+
+  await updateArrivals({
+    withMap: false,
+  });
+
+  const arrivals = getUpcomingArrivalsForStop(stop_id);
+
+  const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
+  const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
+
+  const timeUpdated = new Date();
+  const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
+    timeStyle: 'short',
+  });
+
+  console.log('augmentedArrivals', augmentedArrivals);
+
+  let html = '';
+  if (augmentedArrivals.length === 0) {
+    html = '<div class="no-arrivals">No upcoming arrivals for this stop.</div>';
+  } else {
+    html = ``;
+    html += `<div class="w-full flex items-start justify-between gap-4">
+    <div>
+        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${thisStop.stop_name} (${thisStop.stop_code})</h2>
+        <div class="text-sm text-gray-600">As of ${formattedTimeUpdated}</div>
+    </div>
+    <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
+    </div>`;
+    html += `<table class="w-full arrivals-table my-4">`;
+    html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+    html += `<tbody>`;
+    for (const groupKey in groupedArrivals) {
+      html += `<tr class="odd:bg-white even:bg-slate-100">`;
+      html += `<td class="align-middle pl-2 pr-3 py-2">
+        <div class="flex items-center justify-items-center px-0">
+          <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
+        groupedArrivals[groupKey][0].direction_id
+      }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
+        groupedArrivals[groupKey][0].timetable_id
+      }" class="mx-auto text-center">
+          <span class="route-color-swatch-large" style="background-color: #${
+            groupedArrivals[groupKey][0].route_color
+          };color: #${groupedArrivals[groupKey][0].route_text_color};">${
+        groupedArrivals[groupKey][0].route_short_name
+      }</span>
+          <span class="block direction text-gray-700 text-sm">${
+            groupedArrivals[groupKey][0].direction_name || ''
+          }</span>
+          </a>
+        </div>
+      </td>`;
+      html += `<td class="align-middle py-2">
+      <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
+
+      let arrivalsProcessed = 0;
+      for (const arrival of groupedArrivals[groupKey]) {
+        const dateWithoutSecond = new Date(arrival.time * 1000);
+        const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
+          timeStyle: 'short',
+        });
+        html += `
+            <span class="w-24 text-center ${
+              arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
+            } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
+            <span class="text-2xl text-gray-700">${arrival.time_from_now}</span> min<br />
+            <span class="text-xs text-gray-500">
+                        (${formattedTime})
+            </span>
+            </span>
+        `;
+        arrivalsProcessed += 1;
+        // if (arrivalsProcessed >= 2) {
+        //   break;
+        // }
+      }
+
+      // groupedArrivals[groupKey].forEach((a) => {
+      //   const dateWithoutSecond = new Date(a.time * 1000);
+      //   const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
+      //     timeStyle: 'short',
+      //   });
+      //   html += `
+      //       <span class="w-24 text-center">
+      //       <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
+      //       <span class="text-xs text-gray-500">
+      //                   (${formattedTime})
+      //       </span>
+      //       </span>
+      //   `;
+      // });
+      html += `</div></td>`;
+      html += `</tr>`;
+    }
+    html += `<tbody>`;
+    html += `</table>`;
+    html += `</div>`;
+  }
+
+  $('#results-container').html(html);
+}
+
+function getUpcomingArrivalsForStop(stop_id) {
+  const arrivals = [];
+  if (!tripUpdates) return arrivals;
+
+  for (const tripUpdate of tripUpdates) {
+    const stopTimeUpdates = tripUpdate.trip_update.stop_time_update.filter(
+      (stopTimeUpdate) =>
+        stopTimeUpdate.stop_id === stop_id &&
+        (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
+        stopTimeUpdate.schedule_relationship !== 3
+    );
+
+    for (const update of stopTimeUpdates) {
+      const time = update.departure ? update.departure.time : update.arrival.time;
+      const delay = update.departure ? update.departure.delay : update.arrival.delay;
+      arrivals.push({
+        trip_id: tripUpdate.trip_update.trip.trip_id,
+        time,
+        delay,
+        direction_id: tripUpdate.trip_update.trip.direction_id,
+      });
+    }
+  }
+
+  arrivals.sort((a, b) => a.time - b.time);
+  return arrivals;
 }

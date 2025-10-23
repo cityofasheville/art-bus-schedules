@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+
+  .nav-items a,
+  .nav-items button {
+    @apply no-underline hocus:no-underline text-art-blue font-semibold;
+  }
+
+  /* .nav-items a.top-level {
+    @apply hocus:border-transparent lg:hocus:border-aux-green;
+  } */
+
+  /* .nav-items .nav-link-container {
+    @apply border-l-8 border-transparent
+  } */
+
+  /* .nav-items .nav-link-container:has(a:focus),
+  .nav-items .nav-link-container:has(a:hover) {
+    @apply border-art-blue lg:border-transparent;
+  }
+
+  .nav-items .subnav-link-container:has(a:focus),
+  .nav-items .subnav-link-container:has(a:hover) {
+    @apply border-art-blue;
+  } */
+
+  .nav-items a:has(+ button.dropdown-toggle) {
+    @apply pr-0;
+  }
+
+  .dropdown-toggle[aria-expanded="false"] i.bi-chevron-up {
+    display: none;
+  }
+
+  .dropdown-toggle[aria-expanded="true"] i.bi-chevron-down {
+    display: none;
+  }
+
+  #hamburger[aria-expanded="false"] i.bi-x-lg {
+    display: none;
+  }
+
+  #hamburger[aria-expanded="true"] i.bi-list {
+    display: none;
+  }
+
+  .text-link a {
+    @apply text-slate-800 underline hover:no-underline hover:text-art-blue focus:no-underline focus:text-art-blue underline-offset-4;
+  }
+
+  .text-link-no-decoration {
+    @apply text-slate-800 no-underline hover:underline hover:text-art-blue focus:underline focus:text-art-blue;
+  }
+
+  .btn-sm {
+    @apply flex items-center justify-center px-2 py-1 text-sm;
+  }
+
+  .btn-art-green {
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-white bg-art-green hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
+  }
+
+  .btn-blue {
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-aux-gray bg-art-blue hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
+  }
+
+  .btn-gray {
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-slate-800 bg-aux-gray hocus:bg-slate-300 border border-slate-500 rounded-md shadow-sm;
+  }
+
+  .btn-group>*:not(:last-child) {
+    @apply rounded-r-none;
+    /* @apply border-r-0; */
+  }
+
+  .btn-group>*:not(:first-child) {
+    @apply rounded-l-none;
+    @apply border-l-0;
+  }
+
+  label:has(input:focus) {
+    @apply bg-art-green font-semibold;
+  }
+
+  fieldset:has(input:focus) {
+    @apply border-art-blue;
+  }
+
+  .entry-content td {
+    @apply border-r border-black border;
+    /* Add right border for internal columns */
+  }
+
+  .entry-content th {
+    @apply border-b border-black border;
+    /* Optional: if you want borders for header cells as well */
+  }
+
+  .entry-content ul {
+    @apply my-6 list-disc pl-10
+  }
+
+  .entry-content li {
+    @apply my-4
+  }
+
+  .entry-content blockquote {
+    @apply px-4 italic
+  }
+
+  .entry-content h1 {
+    @apply my-6 text-3xl
+  }
+
+  .entry-content h2 {
+    @apply my-6 text-2xl
+  }
+
+  .entry-content h3 {
+    @apply my-6 text-xl
+  }
+
+  .entry-content h4 {
+    @apply my-6 text-lg
+  }
+
+  .entry-content h5 {
+    @apply my-6 text-lg
+  }
+
+  .entry-content h6 {
+    @apply my-6 text-lg
+  }
+
+
+  .entry-content p,
+  .entry-content pre,
+  .entry-content figure,
+  .entry-content img,
+  .entry-content hr {
+    @apply my-6;
+  }
+
+  .entry-content figcaption {
+    @apply text-sm text-gray-600;
+  }
+
+  .entry-content img.alignleft {
+    @apply float-left mr-4 md:mr-6 lg:mr-8;
+  }
+
+  .entry-content img.alignright {
+    @apply float-right ml-4 md:ml-6 lg:ml-8;
+  }
+
+  .entry-content img.aligncenter {
+    @apply block mx-auto;
+  }
+
+  .entry-content img {
+    @apply max-w-full h-auto;
+  }
+
+  /* Optional: Style the caption */
+  .entry-content figcaption {
+    @apply text-sm text-gray-500 mt-2;
+    /* Example Tailwind classes */
+  }
+
+  .full-height-minus-nav {
+    height: calc(100vh - 9rem);
+  }
+
+}

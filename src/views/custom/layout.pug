@@ -6,6 +6,38 @@ html(lang="en")
     meta(name="viewport" content="initial-scale=1.0, width=device-width")
 
     block extraHeader
+      script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
+      script(src="https://unpkg.com/lodash@4.17.21/lodash.min.js" crossorigin="anonymous")
+      script(src=`/js/dropdown-menus.js`)
+      link(rel="stylesheet" href=`https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css`)
+      link(rel="stylesheet" href=`/css/global.css`)
+      link(rel="stylesheet" href=`/css/tw-output.css`)
 
-  body
-    block content
+  body(class="h-screen")
+    //- div(class="relative")
+    a(href="#main_content" class="absolute left-0 top-0 sr-only focus:not-sr-only") Skip to main content
+    //- div(class="")
+    include navigation.pug
+    //- header.main-header
+    //-   .header-layout
+    //-     if config.logo_url
+    //-       .logo
+    //-         a(href="/")
+    //-           img(src=`${config.logo_url}` alt=`${config.webpageTitle || 'Transit '} logo`)
+    //-     .nav-items
+    //-       a(href="/map/") System Map
+    //-       a(href="/fares-and-passes/") Fares and Passes
+    //-       a(href="/plan-your-trip/") Plan Your Trip
+
+
+    //- main#main_content(class="h-100")
+    block content 
+
+    script.
+      document.addEventListener('DOMContentLoaded', () => {
+        const images = document.querySelectorAll('img[data-src]');
+        images.forEach(img => {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+        });
+      });

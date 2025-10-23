@@ -40,8 +40,24 @@ a:hover {
 /* Overview styles */
 
 .timetable-overview {
-  height: 100vh;
-  align-items: stretch;
+  height: auto;
+}
+
+/* This is the route list element under the map on the system map page */
+.timetable-overview .overview-list {
+  height: calc(100vh - 30rem);
+}
+
+
+@media (min-width: 768px) {
+  .timetable-overview {
+    height: calc(100vh - 10rem);
+    align-items: stretch;
+  }
+
+  .timetable-overview .overview-list {
+    height: auto;
+  }
 }
 
 @media (min-width: 768px) {
@@ -70,16 +86,40 @@ a:hover {
   }
 }
 
+.coa-timetable-page-link-item {
+  list-style: none;
+  border-bottom: 1px solid rgb(226 232 240);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
 .timetable-overview a.timetable-page-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid rgb(226 232 240);
+  /* border-bottom: 1px solid rgb(226 232 240); */
   text-decoration: none;
   padding: 0.5rem;
 }
 
-.timetable-overview a.timetable-page-link:hover {
+button.zoom-to {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+/* .timetable-overview a.timetable-page-link:hover {
+  background-color: rgb(241 245 249);
+  text-decoration: none;
+} */
+
+.timetable-overview li.coa-timetable-page-link-item:hover {
   background-color: rgb(241 245 249);
   text-decoration: none;
 }
@@ -90,6 +130,7 @@ a:hover {
   color: rgb(30 41 59);
 }
 
+/* 
 .timetable-overview .route-color-swatch {
   min-width: 29px;
   height: 29px;
@@ -119,7 +160,7 @@ a:hover {
   flex-shrink: 0;
   font-weight: bold;
   color: white;
-}
+} */
 
 .timetable-overview .btn-blue {
   color: rgb(255 255 255);
@@ -161,10 +202,10 @@ a:hover {
 
 /* Map Styles */
 
-.overview-map {
+/* .overview-map {
   height: 100%;
   width: 100%;
-}
+} */
 
 .overview-map .maplibregl-popup-content .popup-title {
   margin: 0 20px 5px 0;
@@ -201,4 +242,9 @@ a:hover {
 
 .overview-map .maplibregl-popup-content .maplibregl-popup-close-button {
   padding: 0 5px;
+}
+
+.maplibregl-ctrl-geocoder {
+  min-width: 180px;
+  width: unset
 }

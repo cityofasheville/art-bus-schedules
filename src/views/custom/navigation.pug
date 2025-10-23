@@ -1,0 +1,62 @@
+nav#main-nav(class="border-b-4 border-art-blue" aria-label="Main Navigation")
+  div(class="relative flex flex-col lg:flex-row items-end justify-between w-full")
+    div(class="flex justify-between w-full items-end px-4")
+      #header-logo(class="w-full py-4 lg:w-auto text-center sm:text-left")
+        a(href="/")
+          img(class="inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
+          h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
+
+      div(class="lg:hidden w-full sm:w-auto  flex items-end justify-end sm:justify-end py-4")
+        button#hamburger(class="min-w-max text-art-blue font-semibold align-middle" aria-expanded="false")
+          i.bi.bi-list.text-xl(aria-hidden="true")
+          i.bi.bi-x-lg.text-xl(aria-hidden="true")
+          span(class="inline-block text-xl pl-2")="Menu"
+
+    div#top-menu-container(class="nav-items relative z-50 hidden lg:block w-full lg:w-auto border-t-4 border-art-blue lg:border-transparent bg-aux-gray lg:bg-transparent p-0")
+      ul#menu-main-site-navigation(class="flex flex-col lg:flex-row justify-center lg:justify-start")
+
+        li(class="w-full lg:w-auto min-w-max relative flex flex-col border-b-2 border-slate-400 lg:border-transparent")
+          div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="/map/") System Map
+
+        li(class="min-w-max relative flex flex-col border-b-2 border-slate-400 lg:border-transparent")
+          div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="/fares-and-passes/") Fares and Passes
+
+        li(class="min-w-max relative flex flex-col border-b-2 border-slate-400 lg:border-transparent")
+          div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="/plan-your-trip/") Plan Your Trip
+
+        li(class="w-full lg:w-auto min-w-max relative flex flex-col")
+          div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="#") A Dropdown Menu
+            button#submenu-62.dropdown-toggle(
+              class="border-t-8 border-transparent px-4 flex items-center"
+              type="button"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-controls="parent-62"
+              data-dropdown-id="parent-62"
+            )
+              i(class="bi bi-chevron-down", aria-hidden="true")
+              i(class="bi bi-chevron-up", aria-hidden="true")
+              span.sr-only show submenu for Dropdown Menu
+
+          ul#parent-62(
+            class="w-full dropdown-menu submenu z-50 min-w-max lg:rounded-b-sm lg:border-b lg:border-r lg:border-l lg:border-ar-blue relative lg:absolute lg:top-16 lg:right-0 bg-aux-gray text-ar-slate size-max hidden"
+            aria-labelledby="submenu-62"
+          )
+            li(class="relative flex flex-col border-b border-slate-400 lg:border-transparent")
+              div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue has-[a:hover]:border-art-blue flex flex-row group")
+                a(class="w-full px-4 py-3 pl-8 lg:pl-4", href="#p1") Page 1
+            li(class="relative flex flex-col border-b border-slate-400 lg:border-transparent")
+              div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue has-[a:hover]:border-art-blue flex flex-row group")
+                a(class="w-full px-4 py-3 pl-8 lg:pl-4", href="#p2") Page 2 Page 2 Page 2 Page 2 Page 2
+            li(class="relative flex flex-col border-b border-slate-400 lg:border-transparent")
+              div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue has-[a:hover]:border-art-blue flex flex-row group")
+                a(class="w-full px-4 py-3 pl-8 lg:pl-4", href="#p3") Page 3
+            li(class="relative flex flex-col")
+              div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue has-[a:hover]:border-art-blue flex flex-row group")
+                a(class="w-full px-4 py-3 pl-8 lg:pl-4", href="#p4") Page 4
+
+
