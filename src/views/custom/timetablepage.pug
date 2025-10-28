@@ -5,13 +5,16 @@ include formatting_functions.pug
   if config.showRouteTitle
     - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
     div(class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4")
-      h1(class="inline-block")
+      div(class="timetable-heading flex py-4 gap-4")
         each route in timetableRouteList
           .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
-        div= timetablePage.timetable_page_label
-      div(class="inline-block")
+        div()
+          h1(class="mt-0 mb-2 py-0")= timetablePage.timetable_page_label
+          if timetablePage.timetables[0].routes[0].route_desc
+            p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
+      div()
         each route in timetableRouteList
-          a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Brochure`
+          a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Map & Schedule (PDF)`
     if config.effectiveDate
       .effective-date= `Effective ${config.effectiveDate}`
 
