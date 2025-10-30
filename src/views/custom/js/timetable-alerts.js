@@ -22,11 +22,9 @@ async function fetchGtfsRealtime(url, headers) {
   return obj.entity;
 }
 
-function formatAlertAsHtml(
-  alert,
-  affectedRouteIdsInTimetable,
-  affectedStopsIdsInTimetable,
-) {
+function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable) {
+  console.log('Formatting alert:', alert);
+
   const $alert = jQuery('<div>').addClass('timetable-alert');
 
   const $routeList = jQuery('<div>').addClass('route-list');
@@ -50,9 +48,7 @@ function formatAlertAsHtml(
     .addClass('alert-header')
     .append($routeList)
     .append(
-      jQuery('<div>')
-        .addClass('alert-title')
-        .text(alert.alert.header_text.translation[0].text),
+      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text)
     );
 
   // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
@@ -61,9 +57,10 @@ function formatAlertAsHtml(
     .append(
       anchorme(
         jQuery('<div>')
+          .addClass('alert-body')
           .text(alert.alert.description_text.translation[0].text)
-          .html(),
-      ),
+          .html()
+      )
     );
 
   if (alert.alert.url?.translation?.[0].text) {
@@ -89,12 +86,9 @@ function formatAlertAsHtml(
         .appendTo($stopList);
     }
 
-    jQuery('<div>')
-      .text('Stops Affected:')
-      .append($stopList)
-      .appendTo($alertBody);
+    jQuery('<div>').text('Stops Affected:').append($stopList).appendTo($alertBody);
 
-    $stopList.prependTo($alertBody);
+    $stopList.appendTo($alertBody);
   }
 
   $alertHeader.appendTo($alert);
@@ -111,7 +105,7 @@ async function updateAlerts() {
   try {
     const alerts = await fetchGtfsRealtime(
       gtfsRealtimeUrls.realtimeAlerts.url,
-      gtfsRealtimeUrls.realtimeAlerts.headers,
+      gtfsRealtimeUrls.realtimeAlerts.headers
     );
 
     if (!alerts) {
@@ -124,47 +118,35 @@ async function updateAlerts() {
       const affectedRouteIds = [
         ...new Set([
           ...alert.alert.informed_entity
-            .filter(
-              (entity) =>
-                entity.route_id !== undefined && entity.route_id !== '',
-            )
+            .filter((entity) => entity.route_id !== undefined && entity.route_id !== '')
             .map((entity) => entity.route_id),
         ]),
       ];
 
       const affectedRouteIdsInTimetable = routeIds.filter((routeId) =>
-        affectedRouteIds.includes(routeId),
+        affectedRouteIds.includes(routeId)
       );
 
       const affectedStopIds = [
         ...new Set([
           ...alert.alert.informed_entity
-            .filter(
-              (entity) => entity.stop_id !== undefined && entity.stop_id !== '',
-            )
+            .filter((entity) => entity.stop_id !== undefined && entity.stop_id !== '')
             .map((entity) => entity.stop_id),
         ]),
       ];
 
       const affectedStopsIdsInTimetable = stopIds.filter((stopId) =>
-        affectedStopIds.includes(stopId),
+        affectedStopIds.includes(stopId)
       );
 
       // Hide alerts that don't affect any stops or routes in this timetable
-      if (
-        affectedStopsIdsInTimetable.length === 0 &&
-        affectedRouteIdsInTimetable.length === 0
-      ) {
+      if (affectedStopsIdsInTimetable.length === 0 && affectedRouteIdsInTimetable.length === 0) {
         continue;
       }
 
       try {
         formattedAlerts.push(
-          formatAlertAsHtml(
-            alert,
-            affectedRouteIdsInTimetable,
-            affectedStopsIdsInTimetable,
-          ),
+          formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable)
         );
       } catch (error) {
         console.error(error);

@@ -690,6 +690,10 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
   font-size: 16px;
 }
 
+.alert-body {
+  white-space: pre-wrap;
+}
+
 @media print {
   body {
     -webkit-print-color-adjust: exact;
