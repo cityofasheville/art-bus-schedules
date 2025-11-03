@@ -7,6 +7,18 @@ include formatting_functions.pug
     div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
       h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")="Real-time Departures"
       div(class="p-4")
+        fieldset#departure_interface_selector.px-4.border.shadow-md
+          legend="Find real-time departures for a stop"
+          div(class=`w-full grid grid-cols-3 btn-group`)
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
+              span= "By Stop"
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
+              span= "Favorites"
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_by_route")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="by_route" checked=false id="radio_by_route")
+              span= "By Route"
         p.mb-4="Select a stop to see real time departure information"
         select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
           option(value="") Select a stop
@@ -60,8 +72,19 @@ script.
         width: 'element' 
       });
       const initialStopId = getUrlParam('stop_id');
+      console.log('Initial stop ID from URL param:', initialStopId);
       if (initialStopId) {
         $('#stop-select-dropdown').val(initialStopId).trigger('change');
         fetchRealtimeDeparturesForStop(initialStopId);
       } 
+      //- else {
+      //-   const favoriteStopId = localStorage.getItem("default_stop_id");
+      //-   console.log('Default stop ID from local storage:', favoriteStopId);
+      //-   if (favoriteStopId && !initialStopId) {
+      //-     console.log('Loading favorite stop from localStorage:', favoriteStopId);
+      //-     $('#stop-select-dropdown').val(favoriteStopId).trigger('change');
+      //-     setUrlParam('stop_id', favoriteStopId);
+      //-     fetchRealtimeDeparturesForStop(favoriteStopId);
+      //-   }
+      //- }
     });

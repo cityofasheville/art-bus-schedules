@@ -1091,6 +1091,38 @@ function handleStopSelection(event) {
   fetchRealtimeDeparturesForStop(stop_id);
 }
 
+function toggleFavoriteStop(stop_id) {
+  let defaultStops = getFavoriteStops();
+  stop_id = String(stop_id);
+
+  if (defaultStops.includes(stop_id)) {
+    defaultStops = defaultStops.filter((id) => id !== stop_id);
+  } else {
+    defaultStops.push(stop_id);
+  }
+
+  localStorage.setItem('default_stop_id', JSON.stringify(defaultStops));
+  $('#favorite_stop_icon').toggleClass('bi-star-fill bi-star');
+}
+
+function getFavoriteStops() {
+  const stored_stops = localStorage.getItem('default_stop_id');
+  if (!stored_stops) return [];
+  try {
+    const arr = JSON.parse(stored_stops);
+    return Array.isArray(arr) ? arr : [String(arr)];
+  } catch {
+    return [String(stored_stops)];
+  }
+}
+
+// function clearDefaultStop(stop_id) {
+//   let defaultStops = getFavoriteStops();
+//   stop_id = String(stop_id);
+//   defaultStops = defaultStops.filter(id => id !== stop_id);
+//   localStorage.setItem('default_stop_id', JSON.stringify(defaultStops));
+// }
+
 function setUrlParam(paramName, paramValue) {
   const url = new URL(window.location);
   url.searchParams.set(paramName, paramValue);
@@ -1106,6 +1138,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
   // console.log('trip data', tripData);
   // console.log('Handling stop selection: ', event.target.value);
   // const stop_id = event.target.value;
+  const favorite_stops = getFavoriteStops();
   const thisStop = stopData[stop_id];
   $('#results-container').html('Loading upcoming arrivals...');
 
@@ -1140,10 +1173,19 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     html = ``;
     html += `<div class="w-full flex items-start justify-between gap-4">
     <div>
-        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${thisStop.stop_name} (${thisStop.stop_code})</h2>
-        <div class="text-sm text-gray-600">As of ${formattedTimeUpdated}</div>
+        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
+          thisStop.stop_name
+        } (${thisStop.stop_code})</h2>
+        <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></button></div>
     </div>
-    <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
+    <div>
+      <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon" class="bi ${
+      favorite_stops.includes(stop_id) ? 'bi-star-fill' : 'bi-star'
+    }" aria-hidden="true"></i><span class="sr-only">${
+      favorite_stops.includes(stop_id) ? 'Clear default stop' : 'Make this my default stop'
+    }</span>
+      </button>
+    </div>
     </div>`;
     html += `<table class="w-full arrivals-table my-4">`;
     html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;

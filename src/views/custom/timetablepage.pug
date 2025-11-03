@@ -41,7 +41,7 @@ include formatting_functions.pug
 
         if config.showRouteTitle
           .timetable-label
-            h2= `${timetable.timetable_label} | ${timetable.dayListLong}`
+            h2= `${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
               each note in getNotesForTimetableLabel(timetable.notes)
                 include timetable_note_symbol.pug
             if timetable.service_notes !== null
@@ -85,6 +85,7 @@ include formatting_functions.pug
   if config.showMap
     script.
         const timetablePageFromServer = !{JSON.stringify(timetablePage)};
+        timetablePageFromServer.dayLists.sort();
         console.log('GTFS data from server', timetablePageFromServer);
         const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
         //- console.log('GTFS Realtime URLs:', gtfsRealtimeUrls);
