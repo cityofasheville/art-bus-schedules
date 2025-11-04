@@ -622,43 +622,6 @@ video {
   line-height: 1.25rem;
 }
 
-.btn-art-green {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  border-width: 1px;
-  --tw-border-opacity: 1;
-  border-color: rgb(100 116 139 / var(--tw-border-opacity, 1));
-  --tw-bg-opacity: 1;
-  background-color: rgb(108 179 63 / var(--tw-bg-opacity, 1));
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
-  text-decoration-line: none;
-  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.btn-art-green:hover {
-  text-decoration-line: none;
-  --tw-bg-opacity: 1;
-  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
-}
-
-.btn-art-green:focus {
-  --tw-bg-opacity: 1;
-  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
-}
-
 .btn-blue {
   display: flex;
   align-items: center;
@@ -900,10 +863,6 @@ fieldset:has(input:focus) {
   /* Example Tailwind classes */
 }
 
-.full-height-minus-nav {
-  height: calc(100vh - 9rem);
-}
-
 .container {
   width: 100%;
 }
@@ -978,10 +937,6 @@ fieldset:has(input:focus) {
   z-index: 10;
 }
 
-.z-30 {
-  z-index: 30;
-}
-
 .z-50 {
   z-index: 50;
 }
@@ -1010,12 +965,24 @@ fieldset:has(input:focus) {
   margin-bottom: 1rem;
 }
 
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
 .mb-4 {
   margin-bottom: 1rem;
 }
 
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
 .mt-0 {
   margin-top: 0px;
+}
+
+.mt-4 {
+  margin-top: 1rem;
 }
 
 .block {
@@ -1065,10 +1032,6 @@ fieldset:has(input:focus) {
   height: 100vh;
 }
 
-.min-h-36 {
-  min-height: 9rem;
-}
-
 .min-h-64 {
   min-height: 16rem;
 }
@@ -1083,10 +1046,6 @@ fieldset:has(input:focus) {
 
 .w-\[115px\] {
   width: 115px;
-}
-
-.w-\[6px\] {
-  width: 6px;
 }
 
 .w-full {
@@ -1166,6 +1125,10 @@ fieldset:has(input:focus) {
   justify-items: center;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-4 {
   gap: 1rem;
 }
@@ -1179,10 +1142,6 @@ fieldset:has(input:focus) {
 .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-opacity: 1;
   border-color: rgb(226 232 240 / var(--tw-divide-opacity, 1));
-}
-
-.self-center {
-  align-self: center;
 }
 
 .overflow-y-scroll {
@@ -1231,16 +1190,6 @@ fieldset:has(input:focus) {
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
 }
 
-.border-art-green {
-  --tw-border-opacity: 1;
-  border-color: rgb(108 179 63 / var(--tw-border-opacity, 1));
-}
-
-.border-gray-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
-}
-
 .border-slate-400 {
   --tw-border-opacity: 1;
   border-color: rgb(148 163 184 / var(--tw-border-opacity, 1));
@@ -1248,11 +1197,6 @@ fieldset:has(input:focus) {
 
 .border-transparent {
   border-color: transparent;
-}
-
-.bg-art-blue {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 93 170 / var(--tw-bg-opacity, 1));
 }
 
 .bg-art-green {
@@ -1287,9 +1231,9 @@ fieldset:has(input:focus) {
   padding-right: 1rem;
 }
 
-.px-7 {
-  padding-left: 1.75rem;
-  padding-right: 1.75rem;
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .py-2 {
@@ -1324,8 +1268,8 @@ fieldset:has(input:focus) {
   padding-right: 0.75rem;
 }
 
-.pr-5 {
-  padding-right: 1.25rem;
+.pt-4 {
+  padding-top: 1rem;
 }
 
 .text-left {
@@ -1414,10 +1358,6 @@ fieldset:has(input:focus) {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .odd\:bg-white:nth-child(odd) {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
@@ -1439,14 +1379,6 @@ fieldset:has(input:focus) {
   white-space: normal;
 }
 
-.group:focus-within .group-focus-within\:opacity-100 {
-  opacity: 1;
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
 .has-\[a\:focus\]\:border-art-blue:has(a:focus) {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
@@ -1455,14 +1387,6 @@ fieldset:has(input:focus) {
 .has-\[a\:hover\]\:border-art-blue:has(a:hover) {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
-}
-
-.hocus\:underline:hover {
-  text-decoration-line: underline;
-}
-
-.hocus\:underline:focus {
-  text-decoration-line: underline;
 }
 
 @media (min-width: 640px) {
@@ -1534,21 +1458,8 @@ fieldset:has(input:focus) {
     right: 0px;
   }
 
-  .lg\:top-12 {
-    top: 3rem;
-  }
-
-  .lg\:top-14 {
-    top: 3.5rem;
-  }
-
   .lg\:top-16 {
     top: 4rem;
-  }
-
-  .lg\:my-0 {
-    margin-top: 0px;
-    margin-bottom: 0px;
   }
 
   .lg\:block {
@@ -1557,10 +1468,6 @@ fieldset:has(input:focus) {
 
   .lg\:hidden {
     display: none;
-  }
-
-  .lg\:h-auto {
-    height: auto;
   }
 
   .lg\:w-auto {
@@ -1608,10 +1515,6 @@ fieldset:has(input:focus) {
     padding-left: 1rem;
   }
 
-  .lg\:pr-2 {
-    padding-right: 0.5rem;
-  }
-
   .lg\:has-\[a\:focus\]\:border-transparent:has(a:focus) {
     border-color: transparent;
   }
@@ -1634,9 +1537,5 @@ fieldset:has(input:focus) {
 @media (min-width: 1280px) {
   .xl\:w-96 {
     width: 24rem;
-  }
-
-  .xl\:pr-2 {
-    padding-right: 0.5rem;
   }
 }

@@ -1101,18 +1101,18 @@ function toggleFavoriteStop(stop_id) {
     defaultStops.push(stop_id);
   }
 
-  localStorage.setItem('default_stop_id', JSON.stringify(defaultStops));
-  $('#favorite_stop_icon').toggleClass('bi-star-fill bi-star');
+  localStorage.setItem('art_favorite_stops', JSON.stringify(defaultStops));
+  $(`#favorite_stop_icon_${stop_id}`).toggleClass('bi-star-fill bi-star');
 }
 
 function getFavoriteStops() {
-  const stored_stops = localStorage.getItem('default_stop_id');
-  if (!stored_stops) return [];
+  const stored_favorite_stops = localStorage.getItem('art_favorite_stops');
+  if (!stored_favorite_stops) return [];
   try {
-    const arr = JSON.parse(stored_stops);
+    const arr = JSON.parse(stored_favorite_stops);
     return Array.isArray(arr) ? arr : [String(arr)];
   } catch {
-    return [String(stored_stops)];
+    return [String(stored_favorite_stops)];
   }
 }
 
@@ -1120,7 +1120,7 @@ function getFavoriteStops() {
 //   let defaultStops = getFavoriteStops();
 //   stop_id = String(stop_id);
 //   defaultStops = defaultStops.filter(id => id !== stop_id);
-//   localStorage.setItem('default_stop_id', JSON.stringify(defaultStops));
+//   localStorage.setItem('art_favorite_stops', JSON.stringify(defaultStops));
 // }
 
 function setUrlParam(paramName, paramValue) {
@@ -1179,7 +1179,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
         <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></button></div>
     </div>
     <div>
-      <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon" class="bi ${
+      <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon_${stop_id}" class="bi ${
       favorite_stops.includes(stop_id) ? 'bi-star-fill' : 'bi-star'
     }" aria-hidden="true"></i><span class="sr-only">${
       favorite_stops.includes(stop_id) ? 'Clear default stop' : 'Make this my default stop'

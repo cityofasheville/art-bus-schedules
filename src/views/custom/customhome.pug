@@ -5,9 +5,11 @@ include formatting_functions.pug
 
   div(class="w-full px-4")
     div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
-      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")="Real-time Departures"
+      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")
+        i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
+        span(class="inline-block")="Real-time Departures"
       div(class="p-4")
-        fieldset#departure_interface_selector.px-4.border.shadow-md
+        fieldset#departure_interface_selector.px-4.pt-4.border.shadow-md
           legend="Find real-time departures for a stop"
           div(class=`w-full grid grid-cols-3 btn-group`)
             label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
@@ -16,14 +18,27 @@ include formatting_functions.pug
             label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
               input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
               span= "Favorites"
-            label.relative.btn-gray.text-center.cursor-pointer(for="radio_by_route")
-              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="by_route" checked=false id="radio_by_route")
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
               span= "By Route"
-        p.mb-4="Select a stop to see real time departure information"
-        select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-          option(value="") Select a stop
-          each stop in config.timetablePage.stops
-            option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+
+          div(id="container_search_stop" class="departure-interface p-4")
+            p.mb-4="Select a stop to see real time departure information"
+            select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+              option(value="") Select a stop
+              each stop in config.timetablePage.stops
+                option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+
+          div(id="container_favorites" class="departure-interface p-4")
+            p.mb-4="Select one of your favorite stops to see real time departure information"
+            div(id="favorite_stops_select_container" class="mb-4")
+              select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                option(value="") Select a favorite stop
+            div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
+                
+          div(id="container_choose_route" class="departure-interface p-4")
+            p.mb-4="Choose a route, direction, and stop to see real time departure information"
+
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
   footer
@@ -71,20 +86,14 @@ script.
       $('#stop-select-dropdown').select2({
         width: 'element' 
       });
+      $('#favorite-stop-select-dropdown').select2({
+        width: 'element' 
+      });
+
       const initialStopId = getUrlParam('stop_id');
-      console.log('Initial stop ID from URL param:', initialStopId);
       if (initialStopId) {
         $('#stop-select-dropdown').val(initialStopId).trigger('change');
+        //- $('#favorite-stop-select-dropdown').val(initialStopId);
         fetchRealtimeDeparturesForStop(initialStopId);
-      } 
-      //- else {
-      //-   const favoriteStopId = localStorage.getItem("default_stop_id");
-      //-   console.log('Default stop ID from local storage:', favoriteStopId);
-      //-   if (favoriteStopId && !initialStopId) {
-      //-     console.log('Loading favorite stop from localStorage:', favoriteStopId);
-      //-     $('#stop-select-dropdown').val(favoriteStopId).trigger('change');
-      //-     setUrlParam('stop_id', favoriteStopId);
-      //-     fetchRealtimeDeparturesForStop(favoriteStopId);
-      //-   }
-      //- }
+      }
     });
