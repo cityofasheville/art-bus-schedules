@@ -1,17 +1,45 @@
 include formatting_functions.pug
+-const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
 .relative.w-full.h-full.flex.flex-col
   img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
   div(class="w-full px-4")
     div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
-      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")="Real-time Departures"
+      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")
+        i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
+        span(class="inline-block")="Real-time Departures"
       div(class="p-4")
-        p.mb-4="Select a stop to see real time departure information"
-        select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-          option(value="") Select a stop
-          each stop in config.timetablePage.stops
-            option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+        fieldset#departure_interface_selector.p-4.border.shadow-md
+          legend="Find real-time departures for a stop"
+          div(class=`w-full grid grid-cols-3 btn-group`)
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
+              span= "By Stop"
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
+              span= "Favorites"
+            label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
+              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
+              span= "By Route"
+
+          div(id="container_search_stop" class="departure-interface p-4")
+            p.mb-4="Select a stop to see real time departure information"
+            select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+              option(value="") Select a stop
+              each stop in alphabetical_stops
+                option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+
+          div(id="container_favorites" class="departure-interface p-4")
+            div(id="favorite_stops_select_container" class="mb-4")
+              p.mb-4="Select one of your favorite stops to see real time departure information"
+              select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                option(value="") Select a favorite stop
+            div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
+                
+          div(id="container_choose_route" class="departure-interface p-4")
+            p.mb-4="(NOT YET IMPLEMENTED) Choose a route, direction, and stop to see real time departure information"
+
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
   footer
@@ -57,11 +85,18 @@ script.
     console.log('Data:', window.config);
     $(document).ready(function() {
       $('#stop-select-dropdown').select2({
-        width: 'element' 
+        //- width: 'element',
+        width: '100%'
       });
+      $('#favorite-stop-select-dropdown').select2({
+        //- width: 'element',
+        width: '100%' 
+      });
+
       const initialStopId = getUrlParam('stop_id');
       if (initialStopId) {
         $('#stop-select-dropdown').val(initialStopId).trigger('change');
+        //- $('#favorite-stop-select-dropdown').val(initialStopId);
         fetchRealtimeDeparturesForStop(initialStopId);
-      } 
+      }
     });

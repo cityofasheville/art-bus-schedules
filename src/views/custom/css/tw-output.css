@@ -554,6 +554,13 @@ video {
   display: none;
 }
 
+/* ACCORDIONS */
+
+details[open] summary span.bi {
+  --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .nav-items a,
   .nav-items button {
   font-weight: 600;
@@ -608,6 +615,25 @@ video {
 
 #hamburger[aria-expanded="true"] i.bi-list {
   display: none;
+}
+
+.text-link {
+  --tw-text-opacity: 1;
+  color: rgb(30 41 59 / var(--tw-text-opacity, 1));
+  text-decoration-line: underline;
+  text-underline-offset: 4px;
+}
+
+.text-link:hover {
+  --tw-text-opacity: 1;
+  color: rgb(0 93 170 / var(--tw-text-opacity, 1));
+  text-decoration-line: none;
+}
+
+.text-link:focus {
+  --tw-text-opacity: 1;
+  color: rgb(0 93 170 / var(--tw-text-opacity, 1));
+  text-decoration-line: none;
 }
 
 .btn-sm {
@@ -900,10 +926,6 @@ fieldset:has(input:focus) {
   /* Example Tailwind classes */
 }
 
-.full-height-minus-nav {
-  height: calc(100vh - 9rem);
-}
-
 .container {
   width: 100%;
 }
@@ -978,10 +1000,6 @@ fieldset:has(input:focus) {
   z-index: 10;
 }
 
-.z-30 {
-  z-index: 30;
-}
-
 .z-50 {
   z-index: 50;
 }
@@ -1005,17 +1023,46 @@ fieldset:has(input:focus) {
   margin-bottom: 3rem;
 }
 
+.my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 
 .mb-4 {
   margin-bottom: 1rem;
 }
 
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.ml-1 {
+  margin-left: 0.25rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
 .mt-0 {
   margin-top: 0px;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
 }
 
 .block {
@@ -1065,10 +1112,6 @@ fieldset:has(input:focus) {
   height: 100vh;
 }
 
-.min-h-36 {
-  min-height: 9rem;
-}
-
 .min-h-64 {
   min-height: 16rem;
 }
@@ -1083,10 +1126,6 @@ fieldset:has(input:focus) {
 
 .w-\[115px\] {
   width: 115px;
-}
-
-.w-\[6px\] {
-  width: 6px;
 }
 
 .w-full {
@@ -1110,12 +1149,26 @@ fieldset:has(input:focus) {
   max-width: 640px;
 }
 
+.border-spacing-1 {
+  --tw-border-spacing-x: 0.25rem;
+  --tw-border-spacing-y: 0.25rem;
+  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
 
 .resize {
   resize: both;
+}
+
+.list-disc {
+  list-style-type: disc;
+}
+
+.list-none {
+  list-style-type: none;
 }
 
 .grid-cols-2 {
@@ -1166,6 +1219,10 @@ fieldset:has(input:focus) {
   justify-items: center;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-4 {
   gap: 1rem;
 }
@@ -1181,8 +1238,8 @@ fieldset:has(input:focus) {
   border-color: rgb(226 232 240 / var(--tw-divide-opacity, 1));
 }
 
-.self-center {
-  align-self: center;
+.justify-self-end {
+  justify-self: end;
 }
 
 .overflow-y-scroll {
@@ -1193,6 +1250,10 @@ fieldset:has(input:focus) {
   border-radius: 0.25rem;
 }
 
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .rounded-t-sm {
   border-top-left-radius: 0.125rem;
   border-top-right-radius: 0.125rem;
@@ -1200,6 +1261,14 @@ fieldset:has(input:focus) {
 
 .border {
   border-width: 1px;
+}
+
+.border-4 {
+  border-width: 4px;
+}
+
+.border-2 {
+  border-width: 2px;
 }
 
 .border-b {
@@ -1218,6 +1287,10 @@ fieldset:has(input:focus) {
   border-left-width: 8px;
 }
 
+.border-t {
+  border-top-width: 1px;
+}
+
 .border-t-4 {
   border-top-width: 4px;
 }
@@ -1231,14 +1304,14 @@ fieldset:has(input:focus) {
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
 }
 
-.border-art-green {
+.border-gray-300 {
   --tw-border-opacity: 1;
-  border-color: rgb(108 179 63 / var(--tw-border-opacity, 1));
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
 }
 
-.border-gray-400 {
+.border-slate-300 {
   --tw-border-opacity: 1;
-  border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
+  border-color: rgb(203 213 225 / var(--tw-border-opacity, 1));
 }
 
 .border-slate-400 {
@@ -1250,9 +1323,9 @@ fieldset:has(input:focus) {
   border-color: transparent;
 }
 
-.bg-art-blue {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 93 170 / var(--tw-bg-opacity, 1));
+.border-red-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(220 38 38 / var(--tw-border-opacity, 1));
 }
 
 .bg-art-green {
@@ -1263,6 +1336,11 @@ fieldset:has(input:focus) {
 .bg-aux-gray {
   --tw-bg-opacity: 1;
   background-color: rgb(248 249 250 / var(--tw-bg-opacity, 1));
+}
+
+.bg-red-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1));
 }
 
 .p-0 {
@@ -1287,9 +1365,14 @@ fieldset:has(input:focus) {
   padding-right: 1rem;
 }
 
-.px-7 {
-  padding-left: 1.75rem;
-  padding-right: 1.75rem;
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .py-2 {
@@ -1312,8 +1395,21 @@ fieldset:has(input:focus) {
   padding-bottom: 1.5rem;
 }
 
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .pl-2 {
   padding-left: 0.5rem;
+}
+
+.pl-4 {
+  padding-left: 1rem;
 }
 
 .pl-8 {
@@ -1322,10 +1418,6 @@ fieldset:has(input:focus) {
 
 .pr-3 {
   padding-right: 0.75rem;
-}
-
-.pr-5 {
-  padding-right: 1.25rem;
 }
 
 .text-left {
@@ -1348,6 +1440,11 @@ fieldset:has(input:focus) {
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
 }
 
 .text-sm {
@@ -1414,10 +1511,6 @@ fieldset:has(input:focus) {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .odd\:bg-white:nth-child(odd) {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
@@ -1439,14 +1532,6 @@ fieldset:has(input:focus) {
   white-space: normal;
 }
 
-.group:focus-within .group-focus-within\:opacity-100 {
-  opacity: 1;
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
 .has-\[a\:focus\]\:border-art-blue:has(a:focus) {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
@@ -1455,14 +1540,6 @@ fieldset:has(input:focus) {
 .has-\[a\:hover\]\:border-art-blue:has(a:hover) {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
-}
-
-.hocus\:underline:hover {
-  text-decoration-line: underline;
-}
-
-.hocus\:underline:focus {
-  text-decoration-line: underline;
 }
 
 @media (min-width: 640px) {
@@ -1534,21 +1611,8 @@ fieldset:has(input:focus) {
     right: 0px;
   }
 
-  .lg\:top-12 {
-    top: 3rem;
-  }
-
-  .lg\:top-14 {
-    top: 3.5rem;
-  }
-
   .lg\:top-16 {
     top: 4rem;
-  }
-
-  .lg\:my-0 {
-    margin-top: 0px;
-    margin-bottom: 0px;
   }
 
   .lg\:block {
@@ -1557,10 +1621,6 @@ fieldset:has(input:focus) {
 
   .lg\:hidden {
     display: none;
-  }
-
-  .lg\:h-auto {
-    height: auto;
   }
 
   .lg\:w-auto {
@@ -1608,10 +1668,6 @@ fieldset:has(input:focus) {
     padding-left: 1rem;
   }
 
-  .lg\:pr-2 {
-    padding-right: 0.5rem;
-  }
-
   .lg\:has-\[a\:focus\]\:border-transparent:has(a:focus) {
     border-color: transparent;
   }
@@ -1634,9 +1690,5 @@ fieldset:has(input:focus) {
 @media (min-width: 1280px) {
   .xl\:w-96 {
     width: 24rem;
-  }
-
-  .xl\:pr-2 {
-    padding-right: 0.5rem;
   }
 }

@@ -5,6 +5,12 @@
 
 @layer base {
 
+  /* ACCORDIONS */
+
+  details[open] summary span.bi {
+    @apply rotate-180;
+  }
+
   .nav-items a,
   .nav-items button {
     @apply no-underline hocus:no-underline text-art-blue font-semibold;
@@ -48,7 +54,7 @@
     display: none;
   }
 
-  .text-link a {
+  .text-link {
     @apply text-slate-800 underline hover:no-underline hover:text-art-blue focus:no-underline focus:text-art-blue underline-offset-4;
   }
 

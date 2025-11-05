@@ -618,7 +618,7 @@ async function updateArrivals({ withMap = true } = {}) {
 function toggleMap(id) {
   if (maps[id]) {
     // Resize the map to fit the visible area
-    console.log('Resizing map for timetable id', id);
+    // console.log('Resizing map for timetable id', id);
     maps[id].resize();
 
     const geojson = geojsons[id];
@@ -631,9 +631,10 @@ function toggleMap(id) {
         (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
       );
 
-      const vehicleTripUpdate = tripUpdates.find(
-        (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
-      );
+      const vehicleTripUpdate = tripUpdates.find((tripUpdate) => {
+        // console.log('tripUpdate', tripUpdate);
+        tripUpdate?.trip_update?.vehicle?.id === vehicleId;
+      });
 
       attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[id]);
 
@@ -1019,229 +1020,211 @@ function createMaps() {
   }
 }
 
-function augmentArrivalInfo(arrival, stop_id) {
-  let augmentedArrival = { ...arrival };
-  let today_day_of_week = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+// function augmentArrivalInfo(arrival, stop_id) {
+//   let augmentedArrival = { ...arrival };
+//   let today_day_of_week = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
-  if (stopData[stop_id]) {
-    augmentedArrival.stop_name = stopData[stop_id].stop_name;
-  }
+//   if (stopData[stop_id]) {
+//     augmentedArrival.stop_name = stopData[stop_id].stop_name;
+//   }
 
-  if (tripData[arrival.trip_id]) {
-    let thisRouteId = tripData[arrival.trip_id].route_id;
-    if (routeData[thisRouteId]) {
-      augmentedArrival.route_long_name = routeData[thisRouteId].route_long_name;
-      augmentedArrival.route_short_name = routeData[thisRouteId].route_short_name;
-      augmentedArrival.route_color = routeData[thisRouteId].route_color;
-      augmentedArrival.route_text_color = routeData[thisRouteId].route_text_color;
-      let direction_info = directions.filter((dir) => {
-        return dir.route_id === thisRouteId && dir.direction_id === arrival.direction_id;
-      });
-      if (direction_info.length > 0) {
-        augmentedArrival.direction_name = direction_info[0].direction;
-        augmentedArrival.direction_id = direction_info[0].direction_id;
-        let timetableId = 0;
-        let matching_timetable = timetableData.filter((tt) => {
-          return (
-            tt.route_id === thisRouteId &&
-            tt.direction_id === arrival.direction_id &&
-            tt[today_day_of_week] === 1
-          );
-        });
-        if (matching_timetable.length > 0) {
-          augmentedArrival.timetable_id = matching_timetable[0].timetable_id;
-          let default_timetable_day = 'Mon-Fri';
-          if (matching_timetable[0].saturday === 1 && matching_timetable[0].sunday !== 1) {
-            default_timetable_day = 'Sat';
-          } else if (matching_timetable[0].saturday !== 1 && matching_timetable[0].sunday === 1) {
-            default_timetable_day = 'Sun';
-          }
-          augmentedArrival.timetable_day = default_timetable_day;
-        }
-      }
-    }
-  }
+//   if (tripData[arrival.trip_id]) {
+//     let thisRouteId = tripData[arrival.trip_id].route_id;
+//     if (routeData[thisRouteId]) {
+//       augmentedArrival.route_long_name = routeData[thisRouteId].route_long_name;
+//       augmentedArrival.route_short_name = routeData[thisRouteId].route_short_name;
+//       augmentedArrival.route_color = routeData[thisRouteId].route_color;
+//       augmentedArrival.route_text_color = routeData[thisRouteId].route_text_color;
+//       let direction_info = directions.filter((dir) => {
+//         return dir.route_id === thisRouteId && dir.direction_id === arrival.direction_id;
+//       });
+//       if (direction_info.length > 0) {
+//         augmentedArrival.direction_name = direction_info[0].direction;
+//         augmentedArrival.direction_id = direction_info[0].direction_id;
+//         let timetableId = 0;
+//         let matching_timetable = timetableData.filter((tt) => {
+//           return (
+//             tt.route_id === thisRouteId &&
+//             tt.direction_id === arrival.direction_id &&
+//             tt[today_day_of_week] === 1
+//           );
+//         });
+//         if (matching_timetable.length > 0) {
+//           augmentedArrival.timetable_id = matching_timetable[0].timetable_id;
+//           let default_timetable_day = 'Mon-Fri';
+//           if (matching_timetable[0].saturday === 1 && matching_timetable[0].sunday !== 1) {
+//             default_timetable_day = 'Sat';
+//           } else if (matching_timetable[0].saturday !== 1 && matching_timetable[0].sunday === 1) {
+//             default_timetable_day = 'Sun';
+//           }
+//           augmentedArrival.timetable_day = default_timetable_day;
+//         }
+//       }
+//     }
+//   }
 
-  augmentedArrival.time_from_now = Math.round((arrival.time - Date.now() / 1000) / 60);
+//   augmentedArrival.time_from_now = Math.round((arrival.time - Date.now() / 1000) / 60);
 
-  return augmentedArrival;
-}
+//   return augmentedArrival;
+// }
 
-function groupArrivalsByRouteAndDirection(arrivals) {
-  const groups = {};
-  arrivals.forEach((a) => {
-    const groupKey = `${a.route_short_name || 'Unknown'} ${a.direction_name || ''}`.trim();
-    if (!groups[groupKey]) {
-      groups[groupKey] = [];
-    }
-    groups[groupKey].push(a);
-  });
-  return groups;
-}
+// function groupArrivalsByRouteAndDirection(arrivals) {
+//   const groups = {};
+//   arrivals.forEach((a) => {
+//     const groupKey = `${a.route_short_name || 'Unknown'} ${a.direction_name || ''}`.trim();
+//     if (!groups[groupKey]) {
+//       groups[groupKey] = [];
+//     }
+//     groups[groupKey].push(a);
+//   });
+//   return groups;
+// }
 
-function handleReloadArrivals(event) {
-  const stop_id = event.currentTarget.getAttribute('data-stopid');
-  setUrlParam('stop_id', stop_id);
-  fetchRealtimeDeparturesForStop(stop_id);
-}
+// function handleReloadArrivals(event) {
+//   const stop_id = event.currentTarget.getAttribute('data-stopid');
+//   setUrlParam('stop_id', stop_id);
+//   fetchRealtimeDeparturesForStop(stop_id);
+// }
 
-function handleStopSelection(event) {
-  const stop_id = event.target.value;
-  setUrlParam('stop_id', stop_id);
-  fetchRealtimeDeparturesForStop(stop_id);
-}
+// function handleStopSelection(event) {
+//   const stop_id = event.target.value;
+//   setUrlParam('stop_id', stop_id);
+//   fetchRealtimeDeparturesForStop(stop_id);
+// }
 
-function setUrlParam(paramName, paramValue) {
-  const url = new URL(window.location);
-  url.searchParams.set(paramName, paramValue);
-  window.history.replaceState({}, '', url);
-}
+// function setUrlParam(paramName, paramValue) {
+//   const url = new URL(window.location);
+//   url.searchParams.set(paramName, paramValue);
+//   window.history.replaceState({}, '', url);
+// }
 
-function getUrlParam(paramName) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(paramName);
-}
+// function getUrlParam(paramName) {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   return urlParams.get(paramName);
+// }
 
-async function fetchRealtimeDeparturesForStop(stop_id) {
-  // console.log('trip data', tripData);
-  // console.log('Handling stop selection: ', event.target.value);
-  // const stop_id = event.target.value;
-  const thisStop = stopData[stop_id];
-  $('#results-container').html('Loading upcoming arrivals...');
+// async function fetchRealtimeDeparturesForStop(stop_id) {
+//   // console.log('trip data', tripData);
+//   // console.log('Handling stop selection: ', event.target.value);
+//   // const stop_id = event.target.value;
+//   const thisStop = stopData[stop_id];
+//   $('#results-container').html('Loading upcoming arrivals...');
 
-  if (!thisStop) {
-    $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
-    return;
-  }
+//   if (!thisStop) {
+//     $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
+//     return;
+//   }
 
-  // TODO: prepare immutable stop, route, trip, etc datastructures and then derive smaller datastructures for the selected stop
-  // this should make the lookups faster
+//   // TODO: prepare immutable stop, route, trip, etc datastructures and then derive smaller datastructures for the selected stop
+//   // this should make the lookups faster
 
-  await updateArrivals({
-    withMap: false,
-  });
+//   await updateArrivals({
+//     withMap: false,
+//   });
 
-  const arrivals = getUpcomingArrivalsForStop(stop_id);
+//   const arrivals = getUpcomingArrivalsForStop(stop_id);
 
-  const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
-  const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
+//   const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
+//   const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
 
-  const timeUpdated = new Date();
-  const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
-    timeStyle: 'short',
-  });
+//   const timeUpdated = new Date();
+//   const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
+//     timeStyle: 'short',
+//   });
 
-  console.log('augmentedArrivals', augmentedArrivals);
+//   console.log('augmentedArrivals', augmentedArrivals);
 
-  let html = '';
-  if (augmentedArrivals.length === 0) {
-    html = '<div class="no-arrivals">No upcoming arrivals for this stop.</div>';
-  } else {
-    html = ``;
-    html += `<div class="w-full flex items-start justify-between gap-4">
-    <div>
-        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${thisStop.stop_name} (${thisStop.stop_code})</h2>
-        <div class="text-sm text-gray-600">As of ${formattedTimeUpdated}</div>
-    </div>
-    <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
-    </div>`;
-    html += `<table class="w-full arrivals-table my-4">`;
-    html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
-    html += `<tbody>`;
-    for (const groupKey in groupedArrivals) {
-      html += `<tr class="odd:bg-white even:bg-slate-100">`;
-      html += `<td class="align-middle pl-2 pr-3 py-2">
-        <div class="flex items-center justify-items-center px-0">
-          <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
-        groupedArrivals[groupKey][0].direction_id
-      }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
-        groupedArrivals[groupKey][0].timetable_id
-      }" class="mx-auto text-center">
-          <span class="route-color-swatch-large" style="background-color: #${
-            groupedArrivals[groupKey][0].route_color
-          };color: #${groupedArrivals[groupKey][0].route_text_color};">${
-        groupedArrivals[groupKey][0].route_short_name
-      }</span>
-          <span class="block direction text-gray-700 text-sm">${
-            groupedArrivals[groupKey][0].direction_name || ''
-          }</span>
-          </a>
-        </div>
-      </td>`;
-      html += `<td class="align-middle py-2">
-      <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
+//   let html = '';
+//   if (augmentedArrivals.length === 0) {
+//     html = '<div class="no-arrivals">No upcoming arrivals for this stop.</div>';
+//   } else {
+//     html = ``;
+//     html += `<div class="w-full flex items-start justify-between gap-4">
+//     <div>
+//         <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${thisStop.stop_name} (${thisStop.stop_code})</h2>
+//         <div class="text-sm text-gray-600">As of ${formattedTimeUpdated}</div>
+//     </div>
+//     <div><a class="btn-sm btn-art-green" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></a></div>
+//     </div>`;
+//     html += `<table class="w-full arrivals-table my-4">`;
+//     html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+//     html += `<tbody>`;
+//     for (const groupKey in groupedArrivals) {
+//       html += `<tr class="odd:bg-white even:bg-slate-100">`;
+//       html += `<td class="align-middle pl-2 pr-3 py-2">
+//         <div class="flex items-center justify-items-center px-0">
+//           <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
+//         groupedArrivals[groupKey][0].direction_id
+//       }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
+//         groupedArrivals[groupKey][0].timetable_id
+//       }" class="mx-auto text-center">
+//           <span class="route-color-swatch-large" style="background-color: #${
+//             groupedArrivals[groupKey][0].route_color
+//           };color: #${groupedArrivals[groupKey][0].route_text_color};">${
+//         groupedArrivals[groupKey][0].route_short_name
+//       }</span>
+//           <span class="block direction text-gray-700 text-sm">${
+//             groupedArrivals[groupKey][0].direction_name || ''
+//           }</span>
+//           </a>
+//         </div>
+//       </td>`;
+//       html += `<td class="align-middle py-2">
+//       <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
 
-      let arrivalsProcessed = 0;
-      for (const arrival of groupedArrivals[groupKey]) {
-        const dateWithoutSecond = new Date(arrival.time * 1000);
-        const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
-          timeStyle: 'short',
-        });
-        html += `
-            <span class="w-24 text-center ${
-              arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
-            } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
-            <span class="text-2xl text-gray-700">${arrival.time_from_now}</span> min<br />
-            <span class="text-xs text-gray-500">
-                        (${formattedTime})
-            </span>
-            </span>
-        `;
-        arrivalsProcessed += 1;
-        // if (arrivalsProcessed >= 2) {
-        //   break;
-        // }
-      }
+//       let arrivalsProcessed = 0;
+//       for (const arrival of groupedArrivals[groupKey]) {
+//         const dateWithoutSecond = new Date(arrival.time * 1000);
+//         const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
+//           timeStyle: 'short',
+//         });
+//         html += `
+//             <span class="w-24 text-center ${
+//               arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
+//             } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
+//             <span class="text-2xl text-gray-700">${arrival.time_from_now}</span> min<br />
+//             <span class="text-xs text-gray-500">
+//                         (${formattedTime})
+//             </span>
+//             </span>
+//         `;
+//         arrivalsProcessed += 1;
+//       }
+//       html += `</div></td>`;
+//       html += `</tr>`;
+//     }
+//     html += `<tbody>`;
+//     html += `</table>`;
+//     html += `</div>`;
+//   }
 
-      // groupedArrivals[groupKey].forEach((a) => {
-      //   const dateWithoutSecond = new Date(a.time * 1000);
-      //   const formattedTime = dateWithoutSecond.toLocaleTimeString([], {
-      //     timeStyle: 'short',
-      //   });
-      //   html += `
-      //       <span class="w-24 text-center">
-      //       <span class="text-2xl text-gray-700">${a.time_from_now}</span> min<br />
-      //       <span class="text-xs text-gray-500">
-      //                   (${formattedTime})
-      //       </span>
-      //       </span>
-      //   `;
-      // });
-      html += `</div></td>`;
-      html += `</tr>`;
-    }
-    html += `<tbody>`;
-    html += `</table>`;
-    html += `</div>`;
-  }
+//   $('#results-container').html(html);
+// }
 
-  $('#results-container').html(html);
-}
+// function getUpcomingArrivalsForStop(stop_id) {
+//   const arrivals = [];
+//   if (!tripUpdates) return arrivals;
 
-function getUpcomingArrivalsForStop(stop_id) {
-  const arrivals = [];
-  if (!tripUpdates) return arrivals;
+//   for (const tripUpdate of tripUpdates) {
+//     const stopTimeUpdates = tripUpdate.trip_update.stop_time_update.filter(
+//       (stopTimeUpdate) =>
+//         stopTimeUpdate.stop_id === stop_id &&
+//         (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
+//         stopTimeUpdate.schedule_relationship !== 3
+//     );
 
-  for (const tripUpdate of tripUpdates) {
-    const stopTimeUpdates = tripUpdate.trip_update.stop_time_update.filter(
-      (stopTimeUpdate) =>
-        stopTimeUpdate.stop_id === stop_id &&
-        (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
-        stopTimeUpdate.schedule_relationship !== 3
-    );
+//     for (const update of stopTimeUpdates) {
+//       const time = update.departure ? update.departure.time : update.arrival.time;
+//       const delay = update.departure ? update.departure.delay : update.arrival.delay;
+//       arrivals.push({
+//         trip_id: tripUpdate.trip_update.trip.trip_id,
+//         time,
+//         delay,
+//         direction_id: tripUpdate.trip_update.trip.direction_id,
+//       });
+//     }
+//   }
 
-    for (const update of stopTimeUpdates) {
-      const time = update.departure ? update.departure.time : update.arrival.time;
-      const delay = update.departure ? update.departure.delay : update.arrival.delay;
-      arrivals.push({
-        trip_id: tripUpdate.trip_update.trip.trip_id,
-        time,
-        delay,
-        direction_id: tripUpdate.trip_update.trip.direction_id,
-      });
-    }
-  }
-
-  arrivals.sort((a, b) => a.time - b.time);
-  return arrivals;
-}
+//   arrivals.sort((a, b) => a.time - b.time);
+//   return arrivals;
+// }
