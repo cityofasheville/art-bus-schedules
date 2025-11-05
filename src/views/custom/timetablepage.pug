@@ -22,11 +22,19 @@ include formatting_functions.pug
     a(href="#coa_timetable_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
 
   if config.hasGtfsRealtimeAlerts
-    .timetable-alerts
-      h2 Service Alerts
-      .timetable-alerts-list
-        .timetable-alert-empty
-          | There are no service alerts at this time.
+    details(class="bg-aux-gray border border-slate-300 rounded mb-6")
+      summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
+        div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
+          i(class="bi bi-bell-fill" aria-hidden="true")
+          span Service Alerts
+          span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
+        div(class="flex items-center")
+          span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
+            
+      div(class="timetable-alerts border-t border-slate-300")
+        div(class="timetable-alerts-list p-4")
+          div(class="timetable-alert-empty")
+            | There are no service alerts at this time.
 
   each timetable in timetablePage.consolidatedTimetables
     if config.showMap

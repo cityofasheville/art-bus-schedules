@@ -58,7 +58,7 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
       anchorme(
         jQuery('<div>')
           .addClass('alert-body')
-          .text(alert.alert.description_text.translation[0].text)
+          .text(`${alert.alert.description_text.translation[0].text} `)
           .html()
       )
     );
@@ -66,13 +66,14 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
   if (alert.alert.url?.translation?.[0].text) {
     jQuery('<a>')
       .attr('href', alert.alert.url.translation[0].text)
-      .addClass('btn-blue btn-sm alert-more-info')
+      // .addClass('btn-blue btn-sm alert-more-info')
+      .addClass('alert-more-info text-link')
       .text('More Info')
       .appendTo($alertBody);
   }
 
   if (affectedStopsIdsInTimetable.length > 0) {
-    const $stopList = jQuery('<ul>');
+    const $stopList = jQuery('<ul>').addClass('list-disc pl-4 mt-2');
 
     for (const stopId of affectedStopsIdsInTimetable) {
       const stop = stopData[stopId];
@@ -82,11 +83,16 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
       }
 
       jQuery('<li>')
+        .addClass('my-2')
         .append(jQuery('<div>').addClass('stop-name').text(stop.stop_name))
         .appendTo($stopList);
     }
 
-    jQuery('<div>').text('Stops Affected:').append($stopList).appendTo($alertBody);
+    jQuery('<div>')
+      .addClass('mt-4 border-b border-gray-300 font-semibold pb-2')
+      .text('Stops Affected:')
+      .append($stopList)
+      .appendTo($alertBody);
 
     $stopList.appendTo($alertBody);
   }
@@ -109,6 +115,7 @@ async function updateAlerts() {
     );
 
     if (!alerts) {
+      $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
       return;
     }
 
@@ -156,7 +163,10 @@ async function updateAlerts() {
     // Remove previously posted GTFS-RT alerts
     jQuery('.timetable-alerts-list .timetable-alert').remove();
 
+    $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+
     if (formattedAlerts.length > 0) {
+      $('#timetable_alert_count').addClass('border-red-600').text(formattedAlerts.length).show();
       // Remove the empty message if present
       jQuery('.timetable-alert-empty').hide();
 
@@ -173,6 +183,7 @@ async function updateAlerts() {
 }
 
 jQuery(() => {
+  $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
     const alertUpdateInterval = 60 * 1000; // Every Minute
     updateAlerts();

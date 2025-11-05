@@ -44,6 +44,17 @@ function showTimetable(id) {
   toggleMap(id);
 }
 
+function setUrlParam(paramName, paramValue) {
+  const url = new URL(window.location);
+  url.searchParams.set(paramName, paramValue);
+  window.history.replaceState({}, '', url);
+}
+
+function getUrlParam(paramName) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(paramName);
+}
+
 function hideTimepointColumns() {
   const timetables = document.querySelectorAll('.timetable');
 

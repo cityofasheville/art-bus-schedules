@@ -227,13 +227,6 @@ function getFavoriteStops() {
   }
 }
 
-// function clearDefaultStop(stop_id) {
-//   let defaultStops = getFavoriteStops();
-//   stop_id = String(stop_id);
-//   defaultStops = defaultStops.filter(id => id !== stop_id);
-//   localStorage.setItem('art_favorite_stops', JSON.stringify(defaultStops));
-// }
-
 function setUrlParam(paramName, paramValue) {
   const url = new URL(window.location);
   url.searchParams.set(paramName, paramValue);
@@ -246,9 +239,6 @@ function getUrlParam(paramName) {
 }
 
 async function fetchRealtimeDeparturesForStop(stop_id) {
-  // console.log('trip data', tripData);
-  // console.log('Handling stop selection: ', event.target.value);
-  // const stop_id = event.target.value;
   const favorite_stops = getFavoriteStops();
   const thisStop = stopData[stop_id];
   $('#results-container').html('Loading upcoming arrivals...');
@@ -381,17 +371,6 @@ function getUpcomingArrivalsForStop(stop_id) {
   arrivals.sort((a, b) => a.time - b.time);
   return arrivals;
 }
-
-// function getFavoriteStops() {
-//   const stored_favorite_stops = localStorage.getItem('art_favorite_stops');
-//   if (!stored_favorite_stops) return [];
-//   try {
-//     const arr = JSON.parse(stored_favorite_stops);
-//     return Array.isArray(arr) ? arr : [String(arr)];
-//   } catch {
-//     return [String(stored_favorite_stops)];
-//   }
-// }
 
 jQuery(() => {
   jQuery(

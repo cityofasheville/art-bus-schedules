@@ -1,4 +1,5 @@
 include formatting_functions.pug
+-const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
 .relative.w-full.h-full.flex.flex-col
   img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
@@ -9,7 +10,7 @@ include formatting_functions.pug
         i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
         span(class="inline-block")="Real-time Departures"
       div(class="p-4")
-        fieldset#departure_interface_selector.px-4.pt-4.border.shadow-md
+        fieldset#departure_interface_selector.p-4.border.shadow-md
           legend="Find real-time departures for a stop"
           div(class=`w-full grid grid-cols-3 btn-group`)
             label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
@@ -26,18 +27,18 @@ include formatting_functions.pug
             p.mb-4="Select a stop to see real time departure information"
             select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
               option(value="") Select a stop
-              each stop in config.timetablePage.stops
+              each stop in alphabetical_stops
                 option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
 
           div(id="container_favorites" class="departure-interface p-4")
-            p.mb-4="Select one of your favorite stops to see real time departure information"
             div(id="favorite_stops_select_container" class="mb-4")
+              p.mb-4="Select one of your favorite stops to see real time departure information"
               select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
                 option(value="") Select a favorite stop
             div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
                 
           div(id="container_choose_route" class="departure-interface p-4")
-            p.mb-4="Choose a route, direction, and stop to see real time departure information"
+            p.mb-4="(NOT YET IMPLEMENTED) Choose a route, direction, and stop to see real time departure information"
 
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
@@ -84,10 +85,12 @@ script.
     console.log('Data:', window.config);
     $(document).ready(function() {
       $('#stop-select-dropdown').select2({
-        width: 'element' 
+        //- width: 'element',
+        width: '100%'
       });
       $('#favorite-stop-select-dropdown').select2({
-        width: 'element' 
+        //- width: 'element',
+        width: '100%' 
       });
 
       const initialStopId = getUrlParam('stop_id');
