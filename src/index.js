@@ -208,7 +208,7 @@ for (const page of config.customPages) {
 
   const html = pug.renderFile(templatePath, {
     config,
-    timetablePage, // Now available in your template
+    timetablePage,
   });
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });

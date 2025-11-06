@@ -177,12 +177,18 @@ function groupArrivalsByRouteAndDirection(arrivals) {
 
 function handleReloadArrivals(event) {
   const stop_id = event.currentTarget.getAttribute('data-stopid');
+  if (!stop_id) {
+    return;
+  }
   setUrlParam('stop_id', stop_id);
   fetchRealtimeDeparturesForStop(stop_id);
 }
 
 function handleStopSelection(event) {
   const stop_id = event.target.value;
+  if (!stop_id) {
+    return;
+  }
   setUrlParam('stop_id', stop_id);
   fetchRealtimeDeparturesForStop(stop_id);
 }
@@ -239,6 +245,7 @@ function getUrlParam(paramName) {
 }
 
 async function fetchRealtimeDeparturesForStop(stop_id) {
+  // console.log('Fetching realtime departures for stop ID:', stop_id);
   const favorite_stops = getFavoriteStops();
   const thisStop = stopData[stop_id];
   $('#results-container').html('Loading upcoming arrivals...');
@@ -265,7 +272,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     timeStyle: 'short',
   });
 
-  console.log('augmentedArrivals', augmentedArrivals);
+  // console.log('augmentedArrivals', augmentedArrivals);
 
   let html = '';
   if (augmentedArrivals.length === 0) {
@@ -384,7 +391,7 @@ jQuery(() => {
   });
 
   const favorite_stops = getFavoriteStops();
-  console.log('Favorite stops from localStorage:', favorite_stops);
+  // console.log('Favorite stops from localStorage:', favorite_stops);
 
   if (favorite_stops.length > 0) {
     favorite_stops.forEach((stop_id) => {
@@ -397,6 +404,8 @@ jQuery(() => {
       );
       $('#favorite-stop-select-dropdown').append(new_option_element);
     });
+    $('#favorite-stop-select-dropdown').val('').trigger('change');
+
     jQuery('#favorite_instructions_container').hide();
   } else {
     jQuery('#favorite_stops_select_container').hide();

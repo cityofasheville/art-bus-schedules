@@ -13,11 +13,12 @@ html(lang="en")
       link(rel="stylesheet" href=`/css/global.css`)
       link(rel="stylesheet" href=`/css/tw-output.css`)
 
-  body(class="h-screen")
+  body(class="flex flex-col min-h-screen")
     //- div(class="relative")
-    a(href="#main_content" class="absolute left-0 top-0 sr-only focus:not-sr-only") Skip to main content
-    //- div(class="")
-    include navigation.pug
+    header
+      a(href="#main_content" class="absolute mx-auto top-0 sr-only focus:not-sr-only") Skip to main content
+      //- div(class="")
+      include navigation.pug
     //- header.main-header
     //-   .header-layout
     //-     if config.logo_url
@@ -30,8 +31,15 @@ html(lang="en")
     //-       a(href="/plan-your-trip/") Plan Your Trip
 
 
-    //- main#main_content(class="h-100")
-    block content 
+    main#main_content(class="flex-grow")
+      block content 
+
+    footer(class="bg-gray-800 text-white p-4")
+      .footer-layout
+        if config.webpageTitle
+          .footer-item &copy; #{new Date().getFullYear()} #{config.webpageTitle}
+        .footer-item
+          a(href="#" class="text-white underline") Privacy Policy
 
     script.
       document.addEventListener('DOMContentLoaded', () => {

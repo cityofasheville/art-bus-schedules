@@ -42,12 +42,22 @@ include formatting_functions.pug
 
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
+    div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
+      div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
+        i(class="bi bi-bell-fill" aria-hidden="true")
+        span Service Alerts
+        span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
+            
+      div(class="timetable-alerts border-t border-slate-300")
+        div(id="alerts-container" class="timetable-alerts-list p-4")
+          div(class="timetable-alert-empty")
+            | There are no service alerts at this time.
   footer
     p!=config.wordpress.transitConnect.what_we_do
 
 script.
     window.config = !{JSON.stringify(config)};
-    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions};
+    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
     const directions = window.config.timetablePage.directions;
     const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
     const routeData = window.config.timetablePage.routes.reduce((accumulator, route) => {
@@ -71,6 +81,7 @@ script.
       };
       return accumulator;
     }, {});
+    const stopIds = window.config.timetablePage.stops.map(stop => stop.stop_id);
     const stopData = window.config.timetablePage.stops.reduce((accumulator, stop) => {
       accumulator[stop.stop_id] = {
         stop_id: stop.stop_id,
@@ -94,9 +105,19 @@ script.
       });
 
       const initialStopId = getUrlParam('stop_id');
+      console.log('Initial stop ID from URL:', initialStopId);
       if (initialStopId) {
+        console.log('Setting initial stop selection to:', initialStopId);
         $('#stop-select-dropdown').val(initialStopId).trigger('change');
+        $("#favorite-stop-select-dropdown").select2("val", "");
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
         //- $('#favorite-stop-select-dropdown').val(initialStopId);
         fetchRealtimeDeparturesForStop(initialStopId);
+      } else {
+        //- $("#stop-select-dropdown").select2("val", "");
+        //- $("#favorite-stop-select-dropdown").select2("val", "");
+
+        //- $('#stop-select-dropdown').val('').trigger('change');
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
       }
     });
