@@ -205,10 +205,12 @@ db.close();
 for (const page of config.customPages) {
   const templatePath = path.join(config.templatePath, page.template);
   const outputPath = path.join(config.outputPath, page.output);
+  const pageTitle = page.title;
 
   const html = pug.renderFile(templatePath, {
     config,
     timetablePage,
+    pageTitle,
   });
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });

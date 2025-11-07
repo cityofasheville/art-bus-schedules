@@ -1033,6 +1033,11 @@ fieldset:has(input:focus) {
   margin-bottom: 1rem;
 }
 
+.my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -1059,10 +1064,6 @@ fieldset:has(input:focus) {
 
 .mt-4 {
   margin-top: 1rem;
-}
-
-.mt-8 {
-  margin-top: 2rem;
 }
 
 .block {
@@ -1108,10 +1109,6 @@ fieldset:has(input:focus) {
   height: 100%;
 }
 
-.h-screen {
-  height: 100vh;
-}
-
 .min-h-64 {
   min-height: 16rem;
 }
@@ -1153,6 +1150,14 @@ fieldset:has(input:focus) {
   max-width: 640px;
 }
 
+.max-w-screen-xl {
+  max-width: 1280px;
+}
+
+.max-w-screen-2xl {
+  max-width: 1536px;
+}
+
 .flex-grow {
   flex-grow: 1;
 }
@@ -1185,6 +1190,10 @@ fieldset:has(input:focus) {
 
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 
 .flex-row {
@@ -1235,6 +1244,14 @@ fieldset:has(input:focus) {
   gap: 1rem;
 }
 
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
 .divide-x > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-x-reverse: 0;
   border-right-width: calc(1px * var(--tw-divide-x-reverse));
@@ -1275,6 +1292,20 @@ fieldset:has(input:focus) {
   border-width: 2px;
 }
 
+.border-4 {
+  border-width: 4px;
+}
+
+.border-x-2 {
+  border-left-width: 2px;
+  border-right-width: 2px;
+}
+
+.border-x-4 {
+  border-left-width: 4px;
+  border-right-width: 4px;
+}
+
 .border-b {
   border-bottom-width: 1px;
 }
@@ -1295,16 +1326,16 @@ fieldset:has(input:focus) {
   border-top-width: 1px;
 }
 
+.border-t-2 {
+  border-top-width: 2px;
+}
+
 .border-t-4 {
   border-top-width: 4px;
 }
 
 .border-t-8 {
   border-top-width: 8px;
-}
-
-.border-t-2 {
-  border-top-width: 2px;
 }
 
 .border-art-blue {
@@ -1336,6 +1367,11 @@ fieldset:has(input:focus) {
   border-color: transparent;
 }
 
+.border-art-green {
+  --tw-border-opacity: 1;
+  border-color: rgb(108 179 63 / var(--tw-border-opacity, 1));
+}
+
 .bg-art-green {
   --tw-bg-opacity: 1;
   background-color: rgb(108 179 63 / var(--tw-bg-opacity, 1));
@@ -1349,6 +1385,19 @@ fieldset:has(input:focus) {
 .bg-gray-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
+}
+
+.bg-art-green\/20 {
+  background-color: rgb(108 179 63 / 0.2);
+}
+
+.bg-art-green\/10 {
+  background-color: rgb(108 179 63 / 0.1);
+}
+
+.bg-art-blue {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 93 170 / var(--tw-bg-opacity, 1));
 }
 
 .p-0 {
@@ -1408,6 +1457,11 @@ fieldset:has(input:focus) {
   padding-bottom: 1.5rem;
 }
 
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -1426,6 +1480,10 @@ fieldset:has(input:focus) {
 
 .pr-3 {
   padding-right: 0.75rem;
+}
+
+.pt-12 {
+  padding-top: 3rem;
 }
 
 .text-left {
@@ -1472,6 +1530,14 @@ fieldset:has(input:focus) {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-medium {
+  font-weight: 500;
 }
 
 .text-art-blue {
@@ -1627,6 +1693,10 @@ fieldset:has(input:focus) {
     top: 4rem;
   }
 
+  .lg\:mb-0 {
+    margin-bottom: 0px;
+  }
+
   .lg\:block {
     display: block;
   }
@@ -1643,8 +1713,20 @@ fieldset:has(input:focus) {
     max-width: 768px;
   }
 
+  .lg\:max-w-full {
+    max-width: 100%;
+  }
+
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .lg\:flex-row {
     flex-direction: row;
+  }
+
+  .lg\:flex-row-reverse {
+    flex-direction: row-reverse;
   }
 
   .lg\:justify-start {

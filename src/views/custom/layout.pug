@@ -1,7 +1,8 @@
 doctype html
 html(lang="en")
   head
-    title= title
+    -const pageTitleToUse = title ? title : pageTitle ? config.webpageTitle + ' - ' + pageTitle : config.webpageTitle;
+    title= `${pageTitleToUse}`
     meta(charset="utf-8")
     meta(name="viewport" content="initial-scale=1.0, width=device-width")
 

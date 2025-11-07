@@ -17,18 +17,26 @@
   "customPages": [
     {
       "template": "customhome_full.pug",
-      "output": "customhome/index.html"
+      "output": "customhome/index.html",
+      "title": "Real-time Departures, System Alerts, and More"
     },
     {
       "template": "planyourtrip_full.pug",
-      "output": "plan-your-trip/index.html"
+      "output": "plan-your-trip/index.html",
+      "title": "Plan Your Trip"
     },
     {
       "template": "faresandpasses_full.pug",
-      "output": "fares-and-passes/index.html"
+      "output": "fares-and-passes/index.html",
+      "title": "Fares and Passes"
+    },
+    {
+      "template": "tripplanner_full.pug",
+      "output": "trip-planner/index.html",
+      "title": "Trip Planner"
     }
   ],
-  "webpageTitle": "ART Transit System",
+  "webpageTitle": "Asheville Rides Transit",
   "linkStopUrls": true,
   "menuType": "radio",
   "noHead": false,

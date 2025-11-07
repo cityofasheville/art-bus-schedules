@@ -209,13 +209,30 @@ async function updateAlerts() {
     $('#alerts-container').empty();
 
     if (systemWide.length > 0) {
-      $('#alerts-container').append('<h3 class="mt-4 border-t-2">System-wide Alerts</h3>');
+      $('#alerts-container').append('<h3 class="text-xl mb-4">System-wide Alerts</h3>');
       systemWide.forEach((alert) => {
         $('#alerts-container').append(
-          `<div class="p-2 my-4 border alert system-wide"><div class="block text-xl mb-2">${alert.title}:</div> ${alert.description}</div>`
+          `<details class="bg-aux-gray border border-slate-300 rounded mb-6">
+          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer">
+          <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
+          <span class="route-color-swatch-large bg-art-blue text-white">ART</span>
+          <span>${alert.title}</span>
+          </div>
+          <div class="flex items-center">
+          <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
+          </div>
+          </summary>
+          <div class="p-4 border-t border-slate-300">
+          <p>${alert.description}</p>
+          </div>
+         </details>`
+          // `<div class="p-2 my-4 border alert system-wide"><div class="block text-xl mb-2">${alert.title}:</div> ${alert.description}</div>`
         );
       });
     }
+
+    $('#alerts-container').append('<hr />');
+    $('#alerts-container').append('<h3 class="text-xl my-4">Route-specific Alerts</h3>');
 
     Object.keys(routeGroups).forEach((route_id) => {
       // $('#alerts-container').append(
@@ -234,8 +251,8 @@ async function updateAlerts() {
         $('#alerts-container').append(
           `<details class="bg-aux-gray border border-slate-300 rounded mb-6">
           <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer">
-          <div class="flex items-center text-art-blue gap-2 text-lg font-semibold">
-          <span class="route-color-swatch" style="background-color: #${routeData[route_id].route_color};color: #${routeData[route_id].route_text_color};">${routeData[route_id].route_short_name}</span>
+          <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
+          <span class="route-color-swatch-large" style="background-color: #${routeData[route_id].route_color};color: #${routeData[route_id].route_text_color};">${routeData[route_id].route_short_name}</span>
           <span>${alert.title}</span>
           </div>
           <div class="flex items-center">
