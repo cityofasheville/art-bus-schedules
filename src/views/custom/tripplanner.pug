@@ -58,33 +58,26 @@ script.
         const departureDateTime = new Date(`${departure_date}T${departure_time}`);
         const unixTimestamp = Math.floor(departureDateTime.getTime() / 1000);
 
-        //- const formattedDate = departure_date.replace(/-/g, "");
-
-        // 6. Build the URL
         const baseUrl = "https://www.google.com/maps/dir/";
-        
-        // Using URLSearchParams is the safest, most modern way to build query strings.
-        // It automatically handles URL encoding (like spaces in addresses).
+        //- const baseUrl = "https://www.google.com/maps/";
+
+        //- May need to give up on departure_time and route options and let user adjust in Google Maps directly
+
         const params = new URLSearchParams();
         params.append("api", "1");
         params.append("travelmode", "transit");
         params.append("origin", source);
         params.append("destination", destination);
         params.append("departure_time", unixTimestamp);
+
         if (tripPreference) {
           params.append("transit_routing_preference", tripPreference);
         }
-        //- params.append("dirflg", "r");      // "r" for transit/routes
-        //- params.append("rt", "1");          // "1" for departure time
-        //- params.append("date", formattedDate);
-        //- params.append("time", departure_time);    // Google Maps accepts 24-hour HH:MM
-        //- params.append("tt", tripPreference);   // "1", "2", or "3"
 
         const finalUrl = `${baseUrl}?${params.toString()}`;
 
         console.log(`Generated Google Maps URL: ${finalUrl}`);
 
-        // 7. Open the generated Google Maps URL in a new tab
         window.open(finalUrl, "_blank");
 
       });
