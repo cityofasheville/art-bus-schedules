@@ -183,6 +183,7 @@ async function updateAlerts() {
 }
 
 jQuery(() => {
+  console.log('Timetable Alerts JS loaded', gtfsRealtimeUrls);
   $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
     const alertUpdateInterval = 60 * 1000; // Every Minute

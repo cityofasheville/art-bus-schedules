@@ -1,12 +1,31 @@
 include formatting_functions.pug
 -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
-.relative.w-full.h-full.flex.flex-col
-  img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+//- .relative.w-full.h-full.flex.flex-col
+div(class="pt-12 max-w-screen-2xl mx-auto")
+  h1(class="sr-only")=pageTitleToUse
+  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-  div(class="w-full px-4")
-    div(class="relative z-10 max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 my-12")
-      h1(class="p-4 px-4 bg-art-green text-white text-2xl mt-0 mb-4 rounded-t-sm")
+  div(class="w-full flex grid-cols-1 lg:grid-cols-2 flex-col-reverse lg:flex-row gap-8 px-4")
+
+    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-full mx-auto bg-aux-gray border rounded shadow-lg p-0 mb-6 lg:mb-0")
+      //- div(class="w-full py-1 bg-art-green rounded-t-sm")
+      h2(class="p-4 px-4 text-art-blue text-2xl m-0 rounded-t-sm bg-art-green/10")
+        i(class="inline-block bi bi bi-bell-fill mr-2" aria-hidden="true")
+        span(class="inline-block")="Service Alerts"
+
+      //- div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
+      //-   i(class="bi bi-bell-fill" aria-hidden="true")
+      //-   span 
+      //-   span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
+            
+      div(class="timetable-alerts border-t border-slate-300")
+        div(id="alerts-container" class="timetable-alerts-list p-4")
+          div(class="timetable-alert-empty")
+            | Checking for service alerts...
+
+    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-full min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 mb-6 lg:mb-0")
+      h2(class="p-4 px-4 text-art-blue text-2xl m-0 rounded-t-sm bg-art-green/10")
         i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
         span(class="inline-block")="Real-time Departures"
       div(class="p-4")
@@ -42,12 +61,9 @@ include formatting_functions.pug
 
         output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
-  footer
-    p!=config.wordpress.transitConnect.what_we_do
-
 script.
     window.config = !{JSON.stringify(config)};
-    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions};
+    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
     const directions = window.config.timetablePage.directions;
     const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
     const routeData = window.config.timetablePage.routes.reduce((accumulator, route) => {
@@ -71,6 +87,7 @@ script.
       };
       return accumulator;
     }, {});
+    const stopIds = window.config.timetablePage.stops.map(stop => stop.stop_id);
     const stopData = window.config.timetablePage.stops.reduce((accumulator, stop) => {
       accumulator[stop.stop_id] = {
         stop_id: stop.stop_id,
@@ -94,9 +111,19 @@ script.
       });
 
       const initialStopId = getUrlParam('stop_id');
+      console.log('Initial stop ID from URL:', initialStopId);
       if (initialStopId) {
+        console.log('Setting initial stop selection to:', initialStopId);
         $('#stop-select-dropdown').val(initialStopId).trigger('change');
+        $("#favorite-stop-select-dropdown").select2("val", "");
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
         //- $('#favorite-stop-select-dropdown').val(initialStopId);
         fetchRealtimeDeparturesForStop(initialStopId);
+      } else {
+        //- $("#stop-select-dropdown").select2("val", "");
+        //- $("#favorite-stop-select-dropdown").select2("val", "");
+
+        //- $('#stop-select-dropdown').val('').trigger('change');
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
       }
     });
