@@ -71,13 +71,13 @@ function formatRoute(route) {
         .addClass('route-color-swatch')
         .css('backgroundColor', formatRouteColor(route))
         .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? '')
+        .text(route.route_short_name ?? ''),
     );
   }
   routeItemDivs.push(
     jQuery('<div>')
       .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`)
+      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
   );
 
   html.append(routeItemDivs);
@@ -111,7 +111,7 @@ function getStopPopupHtml(feature, stop) {
         (stopTimeUpdate) =>
           stopTimeUpdate.stop_id === stop.stop_id &&
           (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
-          stopTimeUpdate.schedule_relationship !== 3
+          stopTimeUpdate.schedule_relationship !== 3,
       );
       if (stopTimeUpdatesForStop.length > 0) {
         stopTimeUpdates[tripUpdate.trip_update.trip.direction_id].push(...stopTimeUpdatesForStop);
@@ -136,7 +136,7 @@ function getStopPopupHtml(feature, stop) {
       for (const direction of ['0', '1']) {
         if (stopTimeUpdates[direction].length > 0) {
           const directionName = jQuery(`.timetable[data-direction-id="${direction}"]`).data(
-            'direction-name'
+            'direction-name',
           );
           const departureTimes = stopTimeUpdates[direction].map((stopTimeUpdate) =>
             Math.round(
@@ -144,8 +144,8 @@ function getStopPopupHtml(feature, stop) {
                 ? stopTimeUpdate.departure.time
                 : stopTimeUpdate.arrival.time) -
                 Date.now() / 1000) /
-                60
-            )
+                60,
+            ),
           );
 
           // Only use the next 4 departures
@@ -167,14 +167,14 @@ function getStopPopupHtml(feature, stop) {
   jQuery(html).append(
     jQuery('<div>')
       .addClass('route-list')
-      .html(routeIds.map((routeId) => formatRoute(routeData[routeId])))
+      .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
   );
 
   jQuery('<a>')
     .addClass('btn-blue btn-sm')
     .prop(
       'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`
+      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
     )
     .prop('target', '_blank')
     .prop('rel', 'noopener noreferrer')
@@ -214,7 +214,7 @@ function secondsInFuture(dateString) {
     dateString.substring(6, 8), // Day
     dateString.substring(9, 11), // Hours
     dateString.substring(12, 14), // Minutes
-    dateString.substring(15, 17) // Seconds
+    dateString.substring(15, 17), // Seconds
   );
 
   const now = new Date();
@@ -244,7 +244,7 @@ function formatMovingText(vehiclePosition) {
   }
   if (vehiclePosition.vehicle.position.speed) {
     movingText += ` at ${formatSpeed(
-      metersPerSecondToMph(vehiclePosition.vehicle.position.speed)
+      metersPerSecondToMph(vehiclePosition.vehicle.position.speed),
     )}`;
   }
 
@@ -313,7 +313,7 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
             jQuery('<div>').text(formatSeconds(arrival.secondsToArrival)),
             jQuery('<div>').text(`${arrival.stopName} ${delay}`),
           ];
-        })
+        }),
       )
       .appendTo(html);
   }
@@ -541,7 +541,7 @@ async function updateArrivals({ withMap = true } = {}) {
       // Hide vehicles which show up 15 minutes or more before their trip start times
       if (
         secondsInFuture(
-          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`
+          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`,
         ) >
         15 * 60
       ) {
@@ -571,12 +571,12 @@ async function updateArrivals({ withMap = true } = {}) {
 
         let vehicleTripUpdate = tripUpdates?.find(
           (tripUpdate) =>
-            tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id
+            tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id,
         );
 
         if (!vehicleTripUpdate) {
           vehicleTripUpdate = tripUpdates?.find(
-            (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId
+            (tripUpdate) => tripUpdate.trip_update.vehicle.id === vehicleId,
           );
         }
 
@@ -594,7 +594,7 @@ async function updateArrivals({ withMap = true } = {}) {
         attachVehicleMarkerClickHandler(
           vehiclePosition,
           vehicleTripUpdate,
-          maps[visibleTimetableId]
+          maps[visibleTimetableId],
         );
       }
 
@@ -602,7 +602,7 @@ async function updateArrivals({ withMap = true } = {}) {
       for (const vehicleId of Object.keys(vehicleMarkers)) {
         if (
           !vehiclePositions.find(
-            (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
+            (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId,
           )
         ) {
           vehicleMarkers[vehicleId].remove();
@@ -628,7 +628,7 @@ function toggleMap(id) {
     // Update vehicle markers to use the current visible map
     for (const [vehicleId, vehicleMarker] of Object.entries(vehicleMarkers)) {
       const vehiclePosition = vehiclePositions.find(
-        (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId
+        (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId,
       );
 
       const vehicleTripUpdate = tripUpdates.find((tripUpdate) => {
@@ -708,7 +708,7 @@ function disablePointsOfInterest(map) {
 function addMapLayers(map, geojson, defaultRouteColor, lineLayout) {
   const layers = map.getStyle().layers;
   const firstLabelLayerId = layers.find(
-    (layer) => layer.type === 'symbol' && layer.id.includes('label')
+    (layer) => layer.type === 'symbol' && layer.id.includes('label'),
   )?.id;
 
   addRouteLineShadow(map, geojson, lineLayout, firstLabelLayerId);
@@ -745,7 +745,7 @@ function addRouteLineShadow(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -769,7 +769,7 @@ function addRouteLineOutline(map, geojson, lineLayout, firstSymbolId) {
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -793,7 +793,7 @@ function addRouteLine(map, geojson, defaultRouteColor, lineLayout, firstSymbolId
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -972,7 +972,7 @@ function setupTableHoverListeners(id, map) {
         highlightStop(map, id, [stopId.toString()]);
       }
     },
-    () => unHighlightStop(map, id)
+    () => unHighlightStop(map, id),
   );
 }
 

@@ -110,6 +110,16 @@ script.
         width: '100%' 
       });
 
+      // prevent select2 from auto-focusing the search input when the dropdown opens, which causes mobile keyboard to pop up immediately
+      // need to support tab navigation to the search input. the input is not naturally next in the tab order. Maybe we only want to prevent auto-focus if the user is not using keyboard navigation?
+
+      //- $('#stop-select-dropdown').on('select2:open', function() {
+      //-   $('.select2-search input').prop('focus', 0);
+      //- });          
+      //- $('#favorite-stop-select-dropdown').on('select2:open', function() {
+      //-   $('.select2-search input').prop('focus', 0);
+      //- });
+
       const initialStopId = getUrlParam('stop_id');
       console.log('Initial stop ID from URL:', initialStopId);
       if (initialStopId) {

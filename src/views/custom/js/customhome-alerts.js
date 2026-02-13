@@ -52,7 +52,7 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
     .addClass('alert-header')
     .append($routeList)
     .append(
-      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text)
+      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text),
     );
 
   // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
@@ -63,8 +63,8 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
         jQuery('<div>')
           .addClass('alert-body')
           .text(`${alert.alert.description_text.translation[0].text} `)
-          .html()
-      )
+          .html(),
+      ),
     );
 
   if (alert.alert.url?.translation?.[0].text) {
@@ -113,10 +113,14 @@ async function updateAlerts() {
     return;
   }
 
+  const now = new Date();
+  const current_timestamp = Math.floor(now.getTime() / 1000);
+  const two_weeks_from_now = current_timestamp + 14 * 24 * 60 * 60;
+
   try {
     const alerts = await fetchGtfsRealtime(
       gtfsRealtimeUrls.realtimeAlerts.url,
-      gtfsRealtimeUrls.realtimeAlerts.headers
+      gtfsRealtimeUrls.realtimeAlerts.headers,
     );
 
     if (!alerts) {
@@ -127,7 +131,58 @@ async function updateAlerts() {
     let relevant_alert_data = [];
     const formattedAlerts = [];
 
-    for (const alert of alerts) {
+    const active_alerts = alerts.filter((alert) => {
+      if (!alert.alert || alert.alert.is_deleted) {
+        return false;
+      }
+      let isActive = false;
+      let this_timespan = alert.alert.active_period;
+
+      if (this_timespan) {
+        for (const timespan of this_timespan) {
+          // console.log(
+          //   'Checking alert:',
+          //   alert.alert.header_text.translation[0].text,
+          //   'with timespans start:',
+          //   timespan.start,
+          //   'end:',
+          //   timespan.end,
+          //   'current timestamp:',
+          //   current_timestamp,
+          //   'two weeks from now:',
+          //   two_weeks_from_now,
+          // );
+
+          if (
+            (!timespan.start || timespan.start <= two_weeks_from_now) &&
+            (!timespan.end || timespan.end >= current_timestamp)
+          ) {
+            isActive = true;
+            console.log(
+              'Alert ACTIVE:',
+              alert.alert.header_text.translation[0].text,
+              'timespan start:',
+              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
+              'timespan end:',
+              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
+            );
+            break;
+          } else {
+            console.log(
+              'Alert INACTIVE:',
+              alert.alert.header_text.translation[0].text,
+              'timespan start:',
+              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
+              'timespan end:',
+              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
+            );
+          }
+        }
+      }
+      return isActive;
+    });
+
+    for (const alert of active_alerts) {
       if (!alert.alert || alert.alert.is_deleted) {
         continue;
       }
@@ -157,7 +212,7 @@ async function updateAlerts() {
       ];
 
       const affectedRouteIdsInTimetable = routeIds.filter((routeId) =>
-        affectedRouteIds.includes(routeId)
+        affectedRouteIds.includes(routeId),
       );
 
       const affectedStopIds = [
@@ -169,7 +224,7 @@ async function updateAlerts() {
       ];
 
       const affectedStopsIdsInTimetable = stopIds.filter((stopId) =>
-        affectedStopIds.includes(stopId)
+        affectedStopIds.includes(stopId),
       );
 
       // Hide alerts that don't affect any stops or routes in this timetable
@@ -217,6 +272,7 @@ async function updateAlerts() {
           <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
           <span class="route-color-swatch-large bg-art-blue text-white">ART</span>
           <span>${alert.title}</span>
+          <span>${alert.valid_timespans.length}</span>
           </div>
           <div class="flex items-center">
           <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
@@ -225,7 +281,7 @@ async function updateAlerts() {
           <div class="p-4 border-t border-slate-300">
           <p>${alert.description}</p>
           </div>
-         </details>`
+         </details>`,
           // `<div class="p-2 my-4 border alert system-wide"><div class="block text-xl mb-2">${alert.title}:</div> ${alert.description}</div>`
         );
       });
@@ -248,12 +304,35 @@ async function updateAlerts() {
           });
           affected_stops_html += '</ul>';
         }
+        const timespanText = alert.valid_timespans
+          .map((timespan) => {
+            const startDate = timespan.start
+              ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'N/A';
+            const endDate = timespan.end
+              ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'Ongoing';
+            return `${startDate} - ${endDate}`;
+          })
+          .join(', ');
+
         $('#alerts-container').append(
           `<details class="bg-aux-gray border border-slate-300 rounded mb-6">
           <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer">
           <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
           <span class="route-color-swatch-large" style="background-color: #${routeData[route_id].route_color};color: #${routeData[route_id].route_text_color};">${routeData[route_id].route_short_name}</span>
-          <span>${alert.title}</span>
+          <div>
+          <div>${alert.title}</div>
+          <div class="text-sm text-gray-600 mb-2">${timespanText}</div>
+          </div>
           </div>
           <div class="flex items-center">
           <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
@@ -263,7 +342,7 @@ async function updateAlerts() {
           <p>${alert.description}</p>
           ${affected_stops_html}
           </div>
-         </details>`
+         </details>`,
         );
       });
     });
