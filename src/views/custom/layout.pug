@@ -35,12 +35,28 @@ html(lang="en")
     main#main_content(class="flex-grow")
       block content 
 
-    footer(class="bg-gray-800 text-white p-4")
-      .footer-layout
-        if config.webpageTitle
-          .footer-item &copy; #{new Date().getFullYear()} #{config.webpageTitle}
-        .footer-item
-          a(href="#" class="text-white underline") Privacy Policy
+    footer
+      div(class="w-full min-h-96 bg-art-blue relative flex items-center justify-start overflow-hidden")
+        img(src="https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg" class="z-[2] absolute w-full inset-0" )
+        img(src="https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-buswrap-graphic.png" class="z-[4] absolute w-full bottom-0 left-0" )
+
+        div(class="z-[6] w-full max-w-screen-xl grid grid-cols-1 md:grid-cols-2 gap-12 px-12 py-16 mx-auto")
+          div(class="order-2 md:order-1 bg-white rounded-lg shadow-lg p-6")
+            div(class="flex items-center gap-3 mb-6")
+              img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
+              h2(class="text-3xl") Stay in the Loop!
+            iframe(width="100%" height="200" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
+          div(class="order-1 md:order-2 flex items-end justify-center")
+            img(class="inline-block w-80 xl:w-96 h-auto", src=`${config.footer_logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
+
+
+      div(class="bg-gray-800 text-white flex justify-end p-12")
+        .footer-layout
+          img(src=`https://www.ashevillenc.gov/wp-content/uploads/2018/09/city-of-asheville-logo-white.svg` class="w-64 h-auto inline-block mb-4", alt='City of Asheville logo')
+          if config.webpageTitle
+            .footer-item &copy; #{new Date().getFullYear()} #{config.webpageTitle}
+          .footer-item
+            a(href="#" class="text-white underline") Privacy Policy
 
     script.
       document.addEventListener('DOMContentLoaded', () => {

@@ -2,16 +2,56 @@ include formatting_functions.pug
 -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
 //- .relative.w-full.h-full.flex.flex-col
-div(class="pt-12 max-w-screen-2xl mx-auto")
-  h1(class="sr-only")=pageTitleToUse
+div(class="")
+  //- h1(class="sr-only")=pageTitleToUse
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-  div(class="w-full flex grid-cols-1 lg:grid-cols-2 flex-col-reverse lg:flex-row gap-8 px-4")
+  div(class="w-full min-h-128 relative flex items-center justify-start")
+    img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-full mx-auto bg-aux-gray border rounded shadow-lg p-0 mb-6 lg:mb-0")
+    div(id="container_real_time_departures" class="w-full lg:min-w-128 px-6 lg:px-12 relative z-10")
+      div(class="w-full min-h-64 z-10 bg-aux-gray border rounded-lg shadow-lg p-0")
+        h2(class="p-4 px-4 text-white text-2xl m-0 rounded-t-sm bg-art-green")
+          i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
+          span(class="inline-block")="Real-time Departures"
+        div(class="p-4")
+          fieldset#departure_interface_selector.p-4.border.shadow-md
+            //- legend="Find real-time departures for a stop"
+            div(class=`w-full grid grid-cols-3 btn-group rounded-xl`)
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
+                span= "By Stop"
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
+                span= "Favorites"
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
+                span= "By Route"
+
+            div(id="container_search_stop" class="departure-interface p-4")
+              p.mb-4="Select a stop to see real time departure information"
+              select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                option(value="") Select a stop
+                each stop in alphabetical_stops
+                  option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+
+            div(id="container_favorites" class="departure-interface p-4")
+              div(id="favorite_stops_select_container" class="mb-4")
+                p.mb-4="Select one of your favorite stops to see real time departure information"
+                select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                  option(value="") Select a favorite stop
+              div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
+                  
+            div(id="container_choose_route" class="departure-interface p-4")
+              p.mb-4="(NOT YET IMPLEMENTED) Choose a route, direction, and stop to see real time departure information"
+
+          output#results-container.max-w-screen-lg.mx-auto.block.py-6 
+
+  div(class="w-full bg-aux-gray p-12 border-l-[16px] border-aux-red")
+    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
       //- div(class="w-full py-1 bg-art-green rounded-t-sm")
-      h2(class="p-4 px-4 text-art-blue text-2xl m-0 rounded-t-sm bg-art-green/10")
-        i(class="inline-block bi bi bi-bell-fill mr-2" aria-hidden="true")
+      h2(class="p-4 px-4 text-black text-2xl m-0")
+        i(class="inline-block bi bi-bell-fill mr-2" aria-hidden="true")
         span(class="inline-block")="Service Alerts"
 
       //- div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
@@ -24,42 +64,59 @@ div(class="pt-12 max-w-screen-2xl mx-auto")
           div(class="timetable-alert-empty")
             | Checking for service alerts...
 
-    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-full min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 mb-6 lg:mb-0")
-      h2(class="p-4 px-4 text-art-blue text-2xl m-0 rounded-t-sm bg-art-green/10")
-        i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
-        span(class="inline-block")="Real-time Departures"
-      div(class="p-4")
-        fieldset#departure_interface_selector.p-4.border.shadow-md
-          legend="Find real-time departures for a stop"
-          div(class=`w-full grid grid-cols-3 btn-group`)
-            label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
-              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
-              span= "By Stop"
-            label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
-              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
-              span= "Favorites"
-            label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
-              input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
-              span= "By Route"
+  div(class="w-full bg-art-green px-12 py-16")
+    div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
 
-          div(id="container_search_stop" class="departure-interface p-4")
-            p.mb-4="Select a stop to see real time departure information"
-            select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-              option(value="") Select a stop
-              each stop in alphabetical_stops
-                option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+      div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+        i(class="bi bi-map text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+        h3(class="text-xl font-semibold mb-2") Routes and Schedules
+        p(class="mb-6") Find route schedule information for any stop in the system.
+        a(href="/timetable/" class="btn-blue") Find Your Route
 
-          div(id="container_favorites" class="departure-interface p-4")
-            div(id="favorite_stops_select_container" class="mb-4")
-              p.mb-4="Select one of your favorite stops to see real time departure information"
-              select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-                option(value="") Select a favorite stop
-            div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
-                
-          div(id="container_choose_route" class="departure-interface p-4")
-            p.mb-4="(NOT YET IMPLEMENTED) Choose a route, direction, and stop to see real time departure information"
+      div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+        i(class="bi bi-bus-front text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+        h3(class="text-xl font-semibold mb-2") Bus Tracker
+        p(class="mb-6") Save your favorite stops for quick access to departure times.
+        a(href="/timetable/" class="btn-blue") Track Your Bus
 
-        output#results-container.max-w-screen-lg.mx-auto.block.py-6 
+      div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+        i(class="bi bi-ticket-perforated text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+        h3(class="text-xl font-semibold mb-2") Trip Planner
+        p(class="mb-6") Browse routes and see all stops and schedules for each line.
+        a(href="/timetable/" class="btn-blue") Plan Your Trip
+
+  div(class="w-full bg-aux-gray px-12 py-16")
+    h2(class="p-4 px-4 text-2xl m-0")
+      i(class="inline-block bi bi-newspaper mr-2" aria-hidden="true")
+      span(class="inline-block")="Recent News"
+
+    div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
+
+      div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
+        div(class="relative aspect-video w-full mb-4")
+          img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+        div(class="p-6 flex flex-col")
+          a(href="#" class="text-xl font-semibold mb-2") Article One
+          p(class="mb-4") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
+          p(class="text-sm italic") Published on January 1, 2024
+
+      div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
+        div(class="relative aspect-video w-full mb-4")
+          img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+        div(class="p-6 flex flex-col")          
+          a(href="#" class="text-xl font-semibold mb-2") Article Two
+          p(class="mb-0") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
+          p(class="text-sm italic") Published on January 1, 2024
+
+      div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
+        div(class="relative aspect-video w-full mb-4")
+          img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+        div(class="p-6 flex flex-col")          
+          a(href="#" class="text-xl font-semibold mb-2") Article Three
+          p(class="mb-0") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
+          p(class="text-sm italic") Published on January 1, 2024
+
+
 
 script.
     window.config = !{JSON.stringify(config)};
