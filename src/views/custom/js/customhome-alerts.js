@@ -268,7 +268,7 @@ async function updateAlerts() {
       systemWide.forEach((alert) => {
         $('#alerts-container').append(
           `<details class="bg-white border border-slate-300 rounded mb-6">
-          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer">
+          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
           <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
           <span class="route-color-swatch-large bg-art-blue text-white">ART</span>
           <span>${alert.title}</span>
@@ -326,7 +326,7 @@ async function updateAlerts() {
 
         $('#alerts-container').append(
           `<details class="bg-white border border-slate-300 rounded mb-6">
-          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer">
+          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
           <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
           <span class="route-color-swatch-large" style="background-color: #${routeData[route_id].route_color};color: #${routeData[route_id].route_text_color};">${routeData[route_id].route_short_name}</span>
           <div>

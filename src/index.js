@@ -77,7 +77,7 @@ async function getWordPressData() {
   let returnedData = {};
 
   try {
-    const planYourTripResponse = await fetch(
+    const howToRideResponse = await fetch(
       'https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf',
     );
     const faresAndPassesResponse = await fetch(
@@ -86,8 +86,9 @@ async function getWordPressData() {
     const transitConnectResponse = await fetch(
       'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf',
     );
-    if (!planYourTripResponse.ok) {
-      throw new Error(`HTTP error fetching Plan Your Trip! status: ${planYourTripResponse.status}`);
+
+    if (!howToRideResponse.ok) {
+      throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
     }
     if (!faresAndPassesResponse.ok) {
       throw new Error(
@@ -99,10 +100,11 @@ async function getWordPressData() {
         `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`,
       );
     }
-    const planYourTripData = await planYourTripResponse.json();
+
+    const howToRideData = await howToRideResponse.json();
     const faresAndPassesData = await faresAndPassesResponse.json();
     const transitConnectData = await transitConnectResponse.json();
-    returnedData.planYourTrip = planYourTripData;
+    returnedData.howToRide = howToRideData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
     returnedData.title = 'HC title';

@@ -32,7 +32,7 @@ html(lang="en")
     //-       a(href="/plan-your-trip/") Plan Your Trip
 
 
-    main#main_content(class="flex-grow")
+    main#main_content(class="flex-grow flex flex-col")
       block content 
 
     footer
@@ -65,4 +65,5 @@ html(lang="en")
           img.src = img.dataset.src;
           img.removeAttribute('data-src');
         });
+        console.log('All images have been loaded and heres the config', config);
       });

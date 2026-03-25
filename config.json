@@ -21,9 +21,9 @@
       "title": "Real-time Departures, System Alerts, and More"
     },
     {
-      "template": "planyourtrip_full.pug",
-      "output": "plan-your-trip/index.html",
-      "title": "Plan Your Trip"
+      "template": "howtoride_full.pug",
+      "output": "how-to-ride/index.html",
+      "title": "How to Ride"
     },
     {
       "template": "faresandpasses_full.pug",
