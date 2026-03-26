@@ -49,11 +49,11 @@ div(class="")
 
             output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
-  div(class="w-full bg-aux-gray p-12 border-t-[32px] border-b-[32px] border-aux-red")
+  div(class="w-full bg-aux-gray p-6 lg:p-12 border-t-[16px] border-b-[16px] border-aux-red")
     div(class="w-full max-w-7xl mx-auto ")
       div(class=" w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
         //- div(class="w-full py-1 bg-art-green rounded-t-sm")
-        h2(class="p-4 px-4 text-black text-2xl m-0")
+        h2(class="py-4 text-black text-2xl m-0")
           i(class="inline-block bi bi-bell-fill mr-2" aria-hidden="true")
           span(class="inline-block")="Service Alerts"
 
@@ -63,11 +63,11 @@ div(class="")
         //-   span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
               
         div(class="timetable-alerts border-t border-slate-300")
-          div(id="alerts-container" class="timetable-alerts-list p-4")
+          div(id="alerts-container" class="timetable-alerts-list")
             div(class="timetable-alert-empty")
               | Checking for service alerts...
 
-  div(class="w-full bg-art-green px-12 py-16")
+  div(class="w-full bg-art-green p-6 lg:px-12 lg:py-16")
     div(class="w-full max-w-7xl mx-auto ")
 
       div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
@@ -90,7 +90,7 @@ div(class="")
           p(class="mb-6") Browse routes and see all stops and schedules for each line.
           a(href="/timetable/" class="btn-blue") Plan Your Trip
 
-  div(class="w-full bg-aux-gray px-12 py-16")
+  div(class="w-full bg-aux-gray p-6 lg:px-12 lg:py-16")
     div(class="w-full max-w-7xl mx-auto ")
 
       h2(class="p-4 px-4 text-2xl m-0")
