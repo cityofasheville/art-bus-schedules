@@ -594,8 +594,8 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #d52f3e;
-  border: 1px solid #50161c;
+  background: #4AA91E;
+  border: 1px solid #005DAA;
   display: flex;
   align-items: center;
   justify-content: center;

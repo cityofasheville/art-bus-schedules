@@ -2,84 +2,274 @@ include formatting_functions.pug
 -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
 //- .relative.w-full.h-full.flex.flex-col
-div(class="pt-12 max-w-screen-2xl mx-auto")
+div(class="pt-12 bg-aux-gray flex-grow")
   h1(class="sr-only")=pageTitleToUse
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
   div(class="w-full px-4")
 
-    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-gray border rounded shadow-lg p-0 mb-6 lg:mb-0")
-      h2(class="p-4 px-4 text-art-blue text-2xl m-0 rounded-t-sm bg-art-green/10")
+    div(class="relative z-10 w-full max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-white border rounded-lg shadow-lg overflow-hidden p-0 mb-6 lg:mb-0")
+      h2(class="p-4 px-4 text-aux-white text-2xl m-0 rounded-t-sm bg-art-green")
         i(class="inline-block bi bi-compass mr-2" aria-hidden="true")
         span(class="inline-block")="Trip Planner"
       div(class="p-4")
         form(id="trip_planner_form")
-          fieldset#trip_planner_fieldset.p-4.border.shadow-md
+          fieldset#trip_planner_fieldset.p-4
             legend="Plan your trip with Google Maps"
             //- input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="Enter your starting location or destination")
             //- input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2 mt-4" placeholder="Enter your destination or starting location")
             //- button(type="submit" id="trip_planner_submit_button" class="btn-blue")="Plan My Trip"
 
-            div
+            div.autocomplete-wrapper.relative.mb-4
               label(for="trip_planner_input_source") Start Address (Origin)
-              input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="36 Montford Ave" required)
+              input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="36 Montford Ave" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_source_suggestions")
+              ul#trip_planner_input_source_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
 
-            div
+            div.autocomplete-wrapper.relative.mb-4
               label(for="trip_planner_input_destination") End Address (Destination)
-              input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2" placeholder="70 Court Plaza" required)
+              input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2" placeholder="70 Court Plaza" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_destination_suggestions")
+              ul#trip_planner_input_destination_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
 
-            div
-              label(for="trip_planner_input_date") Departure Day
-              input(type="date" id="trip_planner_input_date" class="w-full border p-2" name="trip_planner_input_date" )
+            //- div
+            //-   label(for="trip_planner_input_date") Departure Day
+            //-   input(type="date" id="trip_planner_input_date" class="w-full border p-2" name="trip_planner_input_date" )
 
-            div
-              label(for="trip_planner_input_time") Departure Time
-              input(type="time" id="trip_planner_input_time" class="w-full border p-2" name="trip_planner_input_time" )
+            //- div
+            //-   label(for="trip_planner_input_time") Departure Time
+            //-   input(type="time" id="trip_planner_input_time" class="w-full border p-2" name="trip_planner_input_time" )
 
-            div
-              label(for="trip_planner_input_trip_preference") Trip Preference
-              select(id="trip_planner_input_trip_preference" class="w-full border p-2" name="trip_planner_input_trip_preference" )
-                option(value="") Best route
-                option(value="fewer_transfers") Fewer transfers
-                option(value="less_walking") Less walking
+            //- div
+            //-   label(for="trip_planner_input_trip_preference") Trip Preference
+            //-   select(id="trip_planner_input_trip_preference" class="w-full border p-2" name="trip_planner_input_trip_preference" )
+            //-     option(value="") Best route
+            //-     option(value="fewer_transfers") Fewer transfers
+            //-     option(value="less_walking") Less walking
 
             button(type="submit" class="btn-blue") Get Directions
 
+style.
+  .autocomplete-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .autocomplete-suggestions.show {
+    display: block;
+  }
+  .autocomplete-suggestions li {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+  }
+  .autocomplete-suggestions li:last-child {
+    border-bottom: none;
+  }
+  .autocomplete-suggestions li:hover,
+  .autocomplete-suggestions li.highlighted {
+    background-color: #e8f4fc;
+  }
+  .autocomplete-suggestions li[aria-selected="true"] {
+    background-color: #d0e8f7;
+  }
+  .autocomplete-loading {
+    padding: 10px 12px;
+    color: #666;
+    font-style: italic;
+  }
+  .autocomplete-no-results {
+    padding: 10px 12px;
+    color: #999;
+  }
+
 script.
-    $(document).ready(function() {
-      $('#trip_planner_form').on('submit', function(e) {
-        e.preventDefault();
-        const source = $('#trip_planner_input_source').val();
-        const destination = $('#trip_planner_input_destination').val();
-        const departure_date = $('#trip_planner_input_date').val() ? $('#trip_planner_input_date').val() : new Date().toISOString().split('T')[0];
-        const departure_time = $('#trip_planner_input_time').val() ? $('#trip_planner_input_time').val() : new Date().toTimeString().split(' ')[0].substring(0,5);
-        const tripPreference = $('#trip_planner_input_trip_preference').val() ? $('#trip_planner_input_trip_preference').val() : "1";
+  $(document).ready(function() {
 
-        const departureDateTime = new Date(`${departure_date}T${departure_time}`);
-        const unixTimestamp = Math.floor(departureDateTime.getTime() / 1000);
+    const GEOCODER_URL = 'https://gis.ashevillenc.gov/server/rest/services/Geocoders/simplicity/GeocodeServer/suggest';
+    const DEBOUNCE_DELAY = 300;
+    const MIN_CHARS = 3;
 
-        const baseUrl = "https://www.google.com/maps/dir/";
-        //- const baseUrl = "https://www.google.com/maps/";
 
-        //- May need to give up on departure_time and route options and let user adjust in Google Maps directly
+    initAutocomplete('#trip_planner_input_source', '#trip_planner_input_source_suggestions');
+    initAutocomplete('#trip_planner_input_destination', '#trip_planner_input_destination_suggestions');
 
-        const params = new URLSearchParams();
-        params.append("api", "1");
-        params.append("travelmode", "transit");
-        params.append("origin", source);
-        params.append("destination", destination);
-        params.append("departure_time", unixTimestamp);
+    function initAutocomplete(inputSelector, suggestionsSelector) {
+      const input_target = $(inputSelector);
+      const suggestions_for_input = $(suggestionsSelector);
+      let debounceTimer = null;
+      let highlightedIndex = -1;
+      let currentSuggestions = [];
 
-        if (tripPreference) {
-          params.append("transit_routing_preference", tripPreference);
+      input_target.on('input', function() {
+        const query = $(this).val().trim();
+        
+        clearTimeout(debounceTimer);
+        
+        if (query.length < MIN_CHARS) {
+          hideSuggestions();
+          return;
         }
 
-        const finalUrl = `${baseUrl}?${params.toString()}`;
-
-        console.log(`Generated Google Maps URL: ${finalUrl}`);
-
-        window.open(finalUrl, "_blank");
-
+        debounceTimer = setTimeout(() => {
+          fetchSuggestions(query);
+        }, DEBOUNCE_DELAY);
       });
-      console.log('Trip Planner page loaded');
+
+      input_target.on('keydown', function(e) {
+        if (!suggestions_for_input.hasClass('show')) return;
+
+        switch(e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            highlightedIndex = Math.min(highlightedIndex + 1, currentSuggestions.length - 1);
+            updateHighlight();
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            highlightedIndex = Math.max(highlightedIndex - 1, 0);
+            updateHighlight();
+            break;
+          case 'Enter':
+            if (highlightedIndex >= 0 && currentSuggestions[highlightedIndex]) {
+              e.preventDefault();
+              selectSuggestion(currentSuggestions[highlightedIndex]);
+            }
+            break;
+          case 'Escape':
+            hideSuggestions();
+            break;
+          case 'Tab':
+            if (highlightedIndex >= 0 && currentSuggestions[highlightedIndex]) {
+              selectSuggestion(currentSuggestions[highlightedIndex]);
+            } else {
+              hideSuggestions();
+            }
+            break;
+        }
+      });
+
+      input_target.on('focus', function() {
+        if (currentSuggestions.length > 0) {
+          suggestions_for_input.addClass('show');
+        }
+      });
+
+      async function fetchSuggestions(query) {
+        suggestions_for_input.html('<li class="autocomplete-loading">Searching...</li>').addClass('show');
+        
+        try {
+          const url = `${GEOCODER_URL}?text=${encodeURIComponent(query)}&maxSuggestions=10&f=pjson`;
+          const response = await fetch(url);
+          const data = await response.json();
+          
+          currentSuggestions = data.suggestions || [];
+          highlightedIndex = -1;
+          
+          if (currentSuggestions.length === 0) {
+            suggestions_for_input.html('<li class="autocomplete-no-results">No addresses found</li>');
+          } else {
+            renderSuggestions();
+          }
+        } catch (error) {
+          console.error('Geocoder error:', error);
+          suggestions_for_input.html('<li class="autocomplete-no-results">Error fetching suggestions</li>');
+        }
+      }
+
+      function renderSuggestions() {
+        const html = currentSuggestions.map((suggestion, index) => {
+          return `<li role="option" data-index="${index}" aria-selected="false">${escapeHtml(toTitleCase(suggestion.text))}</li>`;
+        }).join('');
+        
+        suggestions_for_input.html(html).addClass('show');
+        
+        suggestions_for_input.find('li').on('click', function() {
+          const index = $(this).data('index');
+          if (currentSuggestions[index]) {
+            selectSuggestion(currentSuggestions[index]);
+          }
+        });
+      }
+
+      function updateHighlight() {
+        suggestions_for_input.find('li').removeClass('highlighted').attr('aria-selected', 'false');
+        if (highlightedIndex >= 0) {
+          suggestions_for_input.find(`li[data-index="${highlightedIndex}"]`)
+            .addClass('highlighted')
+            .attr('aria-selected', 'true');
+        }
+      }
+
+      function selectSuggestion(suggestion) {
+        input_target.val(toTitleCase(suggestion.text));
+        hideSuggestions();
+        input_target.trigger('change');
+      }
+
+      function hideSuggestions() {
+        suggestions_for_input.removeClass('show');
+        highlightedIndex = -1;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function toTitleCase(text) {
+        return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+      }
+
+      $(document).on('click', function(e) {
+        if (!$(e.target).closest(inputSelector).length && !$(e.target).closest(suggestionsSelector).length) {
+          hideSuggestions();
+        }
+      });
+    }
+
+    $('#trip_planner_form').on('submit', function(e) {
+      e.preventDefault();
+      const source = $('#trip_planner_input_source').val();
+      const destination = $('#trip_planner_input_destination').val();
+      //- const departure_date = $('#trip_planner_input_date').val() ? $('#trip_planner_input_date').val() : new Date().toISOString().split('T')[0];
+      //- const departure_time = $('#trip_planner_input_time').val() ? $('#trip_planner_input_time').val() : new Date().toTimeString().split(' ')[0].substring(0,5);
+      //- const tripPreference = $('#trip_planner_input_trip_preference').val() ? $('#trip_planner_input_trip_preference').val() : "1";
+
+      //- const departureDateTime = new Date(`${departure_date}T${departure_time}`);
+      //- const unixTimestamp = Math.floor(departureDateTime.getTime() / 1000);
+
+      const baseUrl = "https://www.google.com/maps/dir/";
+
+      const params = new URLSearchParams();
+      params.append("api", "1");
+      params.append("travelmode", "transit");
+      params.append("origin", source);
+      params.append("destination", destination);
+      //- params.append("departure_time", unixTimestamp);
+
+      //- if (tripPreference) {
+      //-   params.append("transit_routing_preference", tripPreference);
+      //- }
+
+      const finalUrl = `${baseUrl}?${params.toString()}`;
+
+      console.log(`Generated Google Maps URL: ${finalUrl}`);
+
+      window.open(finalUrl, "_blank");
+
     });
+    console.log('Trip Planner page loaded');
+  });

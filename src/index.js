@@ -77,32 +77,34 @@ async function getWordPressData() {
   let returnedData = {};
 
   try {
-    const planYourTripResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'
+    const howToRideResponse = await fetch(
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf',
     );
     const faresAndPassesResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'
+      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf',
     );
     const transitConnectResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'
+      'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf',
     );
-    if (!planYourTripResponse.ok) {
-      throw new Error(`HTTP error fetching Plan Your Trip! status: ${planYourTripResponse.status}`);
+
+    if (!howToRideResponse.ok) {
+      throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
     }
     if (!faresAndPassesResponse.ok) {
       throw new Error(
-        `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`
+        `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`,
       );
     }
     if (!transitConnectResponse.ok) {
       throw new Error(
-        `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`
+        `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`,
       );
     }
-    const planYourTripData = await planYourTripResponse.json();
+
+    const howToRideData = await howToRideResponse.json();
     const faresAndPassesData = await faresAndPassesResponse.json();
     const transitConnectData = await transitConnectResponse.json();
-    returnedData.planYourTrip = planYourTripData;
+    returnedData.howToRide = howToRideData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
     returnedData.title = 'HC title';
@@ -121,6 +123,8 @@ const templatePath = config.templatePath;
 const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
 config.logo_url = '/art-logo-blue-small.png';
+config.footer_logo_url = '/art-logo-white-no-text.png';
+config.connect_icon_url = '/art-connect-icon.svg';
 config.webpageTitle = 'ART Transit System';
 
 const query1 = `INSERT INTO timetables 
@@ -223,13 +227,19 @@ await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
 await fs.copyFile(templatePath + 'art-logo-blue-small.png', buildPath + 'art-logo-blue-small.png');
 await fs.copyFile(
   templatePath + 'art-logo-white-small.png',
-  buildPath + 'art-logo-white-small.png'
+  buildPath + 'art-logo-white-small.png',
 );
 await fs.copyFile(
   templatePath + 'art-logo-green-small.png',
-  buildPath + 'art-logo-green-small.png'
+  buildPath + 'art-logo-green-small.png',
+);
+await fs.copyFile(templatePath + 'art-connect-icon.svg', buildPath + 'art-connect-icon.svg');
+await fs.copyFile(
+  templatePath + 'art-logo-white-no-text.png',
+  buildPath + 'art-logo-white-no-text.png',
 );
 
+// art-logo-white-no-text.png
 // const htmlSourceFolder = buildPath + folderPath.relativePath;
 // const defaultHomePagePath = buildPath;
 // const customHomePagePath = buildPath + config.customHomePagePath;
