@@ -181,6 +181,8 @@ const timetables = db.prepare('SELECT * FROM timetables').all();
 const trips = db.prepare('SELECT * FROM trips').all();
 const directions = db.prepare('SELECT * FROM directions').all();
 
+console.log('Routes fetched:', routes.length);
+
 // Build a timetablePage-like object
 const timetablePage = {
   consolidatedTimetables: timetables, // You may want to group/filter these

@@ -1,6 +1,9 @@
 .map-container
   .map(id=`map_timetable_id_${formatHtmlId(timetable.timetable_id)}`)
   .map-legend
+    .legend-item.legend-direction
+      .text-lg.font-semibold
+        <b>#{timetable.direction_name || timetable.timetable_label}</b>
     .legend-item
       .legend-icon
         .stop-marker

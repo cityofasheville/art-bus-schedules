@@ -45,7 +45,7 @@ html(lang="en")
             div(class="flex items-center gap-3 mb-6")
               img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
               h2(class="text-3xl") Stay in the Loop!
-            iframe(width="100%" height="200" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
+            iframe(width="100%" height="200" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
           div(class="order-1 md:order-2 flex items-end justify-center")
             img(class="inline-block w-80 xl:w-96 h-auto", src=`${config.footer_logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
 
@@ -65,5 +65,4 @@ html(lang="en")
           img.src = img.dataset.src;
           img.removeAttribute('data-src');
         });
-        console.log('All images have been loaded and heres the config', config);
       });

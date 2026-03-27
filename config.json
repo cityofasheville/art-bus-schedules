@@ -52,5 +52,5 @@
   "cssPath": "/css/",
   "jsPath": "/js/",
   "customHomePagePath": "customhome/",
-  "systemMapPagePath": "map/"
+  "systemMapPagePath": "routes-and-schedules/"
 }

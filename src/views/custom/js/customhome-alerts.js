@@ -182,6 +182,8 @@ async function updateAlerts() {
       return isActive;
     });
 
+    console.log('Active alerts:', active_alerts);
+
     for (const alert of active_alerts) {
       if (!alert.alert || alert.alert.is_deleted) {
         continue;
@@ -246,20 +248,38 @@ async function updateAlerts() {
     const routeGroups = {};
     const systemWide = [];
 
+    // relevant_alert_data.forEach((alert) => {
+    //   if (alert.routes_affected && alert.routes_affected.length > 0) {
+    //     alert.routes_affected.forEach((route) => {
+    //       if (!routeGroups[route.route_id]) {
+    //         routeGroups[route.route_id] = [];
+    //       }
+    //       if (!routeGroups[route.route_id].some((a) => a.id === alert.id)) {
+    //         routeGroups[route.route_id].push(alert);
+    //       }
+    //     });
+    //   } else {
+    //     systemWide.push(alert);
+    //   }
+    // });
+
     relevant_alert_data.forEach((alert) => {
       if (alert.routes_affected && alert.routes_affected.length > 0) {
-        alert.routes_affected.forEach((route) => {
-          if (!routeGroups[route.route_id]) {
-            routeGroups[route.route_id] = [];
-          }
-          if (!routeGroups[route.route_id].some((a) => a.id === alert.id)) {
-            routeGroups[route.route_id].push(alert);
-          }
-        });
+        // alert.routes_affected.forEach((route) => {
+        if (!routeGroups[alert.title]) {
+          routeGroups[alert.title] = [];
+        }
+        if (!routeGroups[alert.title].some((a) => a.id === alert.id)) {
+          routeGroups[alert.title].push(alert);
+        }
+        // });
       } else {
         systemWide.push(alert);
       }
     });
+
+    console.log('Route Groups:', routeGroups);
+    console.log('System-wide alerts:', systemWide);
 
     $('#alerts-container').empty();
 
@@ -270,7 +290,7 @@ async function updateAlerts() {
           `<details class="bg-white border border-slate-300 rounded mb-6">
           <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
           <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
-          <span class="route-color-swatch-large bg-art-blue text-white">ART</span>
+          <span class="route-color-swatch bg-art-blue text-white">ART</span>
           <span>${alert.title}</span>
           <span>${alert.valid_timespans.length}</span>
           </div>
@@ -290,48 +310,85 @@ async function updateAlerts() {
     // $('#alerts-container').append('<hr />');
     $('#alerts-container').append('<h3 class="text-black text-xl my-4">Route-specific Alerts</h3>');
 
-    Object.keys(routeGroups).forEach((route_id) => {
-      // $('#alerts-container').append(
-      //   `<h3 class="mt-4 border-t-2">Alerts for Route ${routeData[route_id].route_short_name}</h3>`
-      // );
-      routeGroups[route_id].forEach((alert) => {
-        let affected_stops_html = '';
-        if (alert.stops_affected && alert.stops_affected.length > 0) {
-          affected_stops_html =
-            '<div class="mt-4 border-b border-gray-300 font-semibold pb-2">Stops Affected</div><ul class="list-disc pl-4 mt-2">';
-          alert.stops_affected.forEach((stop) => {
-            affected_stops_html += `<li class="my-2"><div class="stop-name">${stop.stop_name}</div></li>`;
-          });
-          affected_stops_html += '</ul>';
-        }
-        const timespanText = alert.valid_timespans
-          .map((timespan) => {
-            const startDate = timespan.start
-              ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'N/A';
-            const endDate = timespan.end
-              ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Ongoing';
-            return `${startDate} - ${endDate}`;
-          })
-          .join(', ');
+    Object.keys(routeGroups).forEach((alertTitle) => {
+      const alertsForTitle = routeGroups[alertTitle];
+      const representativeAlert = alertsForTitle[0];
 
-        $('#alerts-container').append(
-          `<details class="bg-white border border-slate-300 rounded mb-6">
+      // Collect all unique routes affected
+      const allRoutesAffected = [];
+      const seenRouteIds = new Set();
+      alertsForTitle.forEach((alert) => {
+        if (alert.routes_affected) {
+          alert.routes_affected.forEach((route) => {
+            if (route && !seenRouteIds.has(route.route_id)) {
+              seenRouteIds.add(route.route_id);
+              allRoutesAffected.push(route);
+            }
+          });
+        }
+      });
+
+      // Collect all unique stops affected
+      const allStopsAffected = [];
+      const seenStopIds = new Set();
+      alertsForTitle.forEach((alert) => {
+        if (alert.stops_affected) {
+          alert.stops_affected.forEach((stop) => {
+            if (stop && !seenStopIds.has(stop.stop_id)) {
+              seenStopIds.add(stop.stop_id);
+              allStopsAffected.push(stop);
+            }
+          });
+        }
+      });
+
+      // Build route swatches HTML
+      let routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0">';
+      allRoutesAffected.forEach((route) => {
+        routeSwatchesHtml += `<li class="route-color-swatch" style="background-color: #${route.route_color};color: #${route.route_text_color};" title="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}" aria-label="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}">${route.route_short_name}</li>`;
+      });
+      routeSwatchesHtml += '</ul>';
+
+      // Build affected stops HTML
+      let affected_stops_html = '';
+      if (allStopsAffected.length > 0) {
+        affected_stops_html =
+          '<div class="mt-4 border-b border-gray-300 font-semibold pb-2">Stops Affected</div><ul class="list-disc pl-4 mt-2">';
+        allStopsAffected.forEach((stop) => {
+          affected_stops_html += `<li class="my-2"><div class="stop-name">${stop.stop_name}</div></li>`;
+        });
+        affected_stops_html += '</ul>';
+      }
+
+      // Build timespan text
+      const timespanText = representativeAlert.valid_timespans
+        .map((timespan) => {
+          const startDate = timespan.start
+            ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : 'N/A';
+          const endDate = timespan.end
+            ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : 'Ongoing';
+          return `${startDate} - ${endDate}`;
+        })
+        .join(', ');
+
+      $('#alerts-container').append(
+        `<details class="bg-white border border-slate-300 rounded mb-6">
           <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
-          <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
-          <span class="route-color-swatch-large" style="background-color: #${routeData[route_id].route_color};color: #${routeData[route_id].route_text_color};">${routeData[route_id].route_short_name}</span>
+          <div class="flex flex-col text-art-blue gap-2 text-lg font-medium">
+          ${routeSwatchesHtml}
           <div>
-          <div>${alert.title}</div>
-          <div class="text-sm text-gray-600 mb-2">${timespanText}</div>
+          <div>${representativeAlert.title}</div>
+          <div class="text-sm text-gray-600">${timespanText}</div>
           </div>
           </div>
           <div class="flex items-center">
@@ -339,12 +396,11 @@ async function updateAlerts() {
           </div>
           </summary>
           <div class="p-4 border-t border-slate-300">
-          <p>${alert.description}</p>
+          <p>${representativeAlert.description}</p>
           ${affected_stops_html}
           </div>
          </details>`,
-        );
-      });
+      );
     });
 
     // Remove previously posted GTFS-RT alerts

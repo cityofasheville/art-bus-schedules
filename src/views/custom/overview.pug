@@ -1,6 +1,61 @@
 include formatting_functions.pug
 
-div(class="timetable-overview flex flex-col-reverse md:flex-row")
+div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
+  h1(class="text-4xl mb-4") All Bus Routes and Schedules
+  p Click on a route number below for detailed route maps and schedules
+
+div(id="all_routes_list" class="w-full max-w-screen-xl mx-auto px-4 mb-6")
+  div(class="flex flex-wrap gap-2 justify-start")
+    each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
+      each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
+        if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
+          - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+          each route in swatchRouteList
+            a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+
+div(class="w-full max-w-screen-xl mx-auto px-4 mb-6")
+  .timetable-radio-menu
+    fieldset#view_selector.p-4.border.shadow-md
+      legend="View"
+      div(class="w-full grid grid-cols-2 btn-group")
+        label.relative.btn-gray.text-center.cursor-pointer(for="radio_view_table")
+          input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="table" id="radio_view_table" checked=true)
+          span Table View
+        label.relative.btn-gray.text-center.cursor-pointer(for="radio_view_map")
+          input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="map" id="radio_view_map")
+          span Map View
+
+div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto p-4 mb-8")
+  table(class="w-full border border-collapse")
+    thead
+      tr
+        th(class="text-left p-2 border-b-2 border-gray-300" scope="col" width="150px") Route Name
+        th(class="text-left p-2 border-b-2 border-gray-300" scope="col") Service Area
+    tbody
+      each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
+        each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
+          if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
+            - const tableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+            tr
+              td(class="p-2 border-b border-gray-200")
+                //- div(class="flex items-center gap-2")
+                a(class="flex items-center gap-2" href=`/${timetablePage.timetable_page_id}`)
+                  - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+                  each route in tableRouteList
+                    .route-color-swatch(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+                  span()= timetablePage.timetable_page_label
+              td(class="p-2 border-b border-gray-200")
+                - const tableDescParts = (tableRouteList[0] && tableRouteList[0].route_desc) ? tableRouteList[0].route_desc.split(' - ') : []
+                div(class="flex flex-wrap gap-1 items-center")
+                  each part, index in tableDescParts
+                    span(class="text-sm block w-full sm:inline-block sm:w-auto sm:py-1 ")
+                      span(class="border-0 bg-transparent sm:border rounded sm:px-2 sm:bg-gray-50 ")= part
+                      if index < tableDescParts.length - 1
+                        span
+                          span(class="sr-only") to
+                          i(class="bi bi-arrow-right mx-1 text-gray-500" aria-hidden="true")
+
+div(id="all_routes_map" class="timetable-overview flex flex-col-reverse md:flex-row border hidden")
   if !timetablePages || !timetablePages.length
     h1 No timetables found
   else
@@ -16,8 +71,13 @@ div(class="timetable-overview flex flex-col-reverse md:flex-row")
                   each route in timetableRouteList
                     .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
                   div
-                    .timetable-page-label= timetablePage.timetable_page_label
-                    .badge-gray= timetablePage.dayList
+                    div(class="timetable-page-label mb-1")= timetablePage.timetable_page_label
+                    - const routeDescParts = (timetableRouteList[0] && timetableRouteList[0].route_desc) ? timetableRouteList[0].route_desc.split(' - ') : []
+                    each part, index in routeDescParts
+                      div.text-sm
+                        span= part
+                        if index < routeDescParts.length - 1
+                          i(class="bi bi-arrow-right ml-1 text-gray-500" aria-hidden="true")
                 //- div.timetable-page-link(href=`${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                 //-   - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                 //-   each route in timetableRouteList
@@ -35,3 +95,32 @@ div(class="timetable-overview flex flex-col-reverse md:flex-row")
         const geojson = !{JSON.stringify(geojson) || '\'\''};
         const mapStyleUrl = '#{config.mapStyleUrl}';
         createSystemMap();
+
+        // View toggle functionality
+        document.querySelectorAll('input[name="viewMode"]').forEach(function(radio) {
+          radio.addEventListener('change', function() {
+            const tableEl = document.getElementById('all_routes_table');
+            const mapEl = document.getElementById('all_routes_map');
+            
+            if (this.value === 'table') {
+              tableEl.classList.remove('hidden');
+              mapEl.classList.add('hidden');
+            } else {
+              tableEl.classList.add('hidden');
+              mapEl.classList.remove('hidden');
+              
+              // Resize and recenter map when shown
+              if (window.systemMap) {
+                setTimeout(function() {
+                  window.systemMap.resize();
+                  if (window.systemMap._systemBounds) {
+                    window.systemMap.fitBounds(window.systemMap._systemBounds, {
+                      padding: 20,
+                      duration: 0
+                    });
+                  }
+                }, 100);
+              }
+            }
+          });
+        });
