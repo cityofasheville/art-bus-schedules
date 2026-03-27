@@ -8,6 +8,8 @@ let vehiclePositions;
 let tripUpdates;
 let vehiclePopup;
 let gtfsRealtimeInterval;
+let rtPositionsPaused = false;
+let previousVehicleCount = null;
 
 console.log('timetable-map script loaded');
 
@@ -326,6 +328,179 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
   return html.prop('outerHTML');
 }
 
+function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
+  const currentVehicleCount = vehiclePositions ? vehiclePositions.length : 0;
+
+  // Update the screen reader status only when vehicle count changes
+  const statusEl = jQuery('#rt_positions_status');
+  if (statusEl.length && previousVehicleCount !== currentVehicleCount) {
+    const statusText =
+      currentVehicleCount === 0
+        ? 'No active buses'
+        : `${currentVehicleCount} active ${currentVehicleCount === 1 ? 'bus' : 'buses'}`;
+    statusEl.text(statusText);
+    previousVehicleCount = currentVehicleCount;
+  }
+
+  // Skip UI updates if paused
+  if (rtPositionsPaused) {
+    console.log('RT positions container updates paused');
+    return;
+  }
+
+  console.log(
+    'Updating real-time positions container with VP: ',
+    vehiclePositions,
+    '  and TU: ',
+    tripUpdates,
+  );
+
+  const container = jQuery('#rt_positions_container');
+  if (!container.length) {
+    return;
+  }
+
+  container.empty();
+
+  if (!vehiclePositions || vehiclePositions.length === 0) {
+    container.append(
+      jQuery('<p>').addClass('p-4 text-gray-500').text('No active vehicles at this time.'),
+    );
+    return;
+  }
+
+  const vehicleList = jQuery('<ul>').addClass(
+    'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 list-none m-0',
+  );
+
+  for (const vehiclePosition of vehiclePositions) {
+    const vehicleId = vehiclePosition.vehicle.vehicle.id;
+
+    let vehicleTripUpdate = tripUpdates?.find(
+      (tripUpdate) => tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id,
+    );
+
+    if (!vehicleTripUpdate) {
+      vehicleTripUpdate = tripUpdates?.find(
+        (tripUpdate) => tripUpdate.trip_update.vehicle?.id === vehicleId,
+      );
+    }
+
+    const vehicleCard = jQuery('<li>').addClass('border rounded p-4 bg-white shadow-sm');
+
+    const lastUpdated = new Date(vehiclePosition.vehicle.timestamp * 1000);
+    const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
+      .parents('.timetable')
+      .data('direction-name');
+
+    // Use h3 for vehicle heading (h2 is the section heading)
+    if (directionName) {
+      jQuery('<h3>')
+        .addClass('font-bold text-lg mb-2 mt-0')
+        .text(`Vehicle: ${directionName}`)
+        .appendTo(vehicleCard);
+    } else {
+      jQuery('<h3>')
+        .addClass('font-bold text-lg mb-2 mt-0')
+        .text(`Vehicle ${vehicleId}`)
+        .appendTo(vehicleCard);
+    }
+
+    const movingText = formatMovingText(vehiclePosition);
+    if (movingText) {
+      jQuery('<p>')
+        .addClass('text-sm text-gray-600 mb-2 my-0')
+        .text(movingText)
+        .appendTo(vehicleCard);
+    }
+
+    const numberOfArrivalsToShow = 5;
+    const nextArrivals = [];
+    if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
+      for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
+        if (stoptimeUpdate.arrival) {
+          const secondsToArrival = stoptimeUpdate.arrival.time - Date.now() / 1000;
+          const stopName = stopData[stoptimeUpdate.stop_id]?.stop_name;
+
+          if (secondsToArrival > 0 && stopName) {
+            nextArrivals.push({
+              delay: stoptimeUpdate.arrival.delay,
+              secondsToArrival,
+              stopName,
+            });
+          }
+
+          if (nextArrivals.length >= numberOfArrivalsToShow) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (nextArrivals.length > 0) {
+      jQuery('<h4>')
+        .addClass('font-semibold text-sm mb-1 mt-2')
+        .text('Upcoming Stops:')
+        .appendTo(vehicleCard);
+
+      const stopsList = jQuery('<ul>').addClass('list-none pl-0 text-sm m-0');
+
+      nextArrivals.forEach((arrival) => {
+        let delayText = '';
+        if (arrival.delay > 0) {
+          delayText = ` (${formatSeconds(arrival.delay)} behind)`;
+        } else if (arrival.delay < 0) {
+          delayText = ` (${formatSeconds(Math.abs(arrival.delay))} ahead)`;
+        }
+
+        jQuery('<li>')
+          .addClass('py-1 border-b border-gray-100 last:border-b-0')
+          .html(
+            `<span class="font-medium">${formatSeconds(arrival.secondsToArrival)}</span> - ${arrival.stopName}${delayText}`,
+          )
+          .appendTo(stopsList);
+      });
+
+      stopsList.appendTo(vehicleCard);
+    }
+
+    jQuery('<p>')
+      .addClass('text-xs text-gray-400 mt-2 mb-0')
+      .text(`Updated: ${lastUpdated.toLocaleTimeString()}`)
+      .appendTo(vehicleCard);
+
+    vehicleCard.appendTo(vehicleList);
+  }
+
+  vehicleList.appendTo(container);
+}
+
+function initRtPositionsPauseButton() {
+  const pauseBtn = jQuery('#rt_positions_pause');
+  if (!pauseBtn.length) return;
+
+  pauseBtn.on('click', function () {
+    rtPositionsPaused = !rtPositionsPaused;
+
+    const icon = pauseBtn.find('i');
+    const text = pauseBtn.find('span');
+
+    if (rtPositionsPaused) {
+      pauseBtn.attr('aria-pressed', 'true');
+      icon.removeClass('bi-pause-fill').addClass('bi-play-fill');
+      text.text('Resume Updates');
+    } else {
+      pauseBtn.attr('aria-pressed', 'false');
+      icon.removeClass('bi-play-fill').addClass('bi-pause-fill');
+      text.text('Pause Updates');
+      // Immediately update when resuming
+      if (vehiclePositions && tripUpdates) {
+        updateRtPositionsContainer(vehiclePositions, tripUpdates);
+      }
+    }
+  });
+}
+
 function getVehicleBearing(vehiclePosition, vehicleTripUpdate) {
   // If vehicle position includes bearing, use that
   if (
@@ -610,6 +785,9 @@ async function updateArrivals({ withMap = true } = {}) {
         }
       }
     }
+
+    // Update the text-based vehicle positions container
+    updateRtPositionsContainer(vehiclePositions, tripUpdates);
   } catch (error) {
     console.error(error);
   }
@@ -1018,6 +1196,9 @@ function createMaps() {
       updateArrivals();
     }, arrivalUpdateInterval);
   }
+
+  // Initialize pause button for RT positions container
+  initRtPositionsPauseButton();
 }
 
 // function augmentArrivalInfo(arrival, stop_id) {

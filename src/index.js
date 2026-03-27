@@ -183,34 +183,11 @@ const directions = db.prepare('SELECT * FROM directions').all();
 
 console.log('Routes fetched:', routes.length);
 
-const routes_with_color_check = routes.map((route) => {
-  if (!route.route_color) {
-    route.route_color = '00639a';
-  } else {
-    route.route_color = route.route_color.toLowerCase();
-  }
-  if (!route.route_text_color) {
-    route.route_text_color = 'ffffff';
-  } else {
-    route.route_text_color = route.route_text_color.toLowerCase();
-  }
-  if (route.route_color === 'f99d1c') {
-    route.route_text_color = '1c2634';
-  }
-  if (route.route_color === '80c342') {
-    route.route_text_color = '1c2634';
-  }
-  if (route.route_color === '00aeef') {
-    route.route_text_color = '1c2634';
-  }
-  return route;
-});
-
 // Build a timetablePage-like object
 const timetablePage = {
   consolidatedTimetables: timetables, // You may want to group/filter these
   stops,
-  routes: routes_with_color_check,
+  routes,
   trips,
   directions,
   // Add other properties as needed

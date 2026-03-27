@@ -45,7 +45,7 @@ a:hover {
 
 /* This is the route list element under the map on the system map page */
 .timetable-overview .overview-list {
-  height: calc(100vh - 30rem);
+  height: max(calc(100vh - 30rem), 25rem);
 }
 
 
@@ -60,11 +60,12 @@ a:hover {
   }
 }
 
+/* 
 @media (min-width: 768px) {
   .timetable-overview {
     display: flex;
   }
-}
+} */
 
 .timetable-overview h1 {
   font-size: 1.5rem;

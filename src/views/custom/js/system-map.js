@@ -25,13 +25,13 @@ function formatRoute(route) {
         .addClass('route-color-swatch')
         .css('backgroundColor', formatRouteColor(route))
         .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? '')
+        .text(route.route_short_name ?? ''),
     );
   }
   routeItemDivs.push(
     jQuery('<div>')
       .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`)
+      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
   );
 
   html.append(routeItemDivs);
@@ -71,14 +71,14 @@ function formatStopPopup(feature) {
   jQuery(html).append(
     jQuery('<div>')
       .addClass('route-list')
-      .html(routes.map((route) => formatRoute(route)))
+      .html(routes.map((route) => formatRoute(route))),
   );
 
   jQuery('<a>')
     .addClass('btn-blue btn-sm')
     .prop(
       'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`
+      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
     )
     .prop('target', '_blank')
     .prop('rel', 'noopener noreferrer')
@@ -136,6 +136,9 @@ function createSystemMap() {
 
   map._systemBounds = bounds;
   map._manualHighlight = false;
+
+  // Store map globally for external access
+  window.systemMap = map;
 
   map.scrollZoom.disable();
   map.addControl(new maplibregl.NavigationControl());
@@ -195,9 +198,9 @@ function addGeocoder(map, bounds) {
       {
         maplibregl,
         zoom: 12,
-      }
+      },
     ),
-    'top-left'
+    'top-left',
   );
 }
 
@@ -221,7 +224,7 @@ function disablePointsOfInterest(map) {
 function addMapLayers(map, geojson, defaultRouteColor, lineLayout) {
   const layers = map.getStyle().layers;
   const firstLabelLayerId = layers.find(
-    (layer) => layer.type === 'symbol' && layer.id.includes('label')
+    (layer) => layer.type === 'symbol' && layer.id.includes('label'),
   )?.id;
 
   addRouteLineShadow(map, geojson, lineLayout, firstLabelLayerId);
@@ -250,24 +253,24 @@ function addRouteLineShadow(map, geojson, lineLayout, firstSymbolId) {
         'line-color': '#000000',
         'line-opacity': 0.3,
         'line-width': {
-          base: 12,
+          base: 6,
           stops: [
-            [14, 20],
-            [18, 42],
+            [14, 10],
+            [18, 21],
           ],
         },
         'line-blur': {
-          base: 12,
+          base: 6,
           stops: [
-            [14, 20],
-            [18, 42],
+            [14, 10],
+            [18, 21],
           ],
         },
       },
       layout: lineLayout,
       filter: ['!has', 'stop_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -281,24 +284,24 @@ function addHighlightedRouteLineShadow(map, geojson, lineLayout, firstSymbolId) 
         'line-color': '#000000',
         'line-opacity': 0.3,
         'line-width': {
-          base: 16,
+          base: 8,
           stops: [
-            [14, 24],
-            [18, 50],
+            [14, 12],
+            [18, 25],
           ],
         },
         'line-blur': {
-          base: 16,
+          base: 8,
           stops: [
-            [14, 24],
-            [18, 50],
+            [14, 12],
+            [18, 25],
           ],
         },
       },
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -312,17 +315,17 @@ function addRouteLineOutline(map, geojson, lineLayout, firstSymbolId) {
         'line-color': '#FFFFFF',
         'line-opacity': 1,
         'line-width': {
-          base: 8,
+          base: 4,
           stops: [
-            [14, 12],
-            [18, 32],
+            [14, 6],
+            [18, 16],
           ],
         },
       },
       layout: lineLayout,
       filter: ['has', 'route_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -336,17 +339,17 @@ function addHighlightedRouteLineOutline(map, geojson, lineLayout, firstSymbolId)
         'line-color': '#FFFFFF',
         'line-opacity': 1,
         'line-width': {
-          base: 10,
+          base: 5,
           stops: [
-            [14, 16],
-            [18, 40],
+            [14, 8],
+            [18, 20],
           ],
         },
       },
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -360,17 +363,17 @@ function addRouteLine(map, geojson, defaultRouteColor, lineLayout, firstSymbolId
         'line-color': ['coalesce', ['get', 'route_color'], defaultRouteColor],
         'line-opacity': 1,
         'line-width': {
-          base: 4,
+          base: 2,
           stops: [
-            [14, 6],
-            [18, 16],
+            [14, 3],
+            [18, 8],
           ],
         },
       },
       layout: lineLayout,
       filter: ['has', 'route_id'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -384,17 +387,17 @@ function addHighlightedRouteLine(map, geojson, defaultRouteColor, lineLayout, fi
         'line-color': ['coalesce', ['get', 'route_color'], defaultRouteColor],
         'line-opacity': 1,
         'line-width': {
-          base: 6,
+          base: 3,
           stops: [
-            [14, 8],
-            [18, 20],
+            [14, 4],
+            [18, 10],
           ],
         },
       },
       layout: lineLayout,
       filter: ['==', ['get', 'route_id'], 'none'],
     },
-    firstSymbolId
+    firstSymbolId,
   );
 }
 
@@ -484,7 +487,7 @@ function handleMouseMove(event, map, routes) {
     if (features.some((feature) => feature.layer.id === 'stops')) {
       highlightStop(
         map,
-        features.find((feature) => feature.layer.id === 'stops').properties.stop_id
+        features.find((feature) => feature.layer.id === 'stops').properties.stop_id,
       );
     }
   } else {
@@ -526,7 +529,7 @@ function showStopPopup(map, feature) {
 function showRoutePopup(map, features, lngLat) {
   const routes = _.orderBy(
     _.uniqBy(features, (feature) => feature.properties.route_short_name),
-    (feature) => Number.parseInt(feature.properties.route_short_name, 10)
+    (feature) => Number.parseInt(feature.properties.route_short_name, 10),
   );
 
   new maplibregl.Popup().setLngLat(lngLat).setHTML(formatRoutePopup(routes)).addTo(map);
@@ -571,11 +574,11 @@ function highlightRoutes(map, routeIds, zoom) {
 
     if (geojson && geojson.features.length > 0) {
       highlightedFeatures = geojson.features.filter((feature) =>
-        routeIds.includes(feature.properties.route_id)
+        routeIds.includes(feature.properties.route_id),
       );
     } else if (data) {
       highlightedFeatures = data.filter((feature) =>
-        routeIds.includes(feature.properties.route_id)
+        routeIds.includes(feature.properties.route_id),
       );
     }
 
@@ -653,7 +656,7 @@ function setupTableHoverListeners(map) {
       () => {
         map._manualHighlight = false;
         unHighlightRoutes(map, true);
-      }
+      },
     );
   });
 }
