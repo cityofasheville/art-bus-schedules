@@ -86,6 +86,9 @@ async function getWordPressData() {
     const transitConnectResponse = await fetch(
       'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf',
     );
+    const transitNewsResponse = await fetch(
+      'https://www.ashevillenc.gov/wp-json/wp/v2/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
+    );
 
     if (!howToRideResponse.ok) {
       throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
@@ -100,13 +103,18 @@ async function getWordPressData() {
         `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`,
       );
     }
+    if (!transitNewsResponse.ok) {
+      throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
+    }
 
     const howToRideData = await howToRideResponse.json();
     const faresAndPassesData = await faresAndPassesResponse.json();
     const transitConnectData = await transitConnectResponse.json();
+    const transitNewsData = await transitNewsResponse.json();
     returnedData.howToRide = howToRideData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
+    returnedData.transitNews = transitNewsData;
     returnedData.title = 'HC title';
     returnedData.content = 'HC content';
   } catch (error) {
@@ -180,6 +188,9 @@ const routes = db.prepare('SELECT * FROM routes').all();
 const timetables = db.prepare('SELECT * FROM timetables').all();
 const trips = db.prepare('SELECT * FROM trips').all();
 const directions = db.prepare('SELECT * FROM directions').all();
+const stopTimes = db
+  .prepare('SELECT trip_id, stop_id, stop_sequence FROM stop_times ORDER BY trip_id, stop_sequence')
+  .all();
 
 console.log('Routes fetched:', routes.length);
 
@@ -190,6 +201,7 @@ const timetablePage = {
   routes,
   trips,
   directions,
+  stopTimes,
   // Add other properties as needed
 };
 

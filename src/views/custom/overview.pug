@@ -6,12 +6,12 @@ div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
 
 div(id="all_routes_list" class="w-full max-w-screen-xl mx-auto px-4 mb-6")
   div(class="flex flex-wrap gap-2 justify-start")
-    each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
-      each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
-        if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
-          - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-          each route in swatchRouteList
-            a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+    - var allTimetablePages = _.flatMap(getAgencyTimetableGroups(timetablePages, agencies), function(g) { return g.timetablePages; });
+    each timetablePage in sortTimetablePages(allTimetablePages)
+      if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
+        - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+        each route in swatchRouteList
+          a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
 
 div(class="w-full max-w-screen-xl mx-auto px-4 mb-6")
   .timetable-radio-menu
