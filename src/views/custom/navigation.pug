@@ -33,22 +33,26 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
           div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
             a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="/how-to-ride/") How to Ride
 
+        li(class="min-w-max relative flex flex-col border-b-2 border-slate-400 lg:border-transparent")
+          div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="/contact/") Contact
+
         li(class="w-full lg:w-auto min-w-max relative flex flex-col")
           div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
-            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="#") A Dropdown Menu
+            a(class="w-full px-4 border-t-8 border-transparent lg:hocus:border-art-blue py-3", href="#") Rider Tools
             button#submenu-62.dropdown-toggle(
               class="border-t-8 border-transparent px-4 flex items-center"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
-              aria-controls="parent-62"
-              data-dropdown-id="parent-62"
+              aria-controls="parent_rider_tools"
+              data-dropdown-id="parent_rider_tools"
             )
               i(class="bi bi-chevron-down", aria-hidden="true")
               i(class="bi bi-chevron-up", aria-hidden="true")
-              span.sr-only show submenu for Dropdown Menu
+              span.sr-only show submenu for Rider Tools
 
-          ul#parent-62(
+          ul#parent_rider_tools(
             class="w-full dropdown-menu submenu z-50 min-w-max lg:rounded-b-sm lg:border-b lg:border-r lg:border-l lg:border-ar-blue relative lg:absolute lg:top-16 lg:right-0 bg-aux-gray text-ar-slate size-max hidden"
             aria-labelledby="submenu-62"
           )

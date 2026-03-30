@@ -2,7 +2,7 @@ include formatting_functions.pug
 -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 
 //- .relative.w-full.h-full.flex.flex-col
-div(class="pt-12 bg-aux-gray flex-grow")
+div(class="py-12 bg-aux-gray flex-grow")
   h1(class="sr-only")=pageTitleToUse
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
@@ -30,20 +30,20 @@ div(class="pt-12 bg-aux-gray flex-grow")
               input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2" placeholder="70 Court Plaza" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_destination_suggestions")
               ul#trip_planner_input_destination_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
 
-            //- div
-            //-   label(for="trip_planner_input_date") Departure Day
-            //-   input(type="date" id="trip_planner_input_date" class="w-full border p-2" name="trip_planner_input_date" )
+            div
+              label(for="trip_planner_input_date") Departure Day
+              input(type="date" id="trip_planner_input_date" class="w-full border p-2 mb-4" name="trip_planner_input_date" )
 
-            //- div
-            //-   label(for="trip_planner_input_time") Departure Time
-            //-   input(type="time" id="trip_planner_input_time" class="w-full border p-2" name="trip_planner_input_time" )
+            div
+              label(for="trip_planner_input_time") Departure Time
+              input(type="time" id="trip_planner_input_time" class="w-full border p-2 mb-4" name="trip_planner_input_time" )
 
-            //- div
-            //-   label(for="trip_planner_input_trip_preference") Trip Preference
-            //-   select(id="trip_planner_input_trip_preference" class="w-full border p-2" name="trip_planner_input_trip_preference" )
-            //-     option(value="") Best route
-            //-     option(value="fewer_transfers") Fewer transfers
-            //-     option(value="less_walking") Less walking
+            div
+              label(for="trip_planner_input_trip_preference") Trip Preference
+              select(id="trip_planner_input_trip_preference" class="w-full border p-2 mb-4" name="trip_planner_input_trip_preference" )
+                option(value="") Best route
+                option(value="fewer_transfers") Fewer transfers
+                option(value="less_walking") Less walking
 
             button(type="submit" class="btn-blue") Get Directions
 
@@ -244,27 +244,45 @@ script.
       e.preventDefault();
       const source = $('#trip_planner_input_source').val();
       const destination = $('#trip_planner_input_destination').val();
-      //- const departure_date = $('#trip_planner_input_date').val() ? $('#trip_planner_input_date').val() : new Date().toISOString().split('T')[0];
-      //- const departure_time = $('#trip_planner_input_time').val() ? $('#trip_planner_input_time').val() : new Date().toTimeString().split(' ')[0].substring(0,5);
-      //- const tripPreference = $('#trip_planner_input_trip_preference').val() ? $('#trip_planner_input_trip_preference').val() : "1";
+      const departure_date = $('#trip_planner_input_date').val();
+      const departure_time = $('#trip_planner_input_time').val();
+      const tripPreference = $('#trip_planner_input_trip_preference').val();
 
-      //- const departureDateTime = new Date(`${departure_date}T${departure_time}`);
-      //- const unixTimestamp = Math.floor(departureDateTime.getTime() / 1000);
-
-      const baseUrl = "https://www.google.com/maps/dir/";
-
+      // Use legacy Google Maps URL format which supports departure time and transit preferences
+      // dirflg: r=transit, w=walking, d=driving, b=bicycling
+      // ttype: dep=depart at, arr=arrive by
+      // transit preferences: rail, bus, subway, tram (can combine with commas)
+      
       const params = new URLSearchParams();
-      params.append("api", "1");
-      params.append("travelmode", "transit");
-      params.append("origin", source);
-      params.append("destination", destination);
-      //- params.append("departure_time", unixTimestamp);
+      params.append("saddr", source);
+      params.append("daddr", destination);
+      params.append("dirflg", "r");
 
-      //- if (tripPreference) {
-      //-   params.append("transit_routing_preference", tripPreference);
-      //- }
+      // Add departure date and time if provided
+      if (departure_date && departure_time) {
+        params.append("ttype", "dep");
+        
+        // Format date as MM/DD/YYYY
+        const [year, month, day] = departure_date.split('-');
+        params.append("date", `${month}/${day}/${year}`);
+        
+        // Format time as h:mma (e.g., 2:30pm)
+        const [hours, minutes] = departure_time.split(':');
+        const hour12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        params.append("time", `${hour12}:${minutes}${ampm}`);
+      }
 
-      const finalUrl = `${baseUrl}?${params.toString()}`;
+      // Add transit routing preference if selected
+      // Google Maps legacy URL uses: fewer_transfers as default,
+      // less_walking requires using different transit modes
+      if (tripPreference === 'fewer_transfers') {
+        params.append("transmode", "r"); // prefer rail/fewer transfers
+      } else if (tripPreference === 'less_walking') {
+        params.append("transmode", "b,s,t,r"); // all transit modes to minimize walking
+      }
+
+      const finalUrl = `https://www.google.com/maps?${params.toString()}`;
 
       console.log(`Generated Google Maps URL: ${finalUrl}`);
 

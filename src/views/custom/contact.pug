@@ -1,0 +1,60 @@
+- const transitConnect = config.wordpress.transitConnect;
+- const contactUs = transitConnect.contact_us;
+
+div(class="w-full max-w-screen-lg mx-auto px-4 py-8")
+  h1(class="text-4xl mb-6") Contact ART
+  
+  p(class="text-lg mb-8")!= contactUs.what_we_do
+
+  div(class="grid grid-cols-1 md:grid-cols-2 gap-8")
+    
+    //- Contact Information
+    div(class="bg-white rounded-lg shadow-md p-6")
+      h2(class="text-2xl mb-4 flex items-center gap-2")
+        i(class="bi bi-telephone-fill text-art-green" aria-hidden="true")
+        span Contact Information
+      
+      ul(class="space-y-4")
+        li(class="flex items-start gap-3")
+          i(class="bi bi-geo-alt-fill text-art-green mt-1" aria-hidden="true")
+          div
+            span(class="font-semibold block") Address
+            span= contactUs.address
+        
+        li(class="flex items-start gap-3")
+          i(class="bi bi-mailbox text-art-green mt-1" aria-hidden="true")
+          div
+            span(class="font-semibold block") Mailing Address
+            span= contactUs.po_box
+        
+        li(class="flex items-start gap-3")
+          i(class="bi bi-telephone text-art-green mt-1" aria-hidden="true")
+          div
+            span(class="font-semibold block") Phone
+            a(href=`tel:${contactUs.phone_number.replace(/-/g, '')}` class="text-art-blue hover:underline")= contactUs.phone_number
+        
+        li(class="flex items-start gap-3")
+          i(class="bi bi-envelope text-art-green mt-1" aria-hidden="true")
+          div
+            span(class="font-semibold block") Email
+            a(href=`mailto:${contactUs.email_address}` class="text-art-blue hover:underline")= contactUs.email_address
+        
+        li(class="flex items-start gap-3")
+          i(class="bi bi-exclamation-triangle-fill text-red-600 mt-1" aria-hidden="true")
+          div
+            span(class="font-semibold block") Emergency Line
+            a(href=`tel:${contactUs.emergency.replace(/-/g, '')}` class="text-art-blue hover:underline")= contactUs.emergency
+
+    //- Business Hours
+    div(class="bg-white rounded-lg shadow-md p-6")
+      h2(class="text-2xl mb-4 flex items-center gap-2")
+        i(class="bi bi-clock-fill text-art-green" aria-hidden="true")
+        span Business Hours
+      
+      ul(class="space-y-4")
+        each info in transitConnect.connect_info
+          li(class="flex items-start gap-3")
+            i(class="bi bi-calendar-check text-art-green mt-1" aria-hidden="true")
+            div
+              span(class="font-semibold block")= info.title
+              span= info.details

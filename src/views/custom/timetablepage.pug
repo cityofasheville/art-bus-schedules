@@ -104,22 +104,24 @@ include formatting_functions.pug
       
   if config.showMap
     script.
-        const timetablePageFromServer = !{JSON.stringify(timetablePage)};
-        timetablePageFromServer.dayLists.sort();
-        console.log('GTFS data from server', timetablePageFromServer);
-        const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
-        //- console.log('GTFS Realtime URLs:', gtfsRealtimeUrls);
-        console.log('Route Data:', routeData);
-        //- console.log('Stop Data:', stopData);
-        //- console.log('Route IDs on Page:', routeIds);
-        //- console.log('Trip IDs on Page:', tripIds);
-        //- console.log('Stop IDs on Page:', stopIds);
-        createMaps();
-        //- $(document).ready(function() {
-          //- const initialTimetable = getUrlParam('timetable_id');
-          //- if (initialTimetable) {
-          //-   jQuery('.timetable').hide();
-          //-   jQuery('.coa-timetable-map-container').hide();
-          //-   showTimetable(initialTimetable);
-          //- } 
-        //- });
+      console.log('Data:', window.config);
+
+      const timetablePageFromServer = !{JSON.stringify(timetablePage)};
+      timetablePageFromServer.dayLists.sort();
+      console.log('GTFS data from server', timetablePageFromServer);
+      const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
+      //- console.log('GTFS Realtime URLs:', gtfsRealtimeUrls);
+      //- console.log('Route Data:', routeData);
+      //- console.log('Stop Data:', stopData);
+      //- console.log('Route IDs on Page:', routeIds);
+      //- console.log('Trip IDs on Page:', tripIds);
+      //- console.log('Stop IDs on Page:', stopIds);
+      createMaps();
+      //- $(document).ready(function() {
+        //- const initialTimetable = getUrlParam('timetable_id');
+        //- if (initialTimetable) {
+        //-   jQuery('.timetable').hide();
+        //-   jQuery('.coa-timetable-map-container').hide();
+        //-   showTimetable(initialTimetable);
+        //- } 
+      //- });

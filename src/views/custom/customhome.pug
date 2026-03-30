@@ -1,5 +1,13 @@
 include formatting_functions.pug
 -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
+-
+-// Build a route/direction -> stops mapping using trips and stopTimes
+-var routeDirectionStops = {};
+-var tripLookup = {};
+-config.timetablePage.trips.forEach(function(trip) { tripLookup[trip.trip_id] = { route_id: trip.route_id, direction_id: trip.direction_id }; });
+-var stopLookup = {};
+-config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
+-config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
 
 //- .relative.w-full.h-full.flex.flex-col
 div(class="")
@@ -45,7 +53,22 @@ div(class="")
                 div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
                     
               div(id="container_choose_route" class="departure-interface p-4")
-                p.mb-4="(NOT YET IMPLEMENTED) Choose a route, direction, and stop to see real time departure information"
+                p.mb-4="Choose a route, direction, and stop to see real time departure information"
+                
+                div.mb-4
+                  label(for="route-select-dropdown") Route
+                  select#route-select-dropdown.border.p-2.w-full
+                    option(value="") Select a route
+
+                div.mb-4
+                  label(for="direction-select-dropdown") Direction
+                  select#direction-select-dropdown.border.p-2.w-full(disabled)
+                    option(value="") Select a direction
+
+                div.mb-4
+                  label(for="stop-by-route-select-dropdown") Stop
+                  select#stop-by-route-select-dropdown.border.p-2.w-full(disabled)
+                    option(value="") Select a stop
 
             output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
@@ -75,20 +98,20 @@ div(class="")
         div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
           i(class="bi bi-map text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
           h3(class="text-xl font-semibold mb-2") Routes and Schedules
-          p(class="mb-6") Find route schedule information for any stop in the system.
-          a(href="/timetable/" class="btn-blue") Find Your Route
+          p(class="mb-6") Find schedule information for any route in the system.
+          a(href="/routes-and-schedules/" class="btn-blue") Find Your Route
 
         div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
           i(class="bi bi-bus-front text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
           h3(class="text-xl font-semibold mb-2") Bus Tracker
           p(class="mb-6") Save your favorite stops for quick access to departure times.
-          a(href="/timetable/" class="btn-blue") Track Your Bus
+          a(href="/" class="btn-blue") Track Your Bus
 
         div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
           i(class="bi bi-ticket-perforated text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
           h3(class="text-xl font-semibold mb-2") Trip Planner
-          p(class="mb-6") Browse routes and see all stops and schedules for each line.
-          a(href="/timetable/" class="btn-blue") Plan Your Trip
+          p(class="mb-6") Know what to expect when you Ride the ART.
+          a(href="/how-to-ride/" class="btn-blue") How to Ride
 
   div(class="w-full bg-aux-gray p-6 lg:px-12 lg:py-16")
     div(class="w-full max-w-7xl mx-auto ")
@@ -99,34 +122,23 @@ div(class="")
 
       div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
 
-        div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
-          div(class="relative aspect-video w-full mb-4")
-            img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
-          div(class="p-6 flex flex-col")
-            a(href="#" class="text-xl font-semibold mb-2") Article One
-            p(class="mb-4") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
-            p(class="text-sm italic") Published on January 1, 2024
-
-        div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
-          div(class="relative aspect-video w-full mb-4")
-            img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
-          div(class="p-6 flex flex-col")          
-            a(href="#" class="text-xl font-semibold mb-2") Article Two
-            p(class="mb-0") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
-            p(class="text-sm italic") Published on January 1, 2024
-
-        div(class="bg-white rounded-lg shadow-lg flex flex-col items-center")
-          div(class="relative aspect-video w-full mb-4")
-            img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
-          div(class="p-6 flex flex-col")          
-            a(href="#" class="text-xl font-semibold mb-2") Article Three
-            p(class="mb-0") Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut...
-            p(class="text-sm italic") Published on January 1, 2024
+        each post in config.wordpress.transitNews
+          - const media = post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]
+          - const imageUrl = media && media.media_details && media.media_details.sizes && media.media_details.sizes.medium_large ? media.media_details.sizes.medium_large.source_url : (media && media.source_url ? media.source_url : 'https://www.ashevillenc.gov/wp-content/uploads/2018/10/P1220005-768x432.jpg')
+          - const postDate = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+          div(class="bg-white rounded-lg shadow-lg flex flex-col")
+            div(class="relative aspect-video w-full")
+              img(src=imageUrl alt="" class="absolute rounded-t-lg" style="width:100%;height:100%;object-fit:cover;")
+            div(class="p-6 flex flex-col flex-grow")
+              a(href=post.link class="text-xl font-semibold mb-2 hover:underline")!= post.title.rendered
+              div(class="mb-4 flex-grow")!= post.excerpt.rendered
+              p(class="text-sm italic text-gray-500") Published on #{postDate}
 
 
 
 script.
     window.config = !{JSON.stringify(config)};
+    const routeDirectionStops = !{JSON.stringify(routeDirectionStops)};
     const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
     const directions = window.config.timetablePage.directions;
     const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
@@ -164,7 +176,85 @@ script.
     }, {});
     const timetableData = window.config.timetablePage.consolidatedTimetables;
     console.log('Data:', window.config);
+    console.log('routeDirectionStops mapping:', routeDirectionStops);
+
+    // Populate route dropdown on page load
+    function initRouteDropdown() {
+      const routeDropdown = $('#route-select-dropdown');
+      const sortedRoutes = Object.values(routeData).sort((a, b) => 
+        (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {numeric: true})
+      );
+      sortedRoutes.forEach(route => {
+        const displayName = route.route_short_name 
+          ? `${route.route_short_name} - ${route.route_long_name}` 
+          : route.route_long_name;
+        routeDropdown.append(`<option value="${route.route_id}">${displayName}</option>`);
+      });
+    }
+
+    // Handle route selection - populate directions
+    function onRouteChange() {
+      const routeId = $('#route-select-dropdown').val();
+      const directionDropdown = $('#direction-select-dropdown');
+      const stopDropdown = $('#stop-by-route-select-dropdown');
+
+      directionDropdown.html('<option value="">Select a direction</option>');
+      stopDropdown.html('<option value="">Select a stop</option>').prop('disabled', true);
+
+      if (!routeId) {
+        directionDropdown.prop('disabled', true);
+        return;
+      }
+
+      const directionsForRoute = directions.filter(dir => dir.route_id === routeId);
+      directionsForRoute.forEach(dir => {
+        directionDropdown.append(`<option value="${dir.direction_id}">${dir.direction}</option>`);
+      });
+      directionDropdown.prop('disabled', false);
+    }
+
+    // Handle direction selection - populate stops
+    function onDirectionChange() {
+      const routeId = $('#route-select-dropdown').val();
+      const directionId = $('#direction-select-dropdown').val();
+      const stopDropdown = $('#stop-by-route-select-dropdown');
+
+      stopDropdown.html('<option value="">Select a stop</option>');
+
+      if (!routeId || !directionId) {
+        stopDropdown.prop('disabled', true);
+        return;
+      }
+
+      // Use pre-built mapping from server-side
+      const key = `${routeId}_${directionId}`;
+      const stops = routeDirectionStops[key] || [];
+      
+      stops.forEach(stop => {
+        const displayName = stop.stop_code 
+          ? `${stop.stop_name} (${stop.stop_code})` 
+          : stop.stop_name;
+        stopDropdown.append(`<option value="${stop.stop_id}">${displayName}</option>`);
+      });
+      
+      stopDropdown.prop('disabled', false);
+    }
+
+    // Handle stop selection from By Route interface
+    function onStopByRouteChange() {
+      const stopId = $('#stop-by-route-select-dropdown').val();
+      if (stopId) {
+        setUrlParam('stop_id', stopId);
+        fetchRealtimeDeparturesForStop(stopId);
+      }
+    }
+
     $(document).ready(function() {
+      // Initialize By Route dropdowns
+      initRouteDropdown();
+      $('#route-select-dropdown').on('change', onRouteChange);
+      $('#direction-select-dropdown').on('change', onDirectionChange);
+      $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
       $('#stop-select-dropdown').select2({
         //- width: 'element',
         width: '100%'
