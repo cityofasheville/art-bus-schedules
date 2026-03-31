@@ -8,7 +8,16 @@
 -   }, 0);
 - }
 - const timetableHasTripNotes = timetable.orderedTrips.flatMap(trip => getNotesForTrip(timetable.notes, trip)).length > 0;
-.table-container
+
+div(id=`timetable_nav_${formatHtmlId(timetable.timetable_id)}` class="mb-4")
+  label(for=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="block mb-2 font-semibold") Jump to a stop
+  select(id=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="stop-search-dropdown border p-2 w-full max-w-md" data-timetable-id=formatHtmlId(timetable.timetable_id))
+    option(value="") Select a stop on this route
+    each stop, idx in timetable.stops
+      option(value=stop.stop_id)= `${stop.stop_name}${stop.stop_code ? ' (' + stop.stop_code + ')' : ''}`
+
+
+.table-container(id=`table-container-${formatHtmlId(timetable.timetable_id)}`)
   table.table-vertical(id=`timetable_main_${formatHtmlId(timetable.timetable_id)}` summary=`This table shows schedules for a selection of key stops on the route for ${timetable.timetable_label} ${timetable.dayList}.  Stops and their schedule times are listed in the columns.` data-orientation="vertical" data-stops="timepoints-only")
     caption.sr-only= `${timetable.timetable_label} | ${timetable.dayList}`
     colgroup
@@ -27,8 +36,9 @@
             th.city-column= stop.stop_city
             - previousCity = stop.stop_city
 
-          th.stop-header(scope="col" data-is-timepoint=`${stop.is_timepoint}` width=`${(100 / columnCount).toFixed(2)}%`)
+          th(class=`stop-header ${stop.is_timepoint? 'font-bold' : 'font-normal'}` scope="col" data-is-timepoint=`${stop.is_timepoint}` width=`${(100 / columnCount).toFixed(2)}%`)
             include timetable_stop_name.pug
+            i(class="bi bi-clock-fill ml-1 text-gray-500" aria-hidden="true")
 
         if timetable.has_continues_as_route
           th.stop-header.continues-as Continues as route

@@ -32,7 +32,7 @@ function showSelectedTimetable() {
   console.log(`Showing timetable for day list: ${dayList}, direction ID: ${directionId}`);
 
   const id = jQuery(
-    `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`
+    `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`,
   ).data('timetable-id');
 
   showTimetable(id);
@@ -164,7 +164,7 @@ jQuery(() => {
     ...new Set(
       jQuery('input[name="directionId"]')
         .map((_, el) => jQuery(el).val())
-        .get()
+        .get(),
     ),
   ];
 
@@ -222,4 +222,113 @@ jQuery(() => {
       // }
     }
   });
+
+  // Initialize stop search dropdowns with select2
+  jQuery('.stop-search-dropdown').each(function () {
+    jQuery(this).select2({
+      width: '100%',
+      placeholder: 'Select a stop on this route',
+    });
+  });
+
+  // Handle stop search selection
+  jQuery('.stop-search-dropdown').on('change', function () {
+    const stopId = jQuery(this).val();
+    const timetableId = jQuery(this).data('timetable-id');
+
+    if (!stopId) return;
+
+    highlightAndScrollToStop(stopId, timetableId);
+  });
 });
+
+/**
+ * Highlights a stop column in the timetable and scrolls it into view
+ * @param {string} stopId - The stop_id to highlight
+ * @param {string} timetableId - The timetable ID
+ */
+function highlightAndScrollToStop(stopId, timetableId) {
+  const tableContainer = document.getElementById(`table-container-${timetableId}`);
+  const table = document.getElementById(`timetable_main_${timetableId}`);
+
+  if (!tableContainer || !table) {
+    console.warn(`Could not find table container or table for timetable: ${timetableId}`);
+    return;
+  }
+
+  // Find the column for this stop using the colgroup
+  const colgroup = table.querySelector('colgroup');
+  if (!colgroup) return;
+
+  const cols = colgroup.querySelectorAll('col');
+  let targetCol = null;
+  let colIndex = -1;
+
+  cols.forEach((col, index) => {
+    if (col.dataset.stopId === stopId) {
+      colIndex = index;
+      targetCol = col;
+    }
+  });
+
+  if (colIndex === -1 || !targetCol) {
+    console.warn(`Stop ${stopId} not found in timetable ${timetableId}`);
+    return;
+  }
+
+  // Check if the stop is a non-timepoint and we're in timepoints-only mode
+  const isTimepoint = targetCol.dataset.isTimepoint === 'true';
+  const timetableEl = table.closest('.timetable');
+  const isTimepointsOnlyMode = timetableEl && timetableEl.dataset.stops === 'timepoints-only';
+
+  if (!isTimepoint && isTimepointsOnlyMode) {
+    // Switch to "all stops" view
+    jQuery('#timepoint_selector input[name="timepoints"][value="all_stops"]').prop('checked', true);
+    showSelectedTimetable();
+    showAllTimepoints();
+
+    // Update button styling
+    jQuery('#timepoint_selector input[name="timepoints"]').each((index, element) => {
+      jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
+      jQuery(element)
+        .parents('label')
+        .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+    });
+  }
+
+  // Remove existing highlights from this table
+  table.querySelectorAll('th.highlighted, td.highlighted, col.highlighted').forEach((el) => {
+    el.classList.remove('highlighted');
+  });
+
+  // Add highlight to the col element
+  targetCol.classList.add('highlighted');
+
+  // Find and highlight the header cell
+  // Select only stop headers (exclude continues-from/continues-as prefix columns)
+  const stopHeaders = table.querySelectorAll(
+    'thead th.stop-header:not(.continues-from):not(.continues-as)',
+  );
+  const headerCell = stopHeaders[colIndex];
+
+  if (headerCell) {
+    headerCell.classList.add('highlighted');
+
+    // Scroll the header into view within the table container
+    const scrollLeft =
+      headerCell.offsetLeft - tableContainer.clientWidth / 2 + headerCell.offsetWidth / 2;
+    tableContainer.scrollTo({
+      left: Math.max(0, scrollLeft),
+      behavior: 'smooth',
+    });
+  }
+
+  // Highlight all body cells in that column
+  // Each row has the same number of stop cells as the colgroup has col elements
+  table.querySelectorAll('tbody tr').forEach((row) => {
+    const stopCells = row.querySelectorAll('td:not(.trip-notes):not(.continues-from)');
+    if (stopCells[colIndex]) {
+      stopCells[colIndex].classList.add('highlighted');
+    }
+  });
+}
