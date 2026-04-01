@@ -1018,29 +1018,24 @@ function addHighlightedStops(map, geojson) {
 }
 
 function setupEventListeners(map, id) {
-  map.on('mousemove', (event) => handleMouseMove(event, map, id));
-  map.on('click', (event) => handleClick(event, map));
+  map.on('mousemove', (event) => handleMouseMove(event, map));
+  map.on('click', (event) => handleClick(event, map, id));
   setupTableHoverListeners(id, map);
 }
 
-function handleMouseMove(event, map, id) {
+function handleMouseMove(event, map) {
+  // Only change cursor on hover, don't highlight
   const features = map.queryRenderedFeatures(event.point, {
     layers: ['stops'],
   });
   if (features.length > 0) {
     map.getCanvas().style.cursor = 'pointer';
-    const stopIds = [features[0].properties.stop_id];
-    if (features[0].properties.parent_station) {
-      stopIds.push(features[0].properties.parent_station);
-    }
-    highlightStop(map, id, stopIds);
   } else {
     map.getCanvas().style.cursor = '';
-    unHighlightStop(map, id);
   }
 }
 
-function handleClick(event, map) {
+function handleClick(event, map, id) {
   const bbox = [
     [event.point.x - 5, event.point.y - 5],
     [event.point.x + 5, event.point.y + 5],
@@ -1049,10 +1044,38 @@ function handleClick(event, map) {
     layers: ['stops-highlighted', 'stops'],
   });
 
-  if (!features || features.length === 0) return;
+  if (!features || features.length === 0) {
+    // Clicked on empty area - clear highlights
+    if (typeof clearStopSelection === 'function') {
+      clearStopSelection(id);
+    } else {
+      unHighlightStop(map, id);
+    }
+    return;
+  }
 
   const feature = features[0];
-  showStopPopup(map, feature);
+  const stopId = feature.properties.stop_id;
+
+  // Check if this stop is already highlighted (toggle behavior)
+  const currentFilter = map.getFilter('stops-highlighted');
+  const isAlreadyHighlighted =
+    currentFilter && currentFilter[0] === 'any' && JSON.stringify(currentFilter).includes(stopId);
+
+  if (isAlreadyHighlighted) {
+    // Clear highlights using unified function
+    if (typeof clearStopSelection === 'function') {
+      clearStopSelection(id);
+    } else {
+      unHighlightStop(map, id);
+    }
+  } else {
+    // Use unified selectStop function to highlight everything
+    if (typeof selectStop === 'function') {
+      selectStop(stopId, id, { fromMap: true });
+    }
+    showStopPopup(map, feature);
+  }
 }
 
 function showStopPopup(map, feature) {
@@ -1143,24 +1166,63 @@ function unHighlightTimetableStops(id) {
 }
 
 function setupTableHoverListeners(id, map) {
-  jQuery('th, td', jQuery(`#timetable_id_${id} table`)).hover(
+  // Use click instead of hover for table cell highlighting
+  jQuery('th.stop-header, td.stop-time', jQuery(`#timetable_id_${id} table`)).on(
+    'click',
     (event) => {
-      const stopId = getStopIdFromTableCell(event.target);
+      // Get the actual td or th element, not a child element that was clicked
+      const actualCell = jQuery(event.target).closest('td, th');
+      const stopId = getStopIdFromTableCell(actualCell);
+
       if (stopId !== undefined) {
-        highlightStop(map, id, [stopId.toString()]);
+        const isAlreadyHighlighted = actualCell.hasClass('highlighted');
+
+        if (isAlreadyHighlighted) {
+          // Clear highlights using unified function
+          if (typeof clearStopSelection === 'function') {
+            clearStopSelection(id);
+          } else {
+            unHighlightTimetableStops(id);
+            unHighlightStop(map, id);
+          }
+        } else {
+          // Use unified selectStop function to highlight everything
+          if (typeof selectStop === 'function') {
+            selectStop(stopId.toString(), id, { fromTable: true });
+          } else {
+            highlightStop(map, id, [stopId.toString()]);
+            highlightTimetableStops(id, [stopId.toString()]);
+          }
+        }
       }
     },
-    () => unHighlightStop(map, id),
   );
 }
 
 function getStopIdFromTableCell(cell) {
-  const table = jQuery(cell).closest('table');
+  // Ensure we're working with the actual td or th, not a child element
+  const actualCell = jQuery(cell).closest('td, th');
+  if (!actualCell.length) return undefined;
+
+  const table = actualCell.closest('table');
   if (table.data('orientation') === 'vertical') {
-    const index = jQuery(cell).index();
+    // For vertical tables, get index among only stop-related cells (not prefix columns)
+    let index;
+    if (actualCell.is('th.stop-header')) {
+      // For header cells, get index among stop-header cells (excluding continues-from/continues-as)
+      index = actualCell
+        .parent()
+        .find('th.stop-header:not(.continues-from):not(.continues-as)')
+        .index(actualCell);
+    } else if (actualCell.is('td.stop-time')) {
+      // For body cells, get index among stop-time cells
+      index = actualCell.parent().find('td.stop-time').index(actualCell);
+    } else {
+      return undefined;
+    }
     return jQuery('colgroup col', table).eq(index).data('stop-id');
   } else {
-    return jQuery(cell).closest('tr').data('stop-id');
+    return actualCell.closest('tr').data('stop-id');
   }
 }
 

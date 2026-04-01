@@ -1155,12 +1155,12 @@ fieldset:has(input:focus) {
   display: flex;
 }
 
-.table {
-  display: table;
-}
-
 .\!table {
   display: table !important;
+}
+
+.table {
+  display: table;
 }
 
 .grid {
@@ -1251,6 +1251,10 @@ fieldset:has(input:focus) {
   max-width: 100%;
 }
 
+.max-w-md {
+  max-width: 28rem;
+}
+
 .max-w-screen-lg {
   max-width: 1024px;
 }
@@ -1261,10 +1265,6 @@ fieldset:has(input:focus) {
 
 .max-w-screen-xl {
   max-width: 1280px;
-}
-
-.max-w-md {
-  max-width: 28rem;
 }
 
 .flex-grow {
@@ -1566,6 +1566,11 @@ fieldset:has(input:focus) {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
+.bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
+}
+
 .p-0 {
   padding: 0px;
 }
@@ -1584,6 +1589,10 @@ fieldset:has(input:focus) {
 
 .p-6 {
   padding: 1.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
 }
 
 .px-0 {
@@ -1745,16 +1754,12 @@ fieldset:has(input:focus) {
   font-weight: 500;
 }
 
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-light {
-  font-weight: 300;
-}
-
 .font-normal {
   font-weight: 400;
+}
+
+.font-semibold {
+  font-weight: 600;
 }
 
 .italic {
@@ -2022,6 +2027,10 @@ fieldset:has(input:focus) {
 
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .lg\:flex-row {
