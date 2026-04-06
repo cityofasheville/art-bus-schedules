@@ -44,13 +44,21 @@ a:hover {
 
 /* Timetable Styles */
 
-div[data-stops='all-stops'] th[data-is-timepoint='true'] {
+/* div[data-stops='all-stops'] th[data-is-timepoint='true'] {
   background-color: #1C2634;
   color: #F1F5FB;
-}
+} */
 
 div[data-stops='all-stops'] col[data-is-timepoint='true'] {
-  border: 2px solid #1C2634;
+  border-top: 4px solid #1C2634;
+}
+
+div.timetable i.bi-clock-fill {
+  display: none;
+}
+
+div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fill {
+  display: inline-block;
 }
 
 .timetable-page {
@@ -400,7 +408,9 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
 .timetable-page .timetable table>tbody>tr.highlighted,
 .timetable-page .timetable table>tbody>tr.highlighted>th,
 .timetable-page .timetable table>tbody .stop-time.highlighted,
-.timetable-page .timetable table>thead .stop-header.highlighted {
+.timetable-page .timetable table>thead .stop-header.highlighted,
+.timetable-page .timetable table>tbody>tr>td.highlighted,
+.timetable-page .timetable table>thead>tr>th.highlighted {
   background-color: #f8f8b9;
 }
 
@@ -542,6 +552,38 @@ div[data-stops='all-stops'] col[data-is-timepoint='true'] {
 
 .timetable-page .map .vehicle-popup .maplibregl-popup-content {
   padding-bottom: 5px;
+}
+
+/* Stop info container (mirrors popup styling) */
+.timetable-page .stop-info-container .route-list {
+  display: inline;
+}
+
+.timetable-page .stop-info-container .map-route-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  line-height: 1;
+  margin-right: 0.5rem;
+  gap: 0.25rem;
+}
+
+.timetable-page .stop-info-container .map-route-item:hover {
+  text-decoration: none;
+}
+
+.timetable-page .stop-info-container .map-route-item .underline-hover:hover {
+  text-decoration: underline;
+}
+
+.timetable-page .stop-info-container .icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
 }
 
 .timetable-page .map-legend {
