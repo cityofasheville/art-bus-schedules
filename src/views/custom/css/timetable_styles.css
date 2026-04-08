@@ -322,7 +322,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
 }
 
 .timetable-page .timetable .table-container {
-  overflow-x: scroll;
+  overflow-x: auto;
   margin: 20px 0;
 }
 

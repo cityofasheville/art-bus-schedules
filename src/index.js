@@ -77,18 +77,29 @@ async function getWordPressData() {
   let returnedData = {};
 
   try {
-    const howToRideResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf',
-    );
-    const faresAndPassesResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf',
-    );
-    const transitConnectResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf',
-    );
-    const transitNewsResponse = await fetch(
-      'https://www.ashevillenc.gov/wp-json/wp/v2/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
-    );
+    const [
+      howToRideResponse,
+      faresAndPassesResponse,
+      transitConnectResponse,
+      adaResponse,
+      bikesResponse,
+      passportResponse,
+      policiesAndTipsResponse,
+      transitNewsResponse,
+    ] = await Promise.all([
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content,acf'),
+      fetch(
+        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/99420?_fields=title,content,acf',
+      ),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/488?_fields=title,content,acf'),
+      fetch(
+        'https://www.ashevillenc.gov/wp-json/wp/v2/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
+      ),
+    ]);
 
     if (!howToRideResponse.ok) {
       throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
@@ -107,14 +118,34 @@ async function getWordPressData() {
       throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
     }
 
-    const howToRideData = await howToRideResponse.json();
-    const faresAndPassesData = await faresAndPassesResponse.json();
-    const transitConnectData = await transitConnectResponse.json();
-    const transitNewsData = await transitNewsResponse.json();
+    const [
+      howToRideData,
+      faresAndPassesData,
+      transitConnectData,
+      transitNewsData,
+      adaData,
+      bikesData,
+      passportData,
+      policiesAndTipsData,
+    ] = await Promise.all([
+      howToRideResponse.json(),
+      faresAndPassesResponse.json(),
+      transitConnectResponse.json(),
+      transitNewsResponse.json(),
+      adaResponse.json(),
+      bikesResponse.json(),
+      passportResponse.json(),
+      policiesAndTipsResponse.json(),
+    ]);
+
     returnedData.howToRide = howToRideData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
     returnedData.transitNews = transitNewsData;
+    returnedData.ada = adaData;
+    returnedData.bikesOnBuses = bikesData;
+    returnedData.passport = passportData;
+    returnedData.policiesAndTips = policiesAndTipsData;
     returnedData.title = 'HC title';
     returnedData.content = 'HC content';
   } catch (error) {

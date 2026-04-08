@@ -26,6 +26,26 @@
       "title": "How to Ride"
     },
     {
+      "template": "policiesandtips_full.pug",
+      "output": "policies-and-tips/index.html",
+      "title": "Policies and Tips"
+    },
+    {
+      "template": "bikesonbuses_full.pug",
+      "output": "bikes-on-buses/index.html",
+      "title": "Bikes on Buses"
+    },
+    {
+      "template": "ada_full.pug",
+      "output": "ada/index.html",
+      "title": "ADA, Wheelchairs and Service Animals"
+    },
+    {
+      "template": "passport_full.pug",
+      "output": "passport-program/index.html",
+      "title": "Passport Program"
+    },
+    {
       "template": "faresandpasses_full.pug",
       "output": "fares-and-passes/index.html",
       "title": "Fares and Passes"

@@ -10,6 +10,7 @@ let vehiclePopup;
 let gtfsRealtimeInterval;
 let rtPositionsPaused = false;
 let previousVehicleCount = null;
+let dataFetchTimestamp = null; // Timestamp (in seconds) when GTFS-RT data was fetched
 
 console.log('timetable-map script loaded');
 
@@ -275,10 +276,12 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
 
   const numberOfArrivalsToShow = 5;
   const nextArrivals = [];
+  // Use fetch timestamp for consistent timing across UI elements
+  const referenceTime = dataFetchTimestamp || Date.now() / 1000;
   if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
     for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
       if (stoptimeUpdate.arrival) {
-        const secondsToArrival = stoptimeUpdate.arrival.time - Date.now() / 1000;
+        const secondsToArrival = stoptimeUpdate.arrival.time - referenceTime;
         const stopName = stopData[stoptimeUpdate.stop_id]?.stop_name;
 
         // Don't show arrivals in the past or non-timepoints
@@ -416,10 +419,12 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
 
     const numberOfArrivalsToShow = 5;
     const nextArrivals = [];
+    // Use fetch timestamp for consistent timing across UI elements
+    const referenceTime = dataFetchTimestamp || Date.now() / 1000;
     if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
       for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
         if (stoptimeUpdate.arrival) {
-          const secondsToArrival = stoptimeUpdate.arrival.time - Date.now() / 1000;
+          const secondsToArrival = stoptimeUpdate.arrival.time - referenceTime;
           const stopName = stopData[stoptimeUpdate.stop_id]?.stop_name;
 
           if (secondsToArrival > 0 && stopName) {
@@ -695,6 +700,9 @@ async function updateArrivals({ withMap = true } = {}) {
       fetchGtfsRealtime(realtimeVehiclePositions?.url, realtimeVehiclePositions?.headers),
       fetchGtfsRealtime(realtimeTripUpdates?.url, realtimeTripUpdates?.headers),
     ]);
+
+    // Store fetch timestamp for consistent arrival time calculations
+    dataFetchTimestamp = Date.now() / 1000;
 
     if (!latestVehiclePositions?.length) {
       jQuery('.vehicle-legend-item').hide();
@@ -1002,16 +1010,16 @@ function addHighlightedStops(map, geojson) {
     type: 'circle',
     source: { type: 'geojson', data: geojson },
     paint: {
-      'circle-color': '#ffff00',
+      'circle-color': '#EFFF77',
       'circle-radius': {
         base: 1.75,
         stops: [
-          [12, 6],
+          [12, 8],
           [22, 150],
         ],
       },
-      'circle-stroke-width': 2,
-      'circle-stroke-color': '#3f4a5c',
+      'circle-stroke-width': 4,
+      'circle-stroke-color': '#005daa',
     },
     filter: ['==', 'stop_id', ''],
   });
