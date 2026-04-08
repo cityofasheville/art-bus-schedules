@@ -9,11 +9,11 @@ function showSelectedInterface() {
       jQuery(element)
         .parents('label')
         .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-    }
+    },
   );
 
   const selected_interface = jQuery(
-    '#departure_interface_selector input[name="departure_interface"]:checked'
+    '#departure_interface_selector input[name="departure_interface"]:checked',
   ).val();
 
   jQuery('.departure-interface').hide();
@@ -30,7 +30,7 @@ function secondsInFuture(dateString) {
     dateString.substring(6, 8), // Day
     dateString.substring(9, 11), // Hours
     dateString.substring(12, 14), // Minutes
-    dateString.substring(15, 17) // Seconds
+    dateString.substring(15, 17), // Seconds
   );
 
   const now = new Date();
@@ -87,7 +87,7 @@ async function updateArrivals() {
       // Hide vehicles which show up 15 minutes or more before their trip start times
       if (
         secondsInFuture(
-          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`
+          `${vehiclePosition.vehicle.trip.start_date} ${vehiclePosition.vehicle.trip.start_time}`,
         ) >
         15 * 60
       ) {
@@ -211,7 +211,7 @@ function toggleFavoriteStop(stop_id) {
       `${this_stop.stop_name} (${this_stop.stop_code})`,
       stop_id,
       true,
-      true
+      true,
     );
     $('#favorite-stop-select-dropdown').append(new_option_element);
     jQuery('#favorite_instructions_container').hide();
@@ -267,6 +267,36 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
   const augmentedArrivals = arrivals.map((arrival) => augmentArrivalInfo(arrival, stop_id));
   const groupedArrivals = groupArrivalsByRouteAndDirection(augmentedArrivals);
 
+  // Extract unique routes serving this stop from routeDirectionStops
+  const uniqueRoutes = [];
+  const seenRoutes = new Set();
+
+  for (const key in routeDirectionStops) {
+    const stops = routeDirectionStops[key] || [];
+    // Check if this route/direction serves the current stop
+    const servesStop = stops.some((stop) => stop.stop_id === stop_id);
+    if (servesStop) {
+      const [route_id, direction_id] = key.split('_');
+      const routeInfo = routeData[route_id];
+
+      if (routeInfo && !seenRoutes.has(routeInfo.route_short_name)) {
+        seenRoutes.add(routeInfo.route_short_name);
+
+        // Get direction name from directions array
+        const directionInfo = directions.find(
+          (dir) => dir.route_id === route_id && dir.direction_id === parseInt(direction_id),
+        );
+
+        uniqueRoutes.push({
+          route_short_name: routeInfo.route_short_name,
+          route_color: routeInfo.route_color,
+          route_text_color: routeInfo.route_text_color,
+          direction_name: directionInfo ? directionInfo.direction : '',
+        });
+      }
+    }
+  }
+
   const timeUpdated = new Date();
   const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
     timeStyle: 'short',
@@ -280,18 +310,29 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
   } else {
     html = ``;
     html += `<div class="w-full flex items-start justify-between gap-4">
-    <div>
-        <h2 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
+    <div id="arrivals_header_container">
+        <h3 class="text-base font-semibold arrivals-header my-0">Routes serving ${
           thisStop.stop_name
-        } (${thisStop.stop_code})</h2>
+        } (${thisStop.stop_code})</h3>
+          <div class="flex gap-2 items-center my-2">
+          ${uniqueRoutes
+            .map(
+              (route) =>
+                `<span class="route-color-swatch" style="background-color: #${route.route_color}; color: #${route.route_text_color};">${route.route_short_name}</span>`,
+            )
+            .join('')}
+        </div>
+        <h3 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
+          thisStop.stop_name
+        } (${thisStop.stop_code})</h3>
         <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></button></div>
     </div>
     <div>
       <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon_${stop_id}" class="bi ${
-      favorite_stops.includes(stop_id) ? 'bi-star-fill' : 'bi-star'
-    }" aria-hidden="true"></i><span class="sr-only">${
-      favorite_stops.includes(stop_id) ? 'Clear default stop' : 'Make this my default stop'
-    }</span>
+        favorite_stops.includes(stop_id) ? 'bi-star-fill' : 'bi-star'
+      }" aria-hidden="true"></i><span class="sr-only">${
+        favorite_stops.includes(stop_id) ? 'Clear default stop' : 'Make this my default stop'
+      }</span>
       </button>
     </div>
     </div>`;
@@ -303,15 +344,15 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
       html += `<td class="align-middle pl-2 pr-3 py-2">
         <div class="flex items-center justify-items-center px-0">
           <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
-        groupedArrivals[groupKey][0].direction_id
-      }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
-        groupedArrivals[groupKey][0].timetable_id
-      }" class="mx-auto text-center">
+            groupedArrivals[groupKey][0].direction_id
+          }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
+            groupedArrivals[groupKey][0].timetable_id
+          }" class="mx-auto text-center">
           <span class="route-color-swatch-large" style="background-color: #${
             groupedArrivals[groupKey][0].route_color
           };color: #${groupedArrivals[groupKey][0].route_text_color};">${
-        groupedArrivals[groupKey][0].route_short_name
-      }</span>
+            groupedArrivals[groupKey][0].route_short_name
+          }</span>
           <span class="block direction text-gray-700 text-sm">${
             groupedArrivals[groupKey][0].direction_name || ''
           }</span>
@@ -360,7 +401,7 @@ function getUpcomingArrivalsForStop(stop_id) {
       (stopTimeUpdate) =>
         stopTimeUpdate.stop_id === stop_id &&
         (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
-        stopTimeUpdate.schedule_relationship !== 3
+        stopTimeUpdate.schedule_relationship !== 3,
     );
 
     for (const update of stopTimeUpdates) {
@@ -381,7 +422,7 @@ function getUpcomingArrivalsForStop(stop_id) {
 
 jQuery(() => {
   jQuery(
-    `#departure_interface_selector input[name="departure_interface"][value="search_stop"]`
+    `#departure_interface_selector input[name="departure_interface"][value="search_stop"]`,
   ).prop('checked', true);
 
   showSelectedInterface();
@@ -389,7 +430,7 @@ jQuery(() => {
   jQuery('#departure_interface_selector input[name="departure_interface"]').change(() => {
     showSelectedInterface();
   });
-
+  console.log('Route data and stop data loaded:', routeData, directions, routeDirectionStops);
   const favorite_stops = getFavoriteStops();
   // console.log('Favorite stops from localStorage:', favorite_stops);
 
@@ -400,7 +441,7 @@ jQuery(() => {
         `${this_stop.stop_name} (${this_stop.stop_code})`,
         stop_id,
         true,
-        true
+        true,
       );
       $('#favorite-stop-select-dropdown').append(new_option_element);
     });

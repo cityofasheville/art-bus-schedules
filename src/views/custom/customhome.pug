@@ -72,6 +72,29 @@ div(class="")
 
             output#results-container.max-w-screen-lg.mx-auto.block.py-6 
 
+  div(class="w-full bg-art-green p-6 lg:px-12 lg:py-16")
+    div(class="w-full max-w-7xl mx-auto ")
+
+      div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
+
+        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+          i(class="bi bi-map text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+          h3(class="text-xl font-semibold mb-2") Routes and Schedules
+          p(class="mb-6") Find schedule information for any route in the system.
+          a(href="/routes-and-schedules/" class="btn-blue") Find Your Route
+
+        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+          i(class="bi bi-bus-front text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+          h3(class="text-xl font-semibold mb-2") Realtime arrivals
+          p(class="mb-6") Save your favorite stops for quick access to departure times.
+          a(href="/" class="btn-blue") Get arrival times
+
+        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
+          i(class="bi bi-ticket-perforated text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
+          h3(class="text-xl font-semibold mb-2") Trip Planner
+          p(class="mb-6") Know how to get from point A to point B.
+          a(href="/trip-planner/" class="btn-blue") Plan your trip
+
   div(class="w-full bg-aux-gray p-6 lg:p-12 border-t-[16px] border-b-[16px] border-aux-red")
     div(class="w-full max-w-7xl mx-auto ")
       div(class=" w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
@@ -89,29 +112,6 @@ div(class="")
           div(id="alerts-container" class="timetable-alerts-list")
             div(class="timetable-alert-empty")
               | Checking for service alerts...
-
-  div(class="w-full bg-art-green p-6 lg:px-12 lg:py-16")
-    div(class="w-full max-w-7xl mx-auto ")
-
-      div(class="grid grid-cols-1 md:grid-cols-3 gap-8")
-
-        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
-          i(class="bi bi-map text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
-          h3(class="text-xl font-semibold mb-2") Routes and Schedules
-          p(class="mb-6") Find schedule information for any route in the system.
-          a(href="/routes-and-schedules/" class="btn-blue") Find Your Route
-
-        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
-          i(class="bi bi-bus-front text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
-          h3(class="text-xl font-semibold mb-2") Bus Tracker
-          p(class="mb-6") Save your favorite stops for quick access to departure times.
-          a(href="/" class="btn-blue") Track Your Bus
-
-        div(class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center")
-          i(class="bi bi-ticket-perforated text-4xl text-art-green mb-4" style="font-size: 4rem;" aria-hidden="true")
-          h3(class="text-xl font-semibold mb-2") Trip Planner
-          p(class="mb-6") Know what to expect when you Ride the ART.
-          a(href="/how-to-ride/" class="btn-blue") How to Ride
 
   div(class="w-full bg-aux-gray p-6 lg:px-12 lg:py-16")
     div(class="w-full max-w-7xl mx-auto ")
