@@ -311,17 +311,6 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     html = ``;
     html += `<div class="w-full flex items-start justify-between gap-4">
     <div id="arrivals_header_container">
-        <h3 class="text-base font-semibold arrivals-header my-0">Routes serving ${
-          thisStop.stop_name
-        } (${thisStop.stop_code})</h3>
-          <div class="flex gap-2 items-center my-2">
-          ${uniqueRoutes
-            .map(
-              (route) =>
-                `<span class="route-color-swatch" style="background-color: #${route.route_color}; color: #${route.route_text_color};">${route.route_short_name}</span>`,
-            )
-            .join('')}
-        </div>
         <h3 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
           thisStop.stop_name
         } (${thisStop.stop_code})</h3>

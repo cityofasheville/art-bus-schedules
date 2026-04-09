@@ -97,13 +97,18 @@ function getStopPopupHtml(feature, stop) {
   if (stop.stop_code ?? false) {
     jQuery('<div>')
       .html([
-        jQuery('<div>').addClass('popup-label').text('Stop Code:'),
-        jQuery('<strong>').text(stop.stop_code),
+        jQuery('<div>').addClass('popup-label')
+          .html(`Stop Code: <strong>${stop.stop_code}</strong><br />
+            <a class="underline hover:no-underline" href="/real-time-departures/?stop_id=${stop.stop_id}">View Real-Time Departures</a>
+          `),
       ])
       .appendTo(html);
   }
 
-  if (tripUpdates) {
+  // Injecting upcoming departures into the stop popup is currently disabled as it included arrivals from other routes that serve the same stop,
+  // which can be confusing without additional context (such as route names or a filter to only show arrivals for the currently viewed route)
+  // The code is left here for easy re-enabling in the future when we can optimize it further
+  if (false && tripUpdates) {
     const stopTimeUpdates = {
       0: [],
       1: [],
@@ -167,11 +172,30 @@ function getStopPopupHtml(feature, stop) {
 
   jQuery('<div>').addClass('popup-label').text('Routes Served:').appendTo(html);
 
-  jQuery(html).append(
-    jQuery('<div>')
-      .addClass('route-list')
-      .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
-  );
+  const routeList = jQuery('<ul>').addClass('route-list flex flex-wrap gap-2 list-none p-0 my-2');
+
+  routeIds.forEach((routeId) => {
+    const route = routeData[routeId];
+    if (!route) return;
+
+    const listItem = jQuery('<li>');
+    const link = jQuery('<a>')
+      .attr('href', `/${route.route_short_name}`)
+      .append(
+        jQuery('<span>')
+          .addClass('route-color-swatch')
+          .css('backgroundColor', formatRouteColor(route))
+          .css('color', formatRouteTextColor(route))
+          .attr('aria-hidden', 'true')
+          .text(route.route_short_name ?? ''),
+      )
+      .append(jQuery('<span>').addClass('sr-only').text(`Route ${route.route_short_name}`));
+
+    listItem.append(link);
+    routeList.append(listItem);
+  });
+
+  html.append(routeList);
 
   jQuery('<a>')
     .addClass('btn-blue btn-sm')
@@ -181,7 +205,12 @@ function getStopPopupHtml(feature, stop) {
     )
     .prop('target', '_blank')
     .prop('rel', 'noopener noreferrer')
-    .html('View on Streetview')
+    .html(
+      `View on Streetview
+      <i class="bi bi-box-arrow-up-right ml-2" aria-hidden="true"></i>    
+      <span class="sr-only">opens external site</span>
+    `,
+    )
     .appendTo(html);
 
   return html.prop('outerHTML');
@@ -334,7 +363,13 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
 function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
   const currentVehicleCount = vehiclePositions ? vehiclePositions.length : 0;
 
-  // Update the screen reader status only when vehicle count changes
+  // Skip all updates if paused (status shows "updates paused" instead)
+  if (rtPositionsPaused) {
+    console.log('RT positions container updates paused');
+    return;
+  }
+
+  // Update the status with bus count
   const statusEl = jQuery('#rt_positions_status');
   if (statusEl.length && previousVehicleCount !== currentVehicleCount) {
     const statusText =
@@ -345,12 +380,6 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     previousVehicleCount = currentVehicleCount;
   }
 
-  // Skip UI updates if paused
-  if (rtPositionsPaused) {
-    console.log('RT positions container updates paused');
-    return;
-  }
-
   console.log(
     'Updating real-time positions container with VP: ',
     vehiclePositions,
@@ -358,7 +387,7 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     tripUpdates,
   );
 
-  const container = jQuery('#rt_positions_container');
+  const container = jQuery('#rt_positions_list');
   if (!container.length) {
     return;
   }
@@ -489,16 +518,19 @@ function initRtPositionsPauseButton() {
 
     const icon = pauseBtn.find('i');
     const text = pauseBtn.find('span');
+    const statusEl = jQuery('#rt_positions_status');
 
     if (rtPositionsPaused) {
       pauseBtn.attr('aria-pressed', 'true');
       icon.removeClass('bi-pause-fill').addClass('bi-play-fill');
       text.text('Resume Updates');
+      statusEl.text('updates paused');
     } else {
       pauseBtn.attr('aria-pressed', 'false');
       icon.removeClass('bi-play-fill').addClass('bi-pause-fill');
       text.text('Pause Updates');
       // Immediately update when resuming
+      previousVehicleCount = null; // Reset to force status update
       if (vehiclePositions && tripUpdates) {
         updateRtPositionsContainer(vehiclePositions, tripUpdates);
       }
@@ -1014,7 +1046,7 @@ function addHighlightedStops(map, geojson) {
       'circle-radius': {
         base: 1.75,
         stops: [
-          [12, 8],
+          [12, 6],
           [22, 150],
         ],
       },
@@ -1082,7 +1114,7 @@ function handleClick(event, map, id) {
     if (typeof selectStop === 'function') {
       selectStop(stopId, id, { fromMap: true });
     }
-    showStopPopup(map, feature);
+    // showStopPopup(map, feature);
   }
 }
 

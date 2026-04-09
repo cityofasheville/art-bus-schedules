@@ -322,10 +322,11 @@ function updateStopInfoContainer(stopId, timetableId) {
   if (stop.stop_code) {
     jQuery('<div>')
       .addClass('mb-2')
-      .html([
-        jQuery('<span>').addClass('text-gray-600').text('Stop Code: '),
-        jQuery('<strong>').text(stop.stop_code),
-      ])
+      .html(
+        `Stop Code: <strong>${stop.stop_code}</strong><br />
+            <a class="underline hover:no-underline" href="/real-time-departures/?stop_id=${stop.stop_id}">View Real-Time Departures</a>
+          `,
+      )
       .appendTo(html);
   }
 
@@ -358,7 +359,10 @@ function updateStopInfoContainer(stopId, timetableId) {
   }
 
   // Real-time departures if available
-  if (typeof tripUpdates !== 'undefined' && tripUpdates) {
+  // Injecting upcoming departures into the stop popup is currently disabled as it included arrivals from other routes that serve the same stop (gotta confirm this),
+  // which can be confusing without additional context (such as route names or a filter to only show arrivals for the currently viewed route)
+  // The code is left here for easy re-enabling in the future when we can optimize it further
+  if (false && typeof tripUpdates !== 'undefined' && tripUpdates) {
     const stopTimeUpdates = {
       0: [],
       1: [],

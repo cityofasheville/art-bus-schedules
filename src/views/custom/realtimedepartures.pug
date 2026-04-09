@@ -1,0 +1,229 @@
+include formatting_functions.pug
+-const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
+-
+-// Build a route/direction -> stops mapping using trips and stopTimes
+-var routeDirectionStops = {};
+-var tripLookup = {};
+-config.timetablePage.trips.forEach(function(trip) { tripLookup[trip.trip_id] = { route_id: trip.route_id, direction_id: trip.direction_id }; });
+-var stopLookup = {};
+-config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
+-config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
+
+//- .relative.w-full.h-full.flex.flex-col
+//- div(class="h-full w-full relative")
+h1(class="sr-only")=pageTitleToUse
+  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+
+div(class="w-full min-h-128 relative flex-grow flex items-start justify-center")
+  img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+
+  //-  px-6 lg:px-12
+  div(class="w-full max-w-7xl mx-6 flex items-center justify-center lg:justify-center  my-12")
+    div(id="container_real_time_departures" class="w-full sm:w-[32rem] lg:w-[48rem] z-10")
+      div(class="w-full min-h-64 z-10 bg-aux-gray border rounded-lg shadow-lg p-0 overflow-hidden")
+        h2(class="p-4 px-4 text-white text-2xl m-0 rounded-t-sm bg-art-green")
+          i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
+          span(class="inline-block")="Real-time Departures"
+        div(class="p-4")
+          fieldset#departure_interface_selector.p-4.border.shadow-md
+            //- legend="Find real-time departures for a stop"
+            div(class=`w-full grid grid-cols-3 btn-group rounded-xl`)
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
+                span= "By Stop"
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
+                span= "Favorites"
+              label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
+                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
+                span= "By Route"
+
+            div(id="container_search_stop" class="departure-interface p-4")
+              p.mb-4="Select a stop to see real time departure information"
+              select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                option(value="") Select a stop
+                each stop in alphabetical_stops
+                  option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
+
+            div(id="container_favorites" class="departure-interface p-4")
+              div(id="favorite_stops_select_container" class="mb-4")
+                p.mb-4="Select one of your favorite stops to see real time departure information"
+                select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
+                  option(value="") Select a favorite stop
+              div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
+                  
+            div(id="container_choose_route" class="departure-interface p-4")
+              p.mb-4="Choose a route, direction, and stop to see real time departure information"
+              
+              div.mb-4
+                label(for="route-select-dropdown") Route
+                select#route-select-dropdown.border.p-2.w-full
+                  option(value="") Select a route
+
+              div.mb-4
+                label(for="direction-select-dropdown") Direction
+                select#direction-select-dropdown.border.p-2.w-full(disabled)
+                  option(value="") Select a direction
+
+              div.mb-4
+                label(for="stop-by-route-select-dropdown") Stop
+                select#stop-by-route-select-dropdown.border.p-2.w-full(disabled)
+                  option(value="") Select a stop
+
+          output#results-container.max-w-screen-lg.mx-auto.block.py-6 
+
+script.
+    window.config = !{JSON.stringify(config)};
+    const routeDirectionStops = !{JSON.stringify(routeDirectionStops)};
+    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
+    const directions = window.config.timetablePage.directions;
+    const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
+    const routeData = window.config.timetablePage.routes.reduce((accumulator, route) => {
+      accumulator[route.route_id] = {
+        route_id: route.route_id,
+        route_short_name: route.route_short_name,
+        route_long_name: route.route_long_name,
+        route_desc: route.route_desc,
+        route_color: route.route_color,
+        route_text_color: route.route_text_color
+      };
+      return accumulator;
+    }, {});
+    const tripIds = window.config.timetablePage.trips.map(trip => trip.trip_id);
+    const tripData = window.config.timetablePage.trips.reduce((accumulator, trip) => {
+      accumulator[trip.trip_id] = {
+        trip_id: trip.trip_id,
+        route_id: trip.route_id,
+        trip_headsign: trip.trip_headsign,
+        direction_id: trip.direction_id
+      };
+      return accumulator;
+    }, {});
+    const stopIds = window.config.timetablePage.stops.map(stop => stop.stop_id);
+    const stopData = window.config.timetablePage.stops.reduce((accumulator, stop) => {
+      accumulator[stop.stop_id] = {
+        stop_id: stop.stop_id,
+        stop_code: stop.stop_code,
+        stop_name: stop.stop_name,
+        stop_lat: stop.stop_lat,
+        stop_lon: stop.stop_lon
+      };
+      return accumulator;
+    }, {});
+    const timetableData = window.config.timetablePage.consolidatedTimetables;
+    console.log('Data:', window.config);
+    console.log('routeDirectionStops mapping:', routeDirectionStops);
+
+    // Populate route dropdown on page load
+    function initRouteDropdown() {
+      const routeDropdown = $('#route-select-dropdown');
+      const sortedRoutes = Object.values(routeData).sort((a, b) => 
+        (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {numeric: true})
+      );
+      sortedRoutes.forEach(route => {
+        const displayName = route.route_short_name 
+          ? `${route.route_short_name} - ${route.route_long_name}` 
+          : route.route_long_name;
+        routeDropdown.append(`<option value="${route.route_id}">${displayName}</option>`);
+      });
+    }
+
+    // Handle route selection - populate directions
+    function onRouteChange() {
+      const routeId = $('#route-select-dropdown').val();
+      const directionDropdown = $('#direction-select-dropdown');
+      const stopDropdown = $('#stop-by-route-select-dropdown');
+
+      directionDropdown.html('<option value="">Select a direction</option>');
+      stopDropdown.html('<option value="">Select a stop</option>').prop('disabled', true);
+
+      if (!routeId) {
+        directionDropdown.prop('disabled', true);
+        return;
+      }
+
+      const directionsForRoute = directions.filter(dir => dir.route_id === routeId);
+      directionsForRoute.forEach(dir => {
+        directionDropdown.append(`<option value="${dir.direction_id}">${dir.direction}</option>`);
+      });
+      directionDropdown.prop('disabled', false);
+    }
+
+    // Handle direction selection - populate stops
+    function onDirectionChange() {
+      const routeId = $('#route-select-dropdown').val();
+      const directionId = $('#direction-select-dropdown').val();
+      const stopDropdown = $('#stop-by-route-select-dropdown');
+
+      stopDropdown.html('<option value="">Select a stop</option>');
+
+      if (!routeId || !directionId) {
+        stopDropdown.prop('disabled', true);
+        return;
+      }
+
+      // Use pre-built mapping from server-side
+      const key = `${routeId}_${directionId}`;
+      const stops = routeDirectionStops[key] || [];
+      
+      stops.forEach(stop => {
+        const displayName = stop.stop_code 
+          ? `${stop.stop_name} (${stop.stop_code})` 
+          : stop.stop_name;
+        stopDropdown.append(`<option value="${stop.stop_id}">${displayName}</option>`);
+      });
+      
+      stopDropdown.prop('disabled', false);
+    }
+
+    // Handle stop selection from By Route interface
+    function onStopByRouteChange() {
+      const stopId = $('#stop-by-route-select-dropdown').val();
+      if (stopId) {
+        setUrlParam('stop_id', stopId);
+        fetchRealtimeDeparturesForStop(stopId);
+      }
+    }
+
+    $(document).ready(function() {
+      // Initialize By Route dropdowns
+      initRouteDropdown();
+      $('#route-select-dropdown').on('change', onRouteChange);
+      $('#direction-select-dropdown').on('change', onDirectionChange);
+      $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
+      $('#stop-select-dropdown').select2({
+        //- width: 'element',
+        width: '100%'
+      });
+      $('#favorite-stop-select-dropdown').select2({
+        //- width: 'element',
+        width: '100%' 
+      });
+
+      // prevent select2 from auto-focusing the search input when the dropdown opens, which causes mobile keyboard to pop up immediately
+      // need to support tab navigation to the search input. the input is not naturally next in the tab order. Maybe we only want to prevent auto-focus if the user is not using keyboard navigation?
+
+      //- $('#stop-select-dropdown').on('select2:open', function() {
+      //-   $('.select2-search input').prop('focus', 0);
+      //- });          
+      //- $('#favorite-stop-select-dropdown').on('select2:open', function() {
+      //-   $('.select2-search input').prop('focus', 0);
+      //- });
+
+      const initialStopId = getUrlParam('stop_id');
+      console.log('Initial stop ID from URL:', initialStopId);
+      if (initialStopId) {
+        console.log('Setting initial stop selection to:', initialStopId);
+        $('#stop-select-dropdown').val(initialStopId).trigger('change');
+        $("#favorite-stop-select-dropdown").select2("val", "");
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
+        //- $('#favorite-stop-select-dropdown').val(initialStopId);
+        fetchRealtimeDeparturesForStop(initialStopId);
+      } else {
+        //- $("#stop-select-dropdown").select2("val", "");
+        //- $("#favorite-stop-select-dropdown").select2("val", "");
+
+        //- $('#stop-select-dropdown').val('').trigger('change');
+        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
+      }
+    });

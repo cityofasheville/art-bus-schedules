@@ -1095,6 +1095,11 @@ fieldset:has(input:focus) {
   margin-bottom: 1.5rem;
 }
 
+.mx-6 {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -1123,6 +1128,10 @@ fieldset:has(input:focus) {
   margin-left: 0.25rem;
 }
 
+.ml-3 {
+  margin-left: 0.75rem;
+}
+
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -1143,8 +1152,8 @@ fieldset:has(input:focus) {
   margin-top: 1rem;
 }
 
-.ml-3 {
-  margin-left: 0.75rem;
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .block {
@@ -1868,6 +1877,10 @@ fieldset:has(input:focus) {
   text-decoration-line: underline;
 }
 
+.hover\:no-underline:hover {
+  text-decoration-line: none;
+}
+
 .focus\:not-sr-only:focus {
   position: static;
   width: auto;
@@ -2053,6 +2066,10 @@ fieldset:has(input:focus) {
 
   .lg\:justify-start {
     justify-content: flex-start;
+  }
+
+  .lg\:justify-center {
+    justify-content: center;
   }
 
   .lg\:rounded-b-sm {

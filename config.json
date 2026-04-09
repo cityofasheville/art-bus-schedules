@@ -21,6 +21,11 @@
       "title": "Real-time Departures, System Alerts, and More"
     },
     {
+      "template": "realtimedepartures_full.pug",
+      "output": "real-time-departures/index.html",
+      "title": "Real-time Departures"
+    },
+    {
       "template": "howtoride_full.pug",
       "output": "how-to-ride/index.html",
       "title": "How to Ride"
