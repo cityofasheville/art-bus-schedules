@@ -23,7 +23,7 @@ div(id=`timetable_nav_${formatHtmlId(timetable.timetable_id)}` class="mb-4")
       div(class="stop-info-content hidden")
 
 
-.table-container(id=`table-container-${formatHtmlId(timetable.timetable_id)}`)
+div(class="table-container max-h-[600px]" id=`table-container-${formatHtmlId(timetable.timetable_id)}`)
   table.table-vertical.relative(id=`timetable_main_${formatHtmlId(timetable.timetable_id)}` summary=`This table shows schedules for a selection of key stops on the route for ${timetable.timetable_label} ${timetable.dayList}.  Stops and their schedule times are listed in the columns.` data-orientation="vertical" data-stops="timepoints-only")
     caption.sr-only= `${timetable.timetable_label} | ${timetable.dayList}`
     colgroup
@@ -42,7 +42,7 @@ div(id=`timetable_nav_${formatHtmlId(timetable.timetable_id)}` class="mb-4")
             th.city-column= stop.stop_city
             - previousCity = stop.stop_city
 
-          th(class=`stop-header ${stop.is_timepoint? 'font-bold' : 'font-normal'}` scope="col" data-is-timepoint=`${stop.is_timepoint}` width=`${(100 / columnCount).toFixed(2)}%`)
+          th(class=`stop-header ${stop.is_timepoint? 'font-bold' : 'font-normal'} sticky top-0 bg-aux-gray z-10` scope="col" data-is-timepoint=`${stop.is_timepoint}` width=`${(100 / columnCount).toFixed(2)}%`)
             include timetable_stop_name.pug
             i(class="bi bi-clock-fill ml-1 text-gray-500" aria-hidden="true")
 

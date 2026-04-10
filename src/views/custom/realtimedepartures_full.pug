@@ -1,0 +1,13 @@
+extends layout
+block content
+  include realtimedepartures.pug
+
+block append extraHeader
+  script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
+  script(src="https://unpkg.com/lodash@4.17.21/lodash.min.js" crossorigin="anonymous")
+  script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" crossorigin="anonymous")
+  script(src=`/js/pbf.js`)
+  script(src=`/js/gtfs-realtime.browser.proto.js`)
+  script(src=`/js/custom-home.js`)
+  
+  link(rel="stylesheet" href=`https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css`)

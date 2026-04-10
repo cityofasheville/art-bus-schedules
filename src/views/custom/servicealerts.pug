@@ -1,0 +1,80 @@
+include formatting_functions.pug
+//- -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
+-
+-// Build a route/direction -> stops mapping using trips and stopTimes
+-var routeDirectionStops = {};
+-var tripLookup = {};
+-config.timetablePage.trips.forEach(function(trip) { tripLookup[trip.trip_id] = { route_id: trip.route_id, direction_id: trip.direction_id }; });
+-var stopLookup = {};
+-config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
+-config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
+
+//- .relative.w-full.h-full.flex.flex-col
+div(class="")
+  //- h1(class="sr-only")=pageTitleToUse
+  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+
+  div(class="w-full min-h-128 relative flex items-center justify-start")
+    img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+
+
+  div(class="w-full bg-aux-gray p-6 lg:p-12 border-t-[16px] border-b-[16px] border-aux-red")
+    div(class="w-full max-w-7xl mx-auto ")
+      div(class=" w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
+        //- div(class="w-full py-1 bg-art-green rounded-t-sm")
+        h2(class="py-4 text-black text-2xl m-0")
+          i(class="inline-block bi bi-bell-fill mr-2" aria-hidden="true")
+          span(class="inline-block")="Service Alerts"
+
+        //- div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
+        //-   i(class="bi bi-bell-fill" aria-hidden="true")
+        //-   span 
+        //-   span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
+              
+        div(class="timetable-alerts border-t border-slate-300")
+          div(id="alerts-container" class="timetable-alerts-list")
+            div(class="timetable-alert-empty")
+              | Checking for service alerts...
+
+
+
+
+script.
+    window.config = !{JSON.stringify(config)};
+    const routeDirectionStops = !{JSON.stringify(routeDirectionStops)};
+    const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
+    const directions = window.config.timetablePage.directions;
+    const routeIds = window.config.timetablePage.routes.map(route => route.route_id);
+    const routeData = window.config.timetablePage.routes.reduce((accumulator, route) => {
+      accumulator[route.route_id] = {
+        route_id: route.route_id,
+        route_short_name: route.route_short_name,
+        route_long_name: route.route_long_name,
+        route_desc: route.route_desc,
+        route_color: route.route_color,
+        route_text_color: route.route_text_color
+      };
+      return accumulator;
+    }, {});
+    const tripIds = window.config.timetablePage.trips.map(trip => trip.trip_id);
+    const tripData = window.config.timetablePage.trips.reduce((accumulator, trip) => {
+      accumulator[trip.trip_id] = {
+        trip_id: trip.trip_id,
+        route_id: trip.route_id,
+        trip_headsign: trip.trip_headsign,
+        direction_id: trip.direction_id
+      };
+      return accumulator;
+    }, {});
+    const stopIds = window.config.timetablePage.stops.map(stop => stop.stop_id);
+    const stopData = window.config.timetablePage.stops.reduce((accumulator, stop) => {
+      accumulator[stop.stop_id] = {
+        stop_id: stop.stop_id,
+        stop_code: stop.stop_code,
+        stop_name: stop.stop_name,
+        stop_lat: stop.stop_lat,
+        stop_lon: stop.stop_lon
+      };
+      return accumulator;
+    }, {});
+    const timetableData = window.config.timetablePage.consolidatedTimetables;
