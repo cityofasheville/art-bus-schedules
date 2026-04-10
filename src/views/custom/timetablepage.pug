@@ -19,13 +19,13 @@ include formatting_functions.pug
       .effective-date= `Effective ${config.effectiveDate}`
 
   if config.hasGtfsRealtimeAlerts
-    details(class="bg-aux-gray border border-slate-300 rounded mb-6")
+    details(class="border my-6 rounded" role="region" aria-labelledby="service_alerts_heading")
       summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
-        div(class="flex items-center text-art-blue gap-2 text-lg font-semibold")
+        div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
           i(class="bi bi-bell-fill" aria-hidden="true")
-          span Service Alerts
-          span(id="timetable_alert_count" class="rounded-full border-spacing-1 border-2 px-2")
-        div(class="flex items-center")
+          h2#service_alerts_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
+          span(id="timetable_alert_count" class="rounded-full border-2 px-2")
+        div(class="flex items-center gap-4")
           span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
             
       div(class="timetable-alerts border-t border-slate-300")
@@ -51,12 +51,13 @@ include formatting_functions.pug
   div(class="relative")
     a(href="#coa_timetable_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
 
-  include timetable_menu.pug
 
   each timetable in timetablePage.consolidatedTimetables
     if config.showMap
       .coa-timetable-map-container.relative(id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}`)
         include timetable_map.pug
+
+  include timetable_menu.pug
 
   div#coa_timetable_container
     //- include timetable_menu.pug

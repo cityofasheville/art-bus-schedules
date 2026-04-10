@@ -22,12 +22,17 @@ async function fetchGtfsRealtime(url, headers) {
   return obj.entity;
 }
 
-function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable) {
+function formatAlertAsHtml(
+  alert,
+  affectedRouteIdsInTimetable,
+  affectedStopsIdsInTimetable,
+  isCurrentlyActive,
+) {
   console.log('Formatting alert:', alert);
 
-  const $alert = jQuery('<div>').addClass('timetable-alert');
+  const $alert = jQuery('<article>').addClass('timetable-alert').attr('role', 'alert');
 
-  const $routeList = jQuery('<div>').addClass('route-list');
+  const $routeList = jQuery('<ul>').addClass('route-list flex gap-1 list-none p-0 m-0');
 
   for (const routeId of affectedRouteIdsInTimetable) {
     const route = routeData[routeId];
@@ -36,44 +41,112 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
       continue;
     }
 
-    jQuery('<div>')
-      .addClass('route-color-swatch')
+    jQuery('<li>')
+      .addClass('route-color-swatch-large')
       .css('background-color', route.route_color || '#000000')
       .css('color', route.route_text_color || '#FFFFFF')
+      .attr('title', route.route_long_name || `Route ${route.route_short_name}`)
       .text(route.route_short_name)
       .appendTo($routeList);
   }
 
-  const $alertHeader = jQuery('<div>')
-    .addClass('alert-header')
+  // Status badge for active vs upcoming
+  const $statusBadge = isCurrentlyActive
+    ? jQuery('<span>')
+        .addClass(
+          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800',
+        )
+        .attr('aria-label', 'Currently active')
+        .text('Active')
+    : jQuery('<span>')
+        .addClass(
+          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800',
+        )
+        .attr('aria-label', 'Upcoming alert')
+        .text('Upcoming');
+
+  const $alertTitle = jQuery('<h3>')
+    .addClass('alert-title text-lg font-semibold m-0')
+    .text(alert.alert.header_text.translation[0].text);
+
+  // Build timespan text from active_period
+  const timespans = alert.alert.active_period || [];
+  const timespanText =
+    timespans.length > 0
+      ? timespans
+          .map((timespan) => {
+            const startDate = timespan.start
+              ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'N/A';
+            const endDate = timespan.end
+              ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'Ongoing';
+            return `${startDate} - ${endDate}`;
+          })
+          .join(', ')
+      : 'Ongoing';
+
+  // Build datetime attribute for <time> element
+  const firstTimespan = timespans[0];
+  const datetimeAttr = firstTimespan?.start
+    ? new Date(firstTimespan.start * 1000).toISOString()
+    : '';
+
+  const $timeElement = jQuery('<time>')
+    .addClass('text-sm text-gray-600')
+    .attr('datetime', datetimeAttr)
+    .text(timespanText);
+
+  // Row 1: Route swatch + title
+  const $alertRow1 = jQuery('<div>')
+    .addClass('flex items-center gap-3')
     .append($routeList)
-    .append(
-      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text)
-    );
+    .append($alertTitle);
+
+  // Row 2: Status badge + timespan
+  const $alertRow2 = jQuery('<div>')
+    .addClass('flex items-center gap-2 mt-1')
+    .append($timeElement)
+    .append($statusBadge);
+
+  const $alertHeader = jQuery('<header>')
+    .addClass('flex flex-col gap-2 border-b border-gray-300 pb-2')
+    .append($alertRow1)
+    .append($alertRow2);
 
   // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
-  const $alertBody = jQuery('<div>')
-    .addClass('alert-body')
-    .append(
-      anchorme(
-        jQuery('<div>')
-          .addClass('alert-body')
-          .text(`${alert.alert.description_text.translation[0].text} `)
-          .html()
-      )
-    );
+  const descriptionHtml = anchorme(
+    jQuery('<span>').text(`${alert.alert.description_text.translation[0].text} `).html(),
+  );
+
+  const $alertBody = jQuery('<div>').addClass('alert-body');
+
+  const $description = jQuery('<p>').addClass('my-2').html(descriptionHtml);
+
+  $description.appendTo($alertBody);
 
   if (alert.alert.url?.translation?.[0].text) {
     jQuery('<a>')
       .attr('href', alert.alert.url.translation[0].text)
-      // .addClass('btn-blue btn-sm alert-more-info')
       .addClass('alert-more-info text-link')
       .text('More Info')
       .appendTo($alertBody);
   }
 
   if (affectedStopsIdsInTimetable.length > 0) {
-    const $stopList = jQuery('<ul>').addClass('list-disc pl-4 mt-2');
+    const $stopsSection = jQuery('<aside>').addClass('mt-4 pt-2 border-t border-gray-300');
+
+    jQuery('<h4>').addClass('font-semibold mb-2').text('Stops Affected:').appendTo($stopsSection);
+
+    const $stopList = jQuery('<ul>').addClass('list-disc pl-4');
 
     for (const stopId of affectedStopsIdsInTimetable) {
       const stop = stopData[stopId];
@@ -82,19 +155,11 @@ function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsI
         continue;
       }
 
-      jQuery('<li>')
-        .addClass('my-2')
-        .append(jQuery('<div>').addClass('stop-name').text(stop.stop_name))
-        .appendTo($stopList);
+      jQuery('<li>').addClass('my-1').text(stop.stop_name).appendTo($stopList);
     }
 
-    jQuery('<div>')
-      .addClass('mt-4 border-b border-gray-300 font-semibold pb-2')
-      .text('Stops Affected:')
-      .append($stopList)
-      .appendTo($alertBody);
-
-    $stopList.appendTo($alertBody);
+    $stopList.appendTo($stopsSection);
+    $stopsSection.appendTo($alertBody);
   }
 
   $alertHeader.appendTo($alert);
@@ -108,10 +173,14 @@ async function updateAlerts() {
     return;
   }
 
+  const now = new Date();
+  const current_timestamp = Math.floor(now.getTime() / 1000);
+  const two_weeks_from_now = current_timestamp + 14 * 24 * 60 * 60;
+
   try {
     const alerts = await fetchGtfsRealtime(
       gtfsRealtimeUrls.realtimeAlerts.url,
-      gtfsRealtimeUrls.realtimeAlerts.headers
+      gtfsRealtimeUrls.realtimeAlerts.headers,
     );
 
     if (!alerts) {
@@ -119,9 +188,30 @@ async function updateAlerts() {
       return;
     }
 
+    // Filter to alerts that are active now or starting within the next 2 weeks
+    const active_alerts = alerts.filter((alert) => {
+      if (!alert.alert || alert.alert.is_deleted) {
+        return false;
+      }
+      const timespans = alert.alert.active_period;
+      if (!timespans || timespans.length === 0) {
+        // No timespan means always active
+        return true;
+      }
+      for (const timespan of timespans) {
+        if (
+          (!timespan.start || timespan.start <= two_weeks_from_now) &&
+          (!timespan.end || timespan.end >= current_timestamp)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+
     const formattedAlerts = [];
 
-    for (const alert of alerts) {
+    for (const alert of active_alerts) {
       const affectedRouteIds = [
         ...new Set([
           ...alert.alert.informed_entity
@@ -131,7 +221,7 @@ async function updateAlerts() {
       ];
 
       const affectedRouteIdsInTimetable = routeIds.filter((routeId) =>
-        affectedRouteIds.includes(routeId)
+        affectedRouteIds.includes(routeId),
       );
 
       const affectedStopIds = [
@@ -143,18 +233,45 @@ async function updateAlerts() {
       ];
 
       const affectedStopsIdsInTimetable = stopIds.filter((stopId) =>
-        affectedStopIds.includes(stopId)
+        affectedStopIds.includes(stopId),
       );
 
-      // Hide alerts that don't affect any stops or routes in this timetable
-      if (affectedStopsIdsInTimetable.length === 0 && affectedRouteIdsInTimetable.length === 0) {
-        continue;
+      // Determine if this alert should show on this route page:
+      // - If alert specifies route_ids, only show if this route is in the list
+      // - If alert has no route_ids (system-wide/stop-only), show if it affects stops on this route
+      const alertHasRouteIds = affectedRouteIds.length > 0;
+
+      if (alertHasRouteIds) {
+        // Alert is route-specific - only show if this route is affected
+        if (affectedRouteIdsInTimetable.length === 0) {
+          continue;
+        }
+      } else {
+        // Alert is system-wide or stop-only - show if it affects stops on this route
+        if (affectedStopsIdsInTimetable.length === 0) {
+          continue;
+        }
       }
 
+      // Determine if alert is currently active vs upcoming
+      const timespans = alert.alert.active_period || [];
+      const isCurrentlyActive =
+        timespans.length === 0 ||
+        timespans.some((timespan) => {
+          // Alert is active if it has no start time OR start time is in the past/present
+          return !timespan.start || timespan.start <= current_timestamp;
+        });
+
       try {
-        formattedAlerts.push(
-          formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable)
-        );
+        formattedAlerts.push({
+          element: formatAlertAsHtml(
+            alert,
+            affectedRouteIdsInTimetable,
+            affectedStopsIdsInTimetable,
+            isCurrentlyActive,
+          ),
+          isCurrentlyActive,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -166,15 +283,30 @@ async function updateAlerts() {
     $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
 
     if (formattedAlerts.length > 0) {
-      $('#timetable_alert_count').addClass('border-red-600').text(formattedAlerts.length).show();
+      // Count active vs upcoming
+      const activeCount = formattedAlerts.filter((a) => a.isCurrentlyActive).length;
+      const upcomingCount = formattedAlerts.filter((a) => !a.isCurrentlyActive).length;
+
+      // Build status text
+      const statusParts = [];
+      if (activeCount > 0) {
+        statusParts.push(`${activeCount} active`);
+      }
+      if (upcomingCount > 0) {
+        statusParts.push(`${upcomingCount} upcoming`);
+      }
+      const statusText = statusParts.join(', ');
+
+      $('#timetable_alert_count').addClass('border-red-600').text(statusText).show();
       // Remove the empty message if present
       jQuery('.timetable-alert-empty').hide();
 
       for (const alert of formattedAlerts) {
-        jQuery('.timetable-alerts-list').append(alert);
+        jQuery('.timetable-alerts-list').append(alert.element);
       }
     } else {
-      // Replace the empty message if present
+      // Show "No alerts" status and empty message
+      $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
       jQuery('.timetable-alert-empty').show();
     }
   } catch (error) {
@@ -184,7 +316,7 @@ async function updateAlerts() {
 
 jQuery(() => {
   console.log('Timetable Alerts JS loaded', gtfsRealtimeUrls);
-  $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+  // $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
     const alertUpdateInterval = 60 * 1000; // Every Minute
     updateAlerts();

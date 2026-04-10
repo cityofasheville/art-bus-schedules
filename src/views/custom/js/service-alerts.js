@@ -1,0 +1,458 @@
+/* global jQuery, anchorme, Pbf, stopData, routeData, routeIds, tripIds, stopIds, gtfsRealtimeUrls */
+/* eslint no-var: "off", prefer-arrow-callback: "off", no-unused-vars: "off" */
+
+let gtfsRealtimeAlertsInterval;
+// const all_routes = window.config.timetablePage.routes;
+// const all_route_ids = window.config.timetablePage.routes.map((route) => route.route_id);
+// const all_stops = window.config.timetablePage.stops;
+// const all_stop_ids = window.config.timetablePage.stops.map((stop) => stop.stop_id);
+
+async function fetchGtfsRealtime(url, headers) {
+  if (!url) {
+    return null;
+  }
+
+  const response = await fetch(url, {
+    headers: { ...(headers ?? {}) },
+  });
+
+  if (!response.ok) {
+    throw new Error(response.status);
+  }
+
+  const bufferRes = await response.arrayBuffer();
+  const pdf = new Pbf(new Uint8Array(bufferRes));
+  const obj = FeedMessage.read(pdf);
+  return obj.entity;
+}
+
+function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable) {
+  console.log('Formatting alert:', alert);
+
+  const $alert = jQuery('<div>').addClass('timetable-alert');
+
+  const $routeList = jQuery('<div>').addClass('route-list');
+
+  for (const routeId of affectedRouteIdsInTimetable) {
+    const route = routeData[routeId];
+
+    if (!route) {
+      continue;
+    }
+
+    jQuery('<div>')
+      .addClass('route-color-swatch')
+      .css('background-color', route.route_color || '#000000')
+      .css('color', route.route_text_color || '#FFFFFF')
+      .text(route.route_short_name)
+      .appendTo($routeList);
+  }
+
+  const $alertHeader = jQuery('<div>')
+    .addClass('alert-header')
+    .append($routeList)
+    .append(
+      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text),
+    );
+
+  // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
+  const $alertBody = jQuery('<div>')
+    .addClass('alert-body')
+    .append(
+      anchorme(
+        jQuery('<div>')
+          .addClass('alert-body')
+          .text(`${alert.alert.description_text.translation[0].text} `)
+          .html(),
+      ),
+    );
+
+  if (alert.alert.url?.translation?.[0].text) {
+    jQuery('<a>')
+      .attr('href', alert.alert.url.translation[0].text)
+      // .addClass('btn-blue btn-sm alert-more-info')
+      .addClass('alert-more-info text-link')
+      .text('More Info')
+      .appendTo($alertBody);
+  }
+
+  if (affectedStopsIdsInTimetable.length > 0) {
+    const $stopList = jQuery('<ul>').addClass('list-disc pl-4 mt-2');
+
+    for (const stopId of affectedStopsIdsInTimetable) {
+      const stop = stopData[stopId];
+
+      if (!stop) {
+        continue;
+      }
+
+      jQuery('<li>')
+        .addClass('my-2')
+        .append(jQuery('<div>').addClass('stop-name').text(stop.stop_name))
+        .appendTo($stopList);
+    }
+
+    jQuery('<div>')
+      .addClass('mt-4 border-b border-gray-300 font-semibold pb-2')
+      .text('Stops Affected:')
+      .append($stopList)
+      .appendTo($alertBody);
+
+    $stopList.appendTo($alertBody);
+  }
+
+  $alertHeader.appendTo($alert);
+  $alertBody.appendTo($alert);
+
+  return $alert;
+}
+
+async function updateAlerts() {
+  console.log('Updating GTFS-Realtime alerts', gtfsRealtimeUrls);
+  if (!gtfsRealtimeUrls?.realtimeAlerts) {
+    return;
+  }
+
+  const now = new Date();
+  const current_timestamp = Math.floor(now.getTime() / 1000);
+  const two_weeks_from_now = current_timestamp + 14 * 24 * 60 * 60;
+
+  try {
+    const alerts = await fetchGtfsRealtime(
+      gtfsRealtimeUrls.realtimeAlerts.url,
+      gtfsRealtimeUrls.realtimeAlerts.headers,
+    );
+
+    if (!alerts) {
+      $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+      return;
+    }
+
+    let relevant_alert_data = [];
+    const formattedAlerts = [];
+
+    const active_alerts = alerts.filter((alert) => {
+      if (!alert.alert || alert.alert.is_deleted) {
+        return false;
+      }
+      let isActive = false;
+      let this_timespan = alert.alert.active_period;
+
+      if (this_timespan) {
+        for (const timespan of this_timespan) {
+          // console.log(
+          //   'Checking alert:',
+          //   alert.alert.header_text.translation[0].text,
+          //   'with timespans start:',
+          //   timespan.start,
+          //   'end:',
+          //   timespan.end,
+          //   'current timestamp:',
+          //   current_timestamp,
+          //   'two weeks from now:',
+          //   two_weeks_from_now,
+          // );
+
+          if (
+            (!timespan.start || timespan.start <= two_weeks_from_now) &&
+            (!timespan.end || timespan.end >= current_timestamp)
+          ) {
+            isActive = true;
+            console.log(
+              'Alert ACTIVE:',
+              alert.alert.header_text.translation[0].text,
+              'timespan start:',
+              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
+              'timespan end:',
+              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
+            );
+            break;
+          } else {
+            console.log(
+              'Alert INACTIVE:',
+              alert.alert.header_text.translation[0].text,
+              'timespan start:',
+              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
+              'timespan end:',
+              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
+            );
+          }
+        }
+      }
+      return isActive;
+    });
+
+    console.log('Active alerts:', active_alerts);
+
+    for (const alert of active_alerts) {
+      if (!alert.alert || alert.alert.is_deleted) {
+        continue;
+      }
+
+      // Determine if alert is currently active (has started) vs future (not yet started)
+      const timespans = alert.alert.active_period || [];
+      const isCurrentlyActive = timespans.some((timespan) => {
+        // Alert is active if it has no start time OR start time is in the past/present
+        return !timespan.start || timespan.start <= current_timestamp;
+      });
+
+      relevant_alert_data.push({
+        id: alert.id,
+        title: alert.alert.header_text.translation[0].text,
+        description: alert.alert.description_text.translation[0].text,
+        routes_affected: [
+          ...alert.alert.informed_entity
+            .filter((entity) => entity.route_id !== undefined && entity.route_id !== '')
+            .map((entity) => routeData[entity.route_id]),
+        ],
+        stops_affected: [
+          ...alert.alert.informed_entity
+            .filter((entity) => entity.stop_id !== undefined && entity.stop_id !== '')
+            .map((entity) => stopData[entity.stop_id]),
+        ],
+        valid_timespans: timespans,
+        isCurrentlyActive: isCurrentlyActive,
+      });
+
+      const affectedRouteIds = [
+        ...new Set([
+          ...alert.alert.informed_entity
+            .filter((entity) => entity.route_id !== undefined && entity.route_id !== '')
+            .map((entity) => entity.route_id),
+        ]),
+      ];
+
+      const affectedRouteIdsInTimetable = routeIds.filter((routeId) =>
+        affectedRouteIds.includes(routeId),
+      );
+
+      const affectedStopIds = [
+        ...new Set([
+          ...alert.alert.informed_entity
+            .filter((entity) => entity.stop_id !== undefined && entity.stop_id !== '')
+            .map((entity) => entity.stop_id),
+        ]),
+      ];
+
+      const affectedStopsIdsInTimetable = stopIds.filter((stopId) =>
+        affectedStopIds.includes(stopId),
+      );
+
+      // Hide alerts that don't affect any stops or routes in this timetable
+      if (affectedStopsIdsInTimetable.length === 0 && affectedRouteIdsInTimetable.length === 0) {
+        continue;
+      }
+
+      try {
+        // formattedAlerts.push(
+        //   formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable)
+        // );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    console.log('Processed alerts:', relevant_alert_data);
+
+    const routeGroups = {};
+    const systemWide = [];
+
+    // relevant_alert_data.forEach((alert) => {
+    //   if (alert.routes_affected && alert.routes_affected.length > 0) {
+    //     alert.routes_affected.forEach((route) => {
+    //       if (!routeGroups[route.route_id]) {
+    //         routeGroups[route.route_id] = [];
+    //       }
+    //       if (!routeGroups[route.route_id].some((a) => a.id === alert.id)) {
+    //         routeGroups[route.route_id].push(alert);
+    //       }
+    //     });
+    //   } else {
+    //     systemWide.push(alert);
+    //   }
+    // });
+
+    relevant_alert_data.forEach((alert) => {
+      if (alert.routes_affected && alert.routes_affected.length > 0) {
+        // alert.routes_affected.forEach((route) => {
+        if (!routeGroups[alert.title]) {
+          routeGroups[alert.title] = [];
+        }
+        if (!routeGroups[alert.title].some((a) => a.id === alert.id)) {
+          routeGroups[alert.title].push(alert);
+        }
+        // });
+      } else {
+        systemWide.push(alert);
+      }
+    });
+
+    console.log('Route Groups:', routeGroups);
+    console.log('System-wide alerts:', systemWide);
+
+    $('#alerts-container').empty();
+
+    if (systemWide.length > 0) {
+      $('#alerts-container').append('<h3 class="text-black text-xl mb-4">System-wide Alerts</h3>');
+      systemWide.forEach((alert) => {
+        const statusBadge = alert.isCurrentlyActive
+          ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" aria-label="Currently active">Active</span>'
+          : '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800" aria-label="Upcoming alert">Upcoming</span>';
+        $('#alerts-container').append(
+          `<details class="bg-white border border-slate-300 rounded mb-6">
+          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
+          <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
+          <span class="route-color-swatch bg-art-blue text-white">ART</span>
+          <span>${alert.title}</span>
+          ${statusBadge}
+          </div>
+          <div class="flex items-center">
+          <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
+          </div>
+          </summary>
+          <div class="p-4 border-t border-slate-300">
+          <p>${alert.description}</p>
+          </div>
+         </details>`,
+        );
+      });
+    }
+
+    // $('#alerts-container').append('<hr />');
+    $('#alerts-container').append('<h3 class="text-black text-xl my-4">Route-specific Alerts</h3>');
+
+    Object.keys(routeGroups).forEach((alertTitle) => {
+      const alertsForTitle = routeGroups[alertTitle];
+      const representativeAlert = alertsForTitle[0];
+
+      // Collect all unique routes affected
+      const allRoutesAffected = [];
+      const seenRouteIds = new Set();
+      alertsForTitle.forEach((alert) => {
+        if (alert.routes_affected) {
+          alert.routes_affected.forEach((route) => {
+            if (route && !seenRouteIds.has(route.route_id)) {
+              seenRouteIds.add(route.route_id);
+              allRoutesAffected.push(route);
+            }
+          });
+        }
+      });
+
+      // Collect all unique stops affected
+      const allStopsAffected = [];
+      const seenStopIds = new Set();
+      alertsForTitle.forEach((alert) => {
+        if (alert.stops_affected) {
+          alert.stops_affected.forEach((stop) => {
+            if (stop && !seenStopIds.has(stop.stop_id)) {
+              seenStopIds.add(stop.stop_id);
+              allStopsAffected.push(stop);
+            }
+          });
+        }
+      });
+
+      // Build route swatches HTML
+      let routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0">';
+      allRoutesAffected.forEach((route) => {
+        routeSwatchesHtml += `<li class="route-color-swatch" style="background-color: #${route.route_color};color: #${route.route_text_color};" title="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}" aria-label="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}">${route.route_short_name}</li>`;
+      });
+      routeSwatchesHtml += '</ul>';
+
+      // Build affected stops HTML
+      let affected_stops_html = '';
+      if (allStopsAffected.length > 0) {
+        affected_stops_html =
+          '<div class="mt-4 border-b border-gray-300 font-semibold pb-2">Stops Affected</div><ul class="list-disc pl-4 mt-2">';
+        allStopsAffected.forEach((stop) => {
+          affected_stops_html += `<li class="my-2"><div class="stop-name">${stop.stop_name}</div></li>`;
+        });
+        affected_stops_html += '</ul>';
+      }
+
+      // Build timespan text
+      const timespanText = representativeAlert.valid_timespans
+        .map((timespan) => {
+          const startDate = timespan.start
+            ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : 'N/A';
+          const endDate = timespan.end
+            ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : 'Ongoing';
+          return `${startDate} - ${endDate}`;
+        })
+        .join(', ');
+
+      const routeStatusBadge = representativeAlert.isCurrentlyActive
+        ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" aria-label="Currently active">Active</span>'
+        : '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800" aria-label="Upcoming alert">Upcoming</span>';
+
+      $('#alerts-container').append(
+        `<details class="bg-white border border-slate-300 rounded mb-6">
+          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
+          <div class="flex flex-col text-art-blue gap-2 text-lg font-medium">
+          ${routeSwatchesHtml}
+          <div>
+          <div class="flex items-center gap-2">
+            <span>${representativeAlert.title}</span>
+            ${routeStatusBadge}
+          </div>
+          <div class="text-sm text-gray-600">${timespanText}</div>
+          </div>
+          </div>
+          <div class="flex items-center">
+          <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
+          </div>
+          </summary>
+          <div class="p-4 border-t border-slate-300">
+          <p>${representativeAlert.description}</p>
+          ${affected_stops_html}
+          </div>
+         </details>`,
+      );
+    });
+
+    // Remove previously posted GTFS-RT alerts
+    jQuery('.timetable-alerts-list .timetable-alert').remove();
+
+    $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+
+    if (formattedAlerts.length > 0) {
+      $('#timetable_alert_count').addClass('border-red-600').text(formattedAlerts.length).show();
+      // Remove the empty message if present
+      jQuery('.timetable-alert-empty').hide();
+
+      for (const alert of formattedAlerts) {
+        jQuery('.timetable-alerts-list').append(alert);
+      }
+    } else {
+      // Replace the empty message if present
+      jQuery('.timetable-alert-empty').show();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+jQuery(() => {
+  console.log('Home Alerts JS loaded', gtfsRealtimeUrls);
+
+  $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+  if (gtfsRealtimeUrls?.realtimeAlerts?.url) {
+    // console.log('Starting GTFS-Realtime alerts update interval');
+    // const alertUpdateInterval = 60 * 1000; // Every Minute
+    updateAlerts();
+    // gtfsRealtimeAlertsInterval = setInterval(() => {
+    //   updateAlerts();
+    // }, alertUpdateInterval);
+  }
+});

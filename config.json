@@ -26,6 +26,11 @@
       "title": "Real-time Departures"
     },
     {
+      "template": "servicealerts_full.pug",
+      "output": "service-alerts/index.html",
+      "title": "Service Alerts"
+    },
+    {
       "template": "howtoride_full.pug",
       "output": "how-to-ride/index.html",
       "title": "How to Ride"

@@ -7,6 +7,7 @@ const vehicleMarkersEventListeners = {};
 let vehiclePositions;
 let tripUpdates;
 let vehiclePopup;
+let stopPopup; // Popup for stop info
 let gtfsRealtimeInterval;
 let rtPositionsPaused = false;
 let previousVehicleCount = null;
@@ -1114,7 +1115,7 @@ function handleClick(event, map, id) {
     if (typeof selectStop === 'function') {
       selectStop(stopId, id, { fromMap: true });
     }
-    // showStopPopup(map, feature);
+    showStopPopup(map, feature);
   }
 }
 
@@ -1122,12 +1123,70 @@ function showStopPopup(map, feature) {
   console.log('popup feature', feature);
   console.log('popup map', map._container.id.split('_id_').pop());
   console.log('feature stop data', stopData[feature.properties.stop_id]);
-  // highlightStop(map, id, [feature.properties.stop_id.toString()]);
 
-  new maplibregl.Popup()
+  // Close any existing stop popup first
+  closeStopPopup();
+
+  stopPopup = new maplibregl.Popup()
     .setLngLat(feature.geometry.coordinates)
     .setHTML(getStopPopupHtml(feature, stopData[feature.properties.stop_id]))
     .addTo(map);
+}
+
+function closeStopPopup() {
+  console.log('closing stop popup', stopPopup);
+  if (stopPopup) {
+    stopPopup.remove();
+    stopPopup = null;
+  }
+}
+
+/**
+ * Shows a stop popup by stop ID (for use from timetable-menu.js)
+ * @param {string} stopId - The stop_id to show popup for
+ * @param {string} timetableId - The timetable ID to get geojson data from
+ */
+function showStopPopupById(stopId, timetableId) {
+  if (typeof maps === 'undefined' || !maps[timetableId]) {
+    console.warn('Map not available for timetable:', timetableId);
+    return;
+  }
+
+  if (typeof stopData === 'undefined' || !stopData[stopId]) {
+    console.warn('Stop data not found for stop:', stopId);
+    return;
+  }
+
+  const map = maps[timetableId];
+  const stop = stopData[stopId];
+
+  // Get route_ids from geojson if available
+  let routeIds = [];
+  if (typeof geojsons !== 'undefined' && geojsons[timetableId]) {
+    const geojson = geojsons[timetableId];
+    for (const feature of geojson.features) {
+      if (
+        feature.geometry.type.toLowerCase() === 'point' &&
+        feature.properties.stop_id === stopId
+      ) {
+        routeIds = feature.properties.route_ids || '[]';
+        break;
+      }
+    }
+  }
+
+  // Construct a feature-like object for showStopPopup
+  const feature = {
+    geometry: {
+      coordinates: [stop.stop_lon, stop.stop_lat],
+    },
+    properties: {
+      stop_id: stopId,
+      route_ids: typeof routeIds === 'string' ? routeIds : JSON.stringify(routeIds),
+    },
+  };
+
+  showStopPopup(map, feature);
 }
 
 function highlightStop(map, id, stopIds) {
@@ -1143,6 +1202,8 @@ function highlightStop(map, id, stopIds) {
 function unHighlightStop(map, id) {
   map.setFilter('stops-highlighted', ['==', 'stop_id', '']);
   unHighlightTimetableStops(id);
+  console.log('unhighlighting stop on map and timetable for id', id);
+  closeStopPopup();
 }
 
 function highlightTimetableStops(id, stopIds) {
@@ -1228,7 +1289,7 @@ function setupTableHoverListeners(id, map) {
         } else {
           // Use unified selectStop function to highlight everything
           if (typeof selectStop === 'function') {
-            selectStop(stopId.toString(), id, { fromTable: true });
+            selectStop(stopId.toString(), id, { fromTable: true, showPopup: false });
           } else {
             highlightStop(map, id, [stopId.toString()]);
             highlightTimetableStops(id, [stopId.toString()]);

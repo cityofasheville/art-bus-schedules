@@ -242,7 +242,7 @@ jQuery(() => {
       return;
     }
 
-    selectStop(stopId, timetableId, { fromDropdown: true });
+    selectStop(stopId, timetableId, { fromDropdown: true, showPopup: false });
   });
 });
 
@@ -261,6 +261,11 @@ function clearStopSelection(timetableId) {
   // Clear map highlight if available
   if (typeof maps !== 'undefined' && maps[timetableId]) {
     maps[timetableId].setFilter('stops-highlighted', ['==', 'stop_id', '']);
+  }
+
+  // Close any map popup
+  if (typeof closeStopPopup === 'function') {
+    closeStopPopup();
   }
 
   // Reset dropdown
@@ -457,6 +462,7 @@ function updateStopInfoContainer(stopId, timetableId) {
  * @param {boolean} options.fromDropdown - If true, don't update the dropdown (avoid loops)
  * @param {boolean} options.fromMap - If true, called from map click
  * @param {boolean} options.fromTable - If true, called from table click
+ * @param {boolean} options.showPopup - If true, show the stop popup on the map
  */
 function selectStop(stopId, timetableId, options = {}) {
   const tableContainer = document.getElementById(`table-container-${timetableId}`);
@@ -465,6 +471,15 @@ function selectStop(stopId, timetableId, options = {}) {
   if (!tableContainer || !table) {
     console.warn(`Could not find table container or table for timetable: ${timetableId}`);
     return;
+  }
+
+  // Close any existing map popup, then optionally show new one
+  if (typeof closeStopPopup === 'function') {
+    closeStopPopup();
+  }
+
+  if (options.showPopup && typeof showStopPopupById === 'function') {
+    showStopPopupById(stopId, timetableId);
   }
 
   // Find the column for this stop using the colgroup

@@ -2,10 +2,15 @@
 /* eslint no-var: "off", prefer-arrow-callback: "off", no-unused-vars: "off" */
 
 let gtfsRealtimeAlertsInterval;
-// const all_routes = window.config.timetablePage.routes;
-// const all_route_ids = window.config.timetablePage.routes.map((route) => route.route_id);
-// const all_stops = window.config.timetablePage.stops;
-// const all_stop_ids = window.config.timetablePage.stops.map((stop) => stop.stop_id);
+
+// Store processed alerts globally for filtering
+let processedAlerts = {
+  systemWide: [],
+  byRoute: {},
+};
+
+// Currently selected route for filtering alerts (null = system-wide "ART")
+let selectedRouteId = null;
 
 async function fetchGtfsRealtime(url, headers) {
   if (!url) {
@@ -26,90 +31,286 @@ async function fetchGtfsRealtime(url, headers) {
   return obj.entity;
 }
 
-function formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable) {
-  console.log('Formatting alert:', alert);
+function formatAlertAsHtml(alert) {
+  const $alert = jQuery('<details>').addClass('bg-white border border-slate-300 rounded mb-4');
 
-  const $alert = jQuery('<div>').addClass('timetable-alert');
-
-  const $routeList = jQuery('<div>').addClass('route-list');
-
-  for (const routeId of affectedRouteIdsInTimetable) {
-    const route = routeData[routeId];
-
-    if (!route) {
-      continue;
-    }
-
-    jQuery('<div>')
-      .addClass('route-color-swatch')
-      .css('background-color', route.route_color || '#000000')
-      .css('color', route.route_text_color || '#FFFFFF')
-      .text(route.route_short_name)
-      .appendTo($routeList);
-  }
-
-  const $alertHeader = jQuery('<div>')
-    .addClass('alert-header')
-    .append($routeList)
-    .append(
-      jQuery('<div>').addClass('alert-title').text(alert.alert.header_text.translation[0].text),
-    );
-
-  // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
-  const $alertBody = jQuery('<div>')
-    .addClass('alert-body')
-    .append(
-      anchorme(
-        jQuery('<div>')
-          .addClass('alert-body')
-          .text(`${alert.alert.description_text.translation[0].text} `)
-          .html(),
-      ),
-    );
-
-  if (alert.alert.url?.translation?.[0].text) {
-    jQuery('<a>')
-      .attr('href', alert.alert.url.translation[0].text)
-      // .addClass('btn-blue btn-sm alert-more-info')
-      .addClass('alert-more-info text-link')
-      .text('More Info')
-      .appendTo($alertBody);
-  }
-
-  if (affectedStopsIdsInTimetable.length > 0) {
-    const $stopList = jQuery('<ul>').addClass('list-disc pl-4 mt-2');
-
-    for (const stopId of affectedStopsIdsInTimetable) {
-      const stop = stopData[stopId];
-
-      if (!stop) {
-        continue;
+  // Build route swatches for this specific alert
+  let routeSwatchesHtml = '';
+  if (alert.routes_affected && alert.routes_affected.length > 0) {
+    routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0 mb-2">';
+    alert.routes_affected.forEach((route) => {
+      if (route) {
+        routeSwatchesHtml += `<li class="route-color-swatch" style="background-color: #${route.route_color || '000000'};color: #${route.route_text_color || 'FFFFFF'};" title="${route.route_long_name || 'Route ' + route.route_short_name}" aria-label="${route.route_long_name || 'Route ' + route.route_short_name}">${route.route_short_name}</li>`;
       }
-
-      jQuery('<li>')
-        .addClass('my-2')
-        .append(jQuery('<div>').addClass('stop-name').text(stop.stop_name))
-        .appendTo($stopList);
-    }
-
-    jQuery('<div>')
-      .addClass('mt-4 border-b border-gray-300 font-semibold pb-2')
-      .text('Stops Affected:')
-      .append($stopList)
-      .appendTo($alertBody);
-
-    $stopList.appendTo($alertBody);
+    });
+    routeSwatchesHtml += '</ul>';
+  } else {
+    // System-wide alert
+    routeSwatchesHtml =
+      '<ul class="flex flex-wrap gap-1 list-none p-0 m-0 mb-2"><li class="route-color-swatch" style="background-color: #1e3a5f; color: #FFFFFF;" title="System wide" aria-label="System wide">ART</li></ul>';
   }
 
-  $alertHeader.appendTo($alert);
-  $alertBody.appendTo($alert);
+  // Build affected stops HTML
+  let affectedStopsHtml = '';
+  if (alert.stops_affected && alert.stops_affected.length > 0) {
+    affectedStopsHtml =
+      '<div class="mt-4 border-t border-gray-300 pt-2"><span class="font-semibold">Stops Affected:</span><ul class="list-disc pl-4 mt-2">';
+    alert.stops_affected.forEach((stop) => {
+      if (stop) {
+        affectedStopsHtml += `<li class="my-1">${stop.stop_name}</li>`;
+      }
+    });
+    affectedStopsHtml += '</ul></div>';
+  }
+
+  // Build timespan text
+  const timespanText = alert.valid_timespans
+    .map((timespan) => {
+      const startDate = timespan.start
+        ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'N/A';
+      const endDate = timespan.end
+        ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'Ongoing';
+      return `${startDate} - ${endDate}`;
+    })
+    .join(', ');
+
+  // Determine active vs future status badge
+  const statusBadge = alert.isCurrentlyActive
+    ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" aria-label="Currently active">Active</span>'
+    : '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800" aria-label="Upcoming alert">Upcoming</span>';
+
+  $alert.html(`
+    <summary class="list-none flex gap-4 align-middle justify-between py-3 px-4 cursor-pointer border-l-4 border-aux-red">
+      <div class="flex flex-col text-art-blue gap-1">
+        ${routeSwatchesHtml}
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-medium">${alert.title}</span>
+          ${statusBadge}
+        </div>
+        <div class="text-sm text-gray-600">${timespanText}</div>
+      </div>
+      <div class="flex items-center">
+        <span class="bi bi-chevron-down text-xl" aria-hidden="true"></span>
+      </div>
+    </summary>
+    <div class="p-4 border-t border-slate-300">
+      <p>${alert.description}</p>
+      ${affectedStopsHtml}
+    </div>
+  `);
 
   return $alert;
+}
+
+// Render clickable route swatches for all affected routes
+function renderRouteSelector() {
+  const $routeList = jQuery('#alerts-route-list');
+  $routeList.empty();
+
+  const hasSystemWide = processedAlerts.systemWide.length > 0;
+  const affectedRoutes = Object.keys(processedAlerts.byRoute);
+
+  if (!hasSystemWide && affectedRoutes.length === 0) {
+    jQuery('#alerts-loading-message').text('No service alerts at this time.').show();
+    jQuery('#alerts-select-prompt').hide();
+    return;
+  }
+
+  jQuery('#alerts-loading-message').hide();
+  jQuery('#alerts-select-prompt').show();
+
+  let isFirst = true;
+
+  // Add system-wide "ART" swatch first if there are system-wide alerts
+  if (hasSystemWide) {
+    const $artTab = jQuery('<button>')
+      .attr('role', 'tab')
+      .attr('id', 'alert-tab-system-wide')
+      .attr('aria-selected', isFirst ? 'true' : 'false')
+      .attr('aria-controls', 'alerts-display-container')
+      .attr('tabindex', isFirst ? '0' : '-1')
+      .attr('type', 'button')
+      .attr('data-route-id', 'system-wide')
+      .addClass(
+        'route-color-swatch-large cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-art-blue focus:ring-2 focus:ring-offset-2 focus:ring-art-blue transition-all',
+      )
+      .css({ 'background-color': '#1e3a5f', color: '#FFFFFF' })
+      .attr(
+        'aria-label',
+        `System-wide alerts (${processedAlerts.systemWide.length} alert${processedAlerts.systemWide.length > 1 ? 's' : ''})`,
+      )
+      .attr('title', `System-wide alerts (${processedAlerts.systemWide.length})`)
+      .text('ART');
+    $routeList.append($artTab);
+    isFirst = false;
+  }
+
+  // Add route swatches sorted by route_short_name
+  const sortedRouteIds = affectedRoutes.sort((a, b) => {
+    const routeA = routeData[a];
+    const routeB = routeData[b];
+    return (routeA?.route_short_name || '').localeCompare(
+      routeB?.route_short_name || '',
+      undefined,
+      { numeric: true },
+    );
+  });
+
+  sortedRouteIds.forEach((routeId) => {
+    const route = routeData[routeId];
+    if (!route) return;
+
+    const alertCount = processedAlerts.byRoute[routeId].length;
+    const $routeTab = jQuery('<button>')
+      .attr('role', 'tab')
+      .attr('id', `alert-tab-${routeId}`)
+      .attr('aria-selected', isFirst ? 'true' : 'false')
+      .attr('aria-controls', 'alerts-display-container')
+      .attr('tabindex', isFirst ? '0' : '-1')
+      .attr('type', 'button')
+      .attr('data-route-id', routeId)
+      .addClass(
+        'route-color-swatch-large cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-art-blue focus:ring-2 focus:ring-offset-2 focus:ring-art-blue transition-all',
+      )
+      .css({
+        'background-color': `#${route.route_color || '000000'}`,
+        color: `#${route.route_text_color || 'FFFFFF'}`,
+      })
+      .attr(
+        'aria-label',
+        `${route.route_long_name || 'Route ' + route.route_short_name} (${alertCount} alert${alertCount > 1 ? 's' : ''})`,
+      )
+      .attr(
+        'title',
+        `${route.route_long_name || 'Route ' + route.route_short_name} (${alertCount})`,
+      )
+      .text(route.route_short_name);
+    $routeList.append($routeTab);
+    isFirst = false;
+  });
+
+  // Attach event handlers using event delegation on the tablist
+  $routeList
+    .off('click keydown') // Remove any existing handlers
+    .on('click', '[role="tab"]', function () {
+      selectRoute(jQuery(this).attr('data-route-id'));
+    })
+    .on('keydown', '[role="tab"]', function (e) {
+      handleTabKeydown(e);
+    });
+}
+
+// Handle keyboard navigation for tabs (arrow keys, Home, End)
+function handleTabKeydown(e) {
+  const $tabs = jQuery('#alerts-route-list [role="tab"]');
+  const $currentTab = jQuery(e.target);
+  const currentIndex = $tabs.index($currentTab);
+
+  if (currentIndex === -1) return;
+
+  let newIndex = currentIndex;
+
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      newIndex = (currentIndex + 1) % $tabs.length;
+      break;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      newIndex = (currentIndex - 1 + $tabs.length) % $tabs.length;
+      break;
+    case 'Home':
+      newIndex = 0;
+      break;
+    case 'End':
+      newIndex = $tabs.length - 1;
+      break;
+    case 'Enter':
+    case ' ':
+      e.preventDefault();
+      selectRoute($currentTab.attr('data-route-id'));
+      return;
+    default:
+      return; // Exit if the key is not recognized
+  }
+
+  e.preventDefault();
+  $tabs.eq(newIndex).focus();
+}
+
+// Handle route selection and display related alerts
+function selectRoute(routeId) {
+  selectedRouteId = routeId;
+  const $tabs = jQuery('#alerts-route-list [role="tab"]');
+  const $selectedTab = jQuery(`#alerts-route-list [data-route-id="${routeId}"]`);
+
+  // Update all tabs: set aria-selected and tabindex
+  $tabs.each(function () {
+    const $tab = jQuery(this);
+    const isSelected = $tab.attr('data-route-id') === routeId;
+    $tab
+      .attr('aria-selected', isSelected ? 'true' : 'false')
+      .attr('tabindex', isSelected ? '0' : '-1')
+      .toggleClass('ring-4 ring-art-blue ring-offset-2', isSelected);
+  });
+
+  // Update tabpanel's aria-labelledby to reference the selected tab
+  jQuery('#alerts-display-container').attr('aria-labelledby', $selectedTab.attr('id'));
+
+  // Display alerts for selected route
+  displayAlertsForRoute(routeId);
+}
+
+// Display alerts for the selected route in the target container
+function displayAlertsForRoute(routeId) {
+  const $container = jQuery('#alerts-display-container');
+  $container.empty();
+
+  jQuery('#alerts-select-prompt').hide();
+
+  let alerts = [];
+  let headerText = '';
+
+  if (routeId === 'system-wide') {
+    alerts = processedAlerts.systemWide;
+    headerText = 'System-wide Alerts';
+  } else {
+    alerts = processedAlerts.byRoute[routeId] || [];
+    const route = routeData[routeId];
+    headerText = route
+      ? `Alerts affecting ${route.route_short_name} - ${route.route_long_name}`
+      : 'Route Alerts';
+  }
+
+  if (alerts.length === 0) {
+    $container.append('<p class="text-gray-600">No alerts for this selection.</p>');
+    return;
+  }
+
+  const $header = jQuery('<h3>').addClass('text-xl font-semibold mb-4 text-black').text(headerText);
+  $container.append($header);
+
+  const $alertsList = jQuery('<div>').addClass('alerts-list');
+  alerts.forEach((alert) => {
+    $alertsList.append(formatAlertAsHtml(alert));
+  });
+  $container.append($alertsList);
 }
 
 async function updateAlerts() {
   console.log('Updating GTFS-Realtime alerts', gtfsRealtimeUrls);
   if (!gtfsRealtimeUrls?.realtimeAlerts) {
+    jQuery('#alerts-loading-message').text('No alerts feed configured.').show();
     return;
   }
 
@@ -124,12 +325,12 @@ async function updateAlerts() {
     );
 
     if (!alerts) {
-      $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+      jQuery('#alerts-loading-message').text('No service alerts at this time.').show();
       return;
     }
 
-    let relevant_alert_data = [];
-    const formattedAlerts = [];
+    // Reset processed alerts
+    processedAlerts = { systemWide: [], byRoute: {} };
 
     const active_alerts = alerts.filter((alert) => {
       if (!alert.alert || alert.alert.is_deleted) {
@@ -140,42 +341,12 @@ async function updateAlerts() {
 
       if (this_timespan) {
         for (const timespan of this_timespan) {
-          // console.log(
-          //   'Checking alert:',
-          //   alert.alert.header_text.translation[0].text,
-          //   'with timespans start:',
-          //   timespan.start,
-          //   'end:',
-          //   timespan.end,
-          //   'current timestamp:',
-          //   current_timestamp,
-          //   'two weeks from now:',
-          //   two_weeks_from_now,
-          // );
-
           if (
             (!timespan.start || timespan.start <= two_weeks_from_now) &&
             (!timespan.end || timespan.end >= current_timestamp)
           ) {
             isActive = true;
-            console.log(
-              'Alert ACTIVE:',
-              alert.alert.header_text.translation[0].text,
-              'timespan start:',
-              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
-              'timespan end:',
-              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
-            );
             break;
-          } else {
-            console.log(
-              'Alert INACTIVE:',
-              alert.alert.header_text.translation[0].text,
-              'timespan start:',
-              timespan.start ? new Date(timespan.start * 1000).toISOString().split('T')[0] : 'N/A',
-              'timespan end:',
-              timespan.end ? new Date(timespan.end * 1000).toISOString().split('T')[0] : 'N/A',
-            );
           }
         }
       }
@@ -184,257 +355,125 @@ async function updateAlerts() {
 
     console.log('Active alerts:', active_alerts);
 
+    // Process each active alert
     for (const alert of active_alerts) {
       if (!alert.alert || alert.alert.is_deleted) {
         continue;
       }
-      relevant_alert_data.push({
+
+      // Determine if alert is currently active (has started) vs future (not yet started)
+      const timespans = alert.alert.active_period || [];
+      const isCurrentlyActive = timespans.some((timespan) => {
+        // Alert is active if it has no start time OR start time is in the past/present
+        return !timespan.start || timespan.start <= current_timestamp;
+      });
+
+      // Build processed alert object
+      const processedAlert = {
         id: alert.id,
         title: alert.alert.header_text.translation[0].text,
         description: alert.alert.description_text.translation[0].text,
-        routes_affected: [
-          ...alert.alert.informed_entity
-            .filter((entity) => entity.route_id !== undefined && entity.route_id !== '')
-            .map((entity) => routeData[entity.route_id]),
-        ],
-        stops_affected: [
-          ...alert.alert.informed_entity
-            .filter((entity) => entity.stop_id !== undefined && entity.stop_id !== '')
-            .map((entity) => stopData[entity.stop_id]),
-        ],
-        valid_timespans: alert.alert.active_period,
+        routes_affected: [],
+        stops_affected: [],
+        valid_timespans: timespans,
+        url: alert.alert.url?.translation?.[0]?.text || null,
+        isCurrentlyActive: isCurrentlyActive,
+      };
+
+      // Collect affected routes
+      const affectedRouteIds = new Set();
+      alert.alert.informed_entity.forEach((entity) => {
+        if (entity.route_id !== undefined && entity.route_id !== '') {
+          affectedRouteIds.add(entity.route_id);
+          const route = routeData[entity.route_id];
+          if (
+            route &&
+            !processedAlert.routes_affected.some((r) => r.route_id === entity.route_id)
+          ) {
+            processedAlert.routes_affected.push(route);
+          }
+        }
       });
 
-      const affectedRouteIds = [
-        ...new Set([
-          ...alert.alert.informed_entity
-            .filter((entity) => entity.route_id !== undefined && entity.route_id !== '')
-            .map((entity) => entity.route_id),
-        ]),
-      ];
+      // Collect affected stops
+      alert.alert.informed_entity.forEach((entity) => {
+        if (entity.stop_id !== undefined && entity.stop_id !== '') {
+          const stop = stopData[entity.stop_id];
+          if (stop && !processedAlert.stops_affected.some((s) => s.stop_id === entity.stop_id)) {
+            processedAlert.stops_affected.push(stop);
+          }
+        }
+      });
 
+      // Filter to only routes/stops in this timetable
       const affectedRouteIdsInTimetable = routeIds.filter((routeId) =>
-        affectedRouteIds.includes(routeId),
+        affectedRouteIds.has(routeId),
+      );
+      const affectedStopIdsInTimetable = processedAlert.stops_affected.filter((stop) =>
+        stopIds.includes(stop.stop_id),
       );
 
-      const affectedStopIds = [
-        ...new Set([
-          ...alert.alert.informed_entity
-            .filter((entity) => entity.stop_id !== undefined && entity.stop_id !== '')
-            .map((entity) => entity.stop_id),
-        ]),
-      ];
-
-      const affectedStopsIdsInTimetable = stopIds.filter((stopId) =>
-        affectedStopIds.includes(stopId),
-      );
-
-      // Hide alerts that don't affect any stops or routes in this timetable
-      if (affectedStopsIdsInTimetable.length === 0 && affectedRouteIdsInTimetable.length === 0) {
+      // Skip alerts that don't affect any routes or stops in this timetable (unless system-wide)
+      if (
+        affectedRouteIdsInTimetable.length === 0 &&
+        affectedStopIdsInTimetable.length === 0 &&
+        processedAlert.routes_affected.length > 0
+      ) {
         continue;
       }
 
-      try {
-        // formattedAlerts.push(
-        //   formatAlertAsHtml(alert, affectedRouteIdsInTimetable, affectedStopsIdsInTimetable)
-        // );
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    console.log('Processed alerts:', relevant_alert_data);
-
-    const routeGroups = {};
-    const systemWide = [];
-
-    // relevant_alert_data.forEach((alert) => {
-    //   if (alert.routes_affected && alert.routes_affected.length > 0) {
-    //     alert.routes_affected.forEach((route) => {
-    //       if (!routeGroups[route.route_id]) {
-    //         routeGroups[route.route_id] = [];
-    //       }
-    //       if (!routeGroups[route.route_id].some((a) => a.id === alert.id)) {
-    //         routeGroups[route.route_id].push(alert);
-    //       }
-    //     });
-    //   } else {
-    //     systemWide.push(alert);
-    //   }
-    // });
-
-    relevant_alert_data.forEach((alert) => {
-      if (alert.routes_affected && alert.routes_affected.length > 0) {
-        // alert.routes_affected.forEach((route) => {
-        if (!routeGroups[alert.title]) {
-          routeGroups[alert.title] = [];
-        }
-        if (!routeGroups[alert.title].some((a) => a.id === alert.id)) {
-          routeGroups[alert.title].push(alert);
-        }
-        // });
+      // Categorize alert
+      if (processedAlert.routes_affected.length === 0) {
+        // System-wide alert
+        processedAlerts.systemWide.push(processedAlert);
       } else {
-        systemWide.push(alert);
+        // Route-specific alert - add to each affected route
+        affectedRouteIdsInTimetable.forEach((routeId) => {
+          if (!processedAlerts.byRoute[routeId]) {
+            processedAlerts.byRoute[routeId] = [];
+          }
+          // Avoid duplicates
+          if (!processedAlerts.byRoute[routeId].some((a) => a.id === processedAlert.id)) {
+            processedAlerts.byRoute[routeId].push(processedAlert);
+          }
+        });
       }
-    });
-
-    console.log('Route Groups:', routeGroups);
-    console.log('System-wide alerts:', systemWide);
-
-    $('#alerts-container').empty();
-
-    if (systemWide.length > 0) {
-      $('#alerts-container').append('<h3 class="text-black text-xl mb-4">System-wide Alerts</h3>');
-      systemWide.forEach((alert) => {
-        $('#alerts-container').append(
-          `<details class="bg-white border border-slate-300 rounded mb-6">
-          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
-          <div class="flex items-center text-art-blue gap-2 text-lg font-medium">
-          <span class="route-color-swatch bg-art-blue text-white">ART</span>
-          <span>${alert.title}</span>
-          <span>${alert.valid_timespans.length}</span>
-          </div>
-          <div class="flex items-center">
-          <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
-          </div>
-          </summary>
-          <div class="p-4 border-t border-slate-300">
-          <p>${alert.description}</p>
-          </div>
-         </details>`,
-          // `<div class="p-2 my-4 border alert system-wide"><div class="block text-xl mb-2">${alert.title}:</div> ${alert.description}</div>`
-        );
-      });
     }
 
-    // $('#alerts-container').append('<hr />');
-    $('#alerts-container').append('<h3 class="text-black text-xl my-4">Route-specific Alerts</h3>');
+    console.log('Processed alerts:', processedAlerts);
 
-    Object.keys(routeGroups).forEach((alertTitle) => {
-      const alertsForTitle = routeGroups[alertTitle];
-      const representativeAlert = alertsForTitle[0];
+    // Render the route selector UI
+    renderRouteSelector();
 
-      // Collect all unique routes affected
-      const allRoutesAffected = [];
-      const seenRouteIds = new Set();
-      alertsForTitle.forEach((alert) => {
-        if (alert.routes_affected) {
-          alert.routes_affected.forEach((route) => {
-            if (route && !seenRouteIds.has(route.route_id)) {
-              seenRouteIds.add(route.route_id);
-              allRoutesAffected.push(route);
-            }
-          });
-        }
-      });
-
-      // Collect all unique stops affected
-      const allStopsAffected = [];
-      const seenStopIds = new Set();
-      alertsForTitle.forEach((alert) => {
-        if (alert.stops_affected) {
-          alert.stops_affected.forEach((stop) => {
-            if (stop && !seenStopIds.has(stop.stop_id)) {
-              seenStopIds.add(stop.stop_id);
-              allStopsAffected.push(stop);
-            }
-          });
-        }
-      });
-
-      // Build route swatches HTML
-      let routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0">';
-      allRoutesAffected.forEach((route) => {
-        routeSwatchesHtml += `<li class="route-color-swatch" style="background-color: #${route.route_color};color: #${route.route_text_color};" title="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}" aria-label="${route.route_long_name ? route.route_long_name : 'Route ' + route.route_short_name}">${route.route_short_name}</li>`;
-      });
-      routeSwatchesHtml += '</ul>';
-
-      // Build affected stops HTML
-      let affected_stops_html = '';
-      if (allStopsAffected.length > 0) {
-        affected_stops_html =
-          '<div class="mt-4 border-b border-gray-300 font-semibold pb-2">Stops Affected</div><ul class="list-disc pl-4 mt-2">';
-        allStopsAffected.forEach((stop) => {
-          affected_stops_html += `<li class="my-2"><div class="stop-name">${stop.stop_name}</div></li>`;
-        });
-        affected_stops_html += '</ul>';
-      }
-
-      // Build timespan text
-      const timespanText = representativeAlert.valid_timespans
-        .map((timespan) => {
-          const startDate = timespan.start
-            ? new Date(timespan.start * 1000).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })
-            : 'N/A';
-          const endDate = timespan.end
-            ? new Date(timespan.end * 1000).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })
-            : 'Ongoing';
-          return `${startDate} - ${endDate}`;
-        })
-        .join(', ');
-
-      $('#alerts-container').append(
-        `<details class="bg-white border border-slate-300 rounded mb-6">
-          <summary class="list-none flex gap-4 align-middle justify-between py-2 px-4 cursor-pointer border-l-4 border-aux-red">
-          <div class="flex flex-col text-art-blue gap-2 text-lg font-medium">
-          ${routeSwatchesHtml}
-          <div>
-          <div>${representativeAlert.title}</div>
-          <div class="text-sm text-gray-600">${timespanText}</div>
-          </div>
-          </div>
-          <div class="flex items-center">
-          <span class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true"></span>
-          </div>
-          </summary>
-          <div class="p-4 border-t border-slate-300">
-          <p>${representativeAlert.description}</p>
-          ${affected_stops_html}
-          </div>
-         </details>`,
-      );
-    });
-
-    // Remove previously posted GTFS-RT alerts
-    jQuery('.timetable-alerts-list .timetable-alert').remove();
-
-    $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
-
-    if (formattedAlerts.length > 0) {
-      $('#timetable_alert_count').addClass('border-red-600').text(formattedAlerts.length).show();
-      // Remove the empty message if present
-      jQuery('.timetable-alert-empty').hide();
-
-      for (const alert of formattedAlerts) {
-        jQuery('.timetable-alerts-list').append(alert);
-      }
+    // Auto-select first available option
+    if (processedAlerts.systemWide.length > 0) {
+      selectRoute('system-wide');
     } else {
-      // Replace the empty message if present
-      jQuery('.timetable-alert-empty').show();
+      const firstRouteId = Object.keys(processedAlerts.byRoute).sort((a, b) => {
+        const routeA = routeData[a];
+        const routeB = routeData[b];
+        return (routeA?.route_short_name || '').localeCompare(
+          routeB?.route_short_name || '',
+          undefined,
+          { numeric: true },
+        );
+      })[0];
+      if (firstRouteId) {
+        selectRoute(firstRouteId);
+      }
     }
   } catch (error) {
-    console.error(error);
+    console.error('Error updating alerts:', error);
+    jQuery('#alerts-loading-message').text('Error loading service alerts.').show();
   }
 }
 
 jQuery(() => {
   console.log('Home Alerts JS loaded', gtfsRealtimeUrls);
 
-  $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
   if (gtfsRealtimeUrls?.realtimeAlerts?.url) {
-    // console.log('Starting GTFS-Realtime alerts update interval');
-    // const alertUpdateInterval = 60 * 1000; // Every Minute
     updateAlerts();
-    // gtfsRealtimeAlertsInterval = setInterval(() => {
-    //   updateAlerts();
-    // }, alertUpdateInterval);
+  } else {
+    jQuery('#alerts-loading-message').text('No alerts feed configured.').show();
   }
 });

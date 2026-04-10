@@ -57,12 +57,3 @@ html(lang="en")
             .footer-item &copy; #{new Date().getFullYear()} #{config.webpageTitle}
           .footer-item
             a(href="#" class="text-white underline") Privacy Policy
-
-    script.
-      document.addEventListener('DOMContentLoaded', () => {
-        const images = document.querySelectorAll('img[data-src]');
-        images.forEach(img => {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-        });
-      });
