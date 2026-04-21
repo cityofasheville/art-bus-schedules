@@ -96,6 +96,10 @@
     @apply border-art-blue;
   }
 
+  .entry-content a {
+    @apply text-art-blue underline hover:no-underline focus:no-underline underline-offset-4;
+  }
+
   .entry-content td {
     @apply border-r border-black border;
     /* Add right border for internal columns */

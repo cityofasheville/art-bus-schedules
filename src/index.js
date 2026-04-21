@@ -141,6 +141,7 @@ async function getWordPressData() {
     returnedData.howToRide = howToRideData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
+    returnedData.transitAbout = transitConnectData;
     returnedData.transitNews = transitNewsData;
     returnedData.ada = adaData;
     returnedData.bikesOnBuses = bikesData;
