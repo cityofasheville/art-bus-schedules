@@ -69,6 +69,11 @@
       "template": "contact_full.pug",
       "output": "contact/index.html",
       "title": "Contact"
+    },
+    {
+      "template": "about_full.pug",
+      "output": "about/index.html",
+      "title": "Overview"
     }
   ],
   "webpageTitle": "Asheville Rides Transit",

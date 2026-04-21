@@ -90,3 +90,7 @@
     max-width: none;
   }
 }
+
+.maplibregl-ctrl-top-left .maplibregl-ctrl {
+  display: none;
+}
