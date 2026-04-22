@@ -1,112 +1,113 @@
 include formatting_functions.pug
 
-<!-- Timetable generated on #{new Date().toISOString()} using GTFS-to-HTML version #{config.gtfsToHtmlVersion} -->
-.timetable-page(class=`menu-type-${config.menuType}`)
-  if config.showRouteTitle
-    - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-    div(class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4")
-      div(class="timetable-heading flex py-4 gap-4")
-        each route in timetableRouteList
-          .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
+  <!-- Timetable generated on #{new Date().toISOString()} using GTFS-to-HTML version #{config.gtfsToHtmlVersion} -->
+  .timetable-page(class=`menu-type-${config.menuType}`)
+    if config.showRouteTitle
+      - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+      div(class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4")
+        div(class="timetable-heading flex py-4 gap-4")
+          each route in timetableRouteList
+            .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+          div()
+            h1(class="mt-0 mb-2 py-0")= timetablePage.timetable_page_label
+            if timetablePage.timetables[0].routes[0].route_desc
+              p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
         div()
-          h1(class="mt-0 mb-2 py-0")= timetablePage.timetable_page_label
-          if timetablePage.timetables[0].routes[0].route_desc
-            p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
-      div()
-        each route in timetableRouteList
-          a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Map & Schedule (PDF)`
-    if config.effectiveDate
-      .effective-date= `Effective ${config.effectiveDate}`
+          each route in timetableRouteList
+            a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Map & Schedule (PDF)`
+      if config.effectiveDate
+        .effective-date= `Effective ${config.effectiveDate}`
 
-  if config.hasGtfsRealtimeAlerts
-    details(class="border my-6 rounded" role="region" aria-labelledby="service_alerts_heading")
+    if config.hasGtfsRealtimeAlerts
+      details(class="border my-6 rounded" role="region" aria-labelledby="service_alerts_heading")
+        summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
+          div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
+            i(class="bi bi-bell-fill" aria-hidden="true")
+            h2#service_alerts_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
+            span(id="timetable_alert_count" class="rounded-full border-2 px-2")
+          div(class="flex items-center gap-4")
+            span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
+              
+        div(class="timetable-alerts border-t border-slate-300")
+          div(class="timetable-alerts-list p-4")
+            div(class="timetable-alert-empty")
+              | There are no service alerts at this time.
+
+    details(class="border my-6 rounded" role="region" aria-labelledby="rt_positions_heading")
       summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
         div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
-          i(class="bi bi-bell-fill" aria-hidden="true")
-          h2#service_alerts_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
-          span(id="timetable_alert_count" class="rounded-full border-2 px-2")
+          i(class="bi bi-bus-front" aria-hidden="true")
+          h2#rt_positions_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Realtime Bus Positions "
+          span(id="rt_positions_status" class="rounded-full border-2 px-2" aria-live="polite" aria-atomic="true")
         div(class="flex items-center gap-4")
           span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
-            
-      div(class="timetable-alerts border-t border-slate-300")
-        div(class="timetable-alerts-list p-4")
-          div(class="timetable-alert-empty")
-            | There are no service alerts at this time.
+      div(id="rt_positions_container" class="border-t" aria-label="Real-time bus positions")
+        div(class="flex justify-end px-4 mt-4")
+          button#rt_positions_pause(type="button" class="btn-gray btn-sm flex items-center gap-2" aria-pressed="false")
+            i(class="bi bi-pause-fill" aria-hidden="true")
+            span Pause Updates
+        div(id="rt_positions_list")
 
-  details(class="border my-6 rounded" role="region" aria-labelledby="rt_positions_heading")
-    summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
-      div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
-        i(class="bi bi-bus-front" aria-hidden="true")
-        h2#rt_positions_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Realtime Bus Positions "
-        span(id="rt_positions_status" class="rounded-full border-2 px-2" aria-live="polite" aria-atomic="true")
-      div(class="flex items-center gap-4")
-        span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
-    div(id="rt_positions_container" class="border-t" aria-label="Real-time bus positions")
-      div(class="flex justify-end px-4 mt-4")
-        button#rt_positions_pause(type="button" class="btn-gray btn-sm flex items-center gap-2" aria-pressed="false")
-          i(class="bi bi-pause-fill" aria-hidden="true")
-          span Pause Updates
-      div(id="rt_positions_list")
+    div(class="relative")
+      a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
 
-  div(class="relative")
-    a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
-
-
-  each timetable in timetablePage.consolidatedTimetables
-    if config.showMap
-      .coa-timetable-map-container.relative(id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}`)
-        include timetable_map.pug
-
-  div(id="timetable_menu_container")
-    include timetable_menu.pug
-
-  div#coa_timetable_container
-    //- include timetable_menu.pug
 
     each timetable in timetablePage.consolidatedTimetables
-      div(id=`timetable_id_${formatHtmlId(timetable.timetable_id)}` class="timetable my-6" data-day-list=timetable.dayList data-direction-name=timetable.direction_name || timetable.timetable_label data-timetable-id=`${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id data-route-id=timetable.route_ids.join('_') data-stops="timepoints-only")
+      if config.showMap
+        .coa-timetable-map-container.relative(id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}`)
+          include timetable_map.pug
 
-        if config.showRouteTitle
-          .timetable-label
-            h2= `${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
-              each note in getNotesForTimetableLabel(timetable.notes)
-                include timetable_note_symbol.pug
-            if timetable.service_notes !== null
-              .timetable-service-notes= timetable.service_notes
-              
-        if timetable.orientation === 'horizontal'
-          include timetable_horizontal.pug
-        else if timetable.orientation === 'hourly'
-          include timetable_hourly.pug
-        else if timetable.orientation === 'vertical'
-          include timetable_vertical.pug
+    div(id="timetable_menu_container")
+      include timetable_menu.pug
 
-        .timetable-footer
-          if hasNotesOrNotices(timetable)
-            .notes
-              if timetable.requestPickupSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-request-pickup`)= `${config.requestPickupSymbol} = ${config.requestPickupText}`
-              if timetable.noPickupSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-no-pickup`)= `${config.noPickupSymbol} = ${config.noPickupText}`
-              if timetable.requestDropoffSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-request-dropoff`)= `${config.requestDropoffSymbol} = ${config.requestDropoffText}`
-              if timetable.noDropoffSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-no-dropoff`)= `${config.noDropoffSymbol} = ${config.noDropoffText}`
-              if timetable.noServiceSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-no-service`)= `${config.noServiceSymbol} = ${config.noServiceText}`
-              if timetable.interpolatedStopSymbolUsed
-                .note(id=`note-${timetable.timetable_id}-interpolated-stop`)= `${config.interpolatedStopSymbol} = ${config.interpolatedStopText}`
-              each note in _.uniqBy(timetable.notes, 'note_id')
-                .note(id=`note-${timetable.timetable_id}-${note.note_id}`)
-                  span= note.symbol 
-                  span &nbsp;=&nbsp;
-                  span!= md(note.note)
+    div#coa_timetable_container
+      //- include timetable_menu.pug
 
-          if config.showCalendarExceptions && timetable.calendarDates.includedDates.length
-            .included-dates= `${config.serviceProvidedOnText}: ${timetable.calendarDates.includedDates.join(', ')}`
+      each timetable in timetablePage.consolidatedTimetables
+        div(id=`timetable_id_${formatHtmlId(timetable.timetable_id)}` class="timetable my-6" data-day-list=timetable.dayList data-direction-name=timetable.direction_name || timetable.timetable_label data-timetable-id=`${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id data-route-id=timetable.route_ids.join('_') data-stops="timepoints-only")
 
-          if config.showCalendarExceptions && timetable.calendarDates.excludedDates.length
-            .excluded-dates= `${config.serviceNotProvidedOnText}: ${timetable.calendarDates.excludedDates.join(', ')}`
+          if config.showRouteTitle
+            .timetable-label
+              h2= `${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
+                each note in getNotesForTimetableLabel(timetable.notes)
+                  include timetable_note_symbol.pug
+              if timetable.service_notes !== null
+                .timetable-service-notes= timetable.service_notes
+                
+          if timetable.orientation === 'horizontal'
+            include timetable_horizontal.pug
+          else if timetable.orientation === 'hourly'
+            include timetable_hourly.pug
+          else if timetable.orientation === 'vertical'
+            include timetable_vertical.pug
+
+          .timetable-footer
+            if hasNotesOrNotices(timetable)
+              .notes
+                if timetable.requestPickupSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-request-pickup`)= `${config.requestPickupSymbol} = ${config.requestPickupText}`
+                if timetable.noPickupSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-no-pickup`)= `${config.noPickupSymbol} = ${config.noPickupText}`
+                if timetable.requestDropoffSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-request-dropoff`)= `${config.requestDropoffSymbol} = ${config.requestDropoffText}`
+                if timetable.noDropoffSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-no-dropoff`)= `${config.noDropoffSymbol} = ${config.noDropoffText}`
+                if timetable.noServiceSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-no-service`)= `${config.noServiceSymbol} = ${config.noServiceText}`
+                if timetable.interpolatedStopSymbolUsed
+                  .note(id=`note-${timetable.timetable_id}-interpolated-stop`)= `${config.interpolatedStopSymbol} = ${config.interpolatedStopText}`
+                each note in _.uniqBy(timetable.notes, 'note_id')
+                  .note(id=`note-${timetable.timetable_id}-${note.note_id}`)
+                    span= note.symbol 
+                    span &nbsp;=&nbsp;
+                    span!= md(note.note)
+
+            if config.showCalendarExceptions && timetable.calendarDates.includedDates.length
+              .included-dates= `${config.serviceProvidedOnText}: ${timetable.calendarDates.includedDates.join(', ')}`
+
+            if config.showCalendarExceptions && timetable.calendarDates.excludedDates.length
+              .excluded-dates= `${config.serviceNotProvidedOnText}: ${timetable.calendarDates.excludedDates.join(', ')}`
 
       
   if config.showMap

@@ -1,19 +1,27 @@
 include formatting_functions.pug
 
-div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
-  h1(class="text-4xl mb-4") All Bus Routes and Schedules
-  p Click on a route number below for detailed route maps and schedules
+div(class="relative w-full bg-aux-green border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
+  div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
+    h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
+      span="All Bus Routes and Schedules"
 
-div(id="all_routes_list" class="w-full max-w-screen-xl mx-auto px-4 mb-6")
-  div(class="flex flex-wrap gap-2 justify-start")
-    - var allTimetablePages = _.flatMap(getAgencyTimetableGroups(timetablePages, agencies), function(g) { return g.timetablePages; });
-    each timetablePage in sortTimetablePages(allTimetablePages)
-      if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
-        - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-        each route in swatchRouteList
-          a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+//- div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
+//-   p Click on a route number below for detailed route maps and schedules
 
-div(class="w-full max-w-screen-xl mx-auto px-4 mb-6")
+//- nav(id="all_routes_list" class="relative w-full max-w-screen-xl mx-auto px-4 mb-6" aria-label="All ART Routes")
+//-   a(href="#route_listing" class="absolute mx-auto top-0 sr-only focus:not-sr-only") Skip to list of routes and service areas
+//-   div(class="flex flex-wrap gap-2 justify-start")
+//-     - var allTimetablePages = _.flatMap(getAgencyTimetableGroups(timetablePages, agencies), function(g) { return g.timetablePages; });
+//-     each timetablePage in sortTimetablePages(allTimetablePages)
+//-       if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
+//-         - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
+//-         each route in swatchRouteList
+//-           a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
+
+//- div(id="route_listing" class="w-full max-w-screen-xl mx-auto px-4 mb-6")
+//-   h2="All Routes and Service Areas"
+    
+div(class="w-full max-w-screen-xl mx-auto px-4 py-8")
   .timetable-radio-menu
     fieldset#view_selector.p-4.border.shadow-md
       legend="View"
@@ -25,7 +33,7 @@ div(class="w-full max-w-screen-xl mx-auto px-4 mb-6")
           input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="map" id="radio_view_map")
           span Map View
 
-div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto p-4 mb-8")
+div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
   table(class="w-full border border-collapse")
     thead
       tr

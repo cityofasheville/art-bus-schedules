@@ -810,14 +810,12 @@ fieldset:has(input:focus) {
 }
 
 .entry-content ul {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   list-style-type: disc;
   padding-left: 2.5rem;
 }
 
 .entry-content li {
-  margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -828,42 +826,36 @@ fieldset:has(input:focus) {
 }
 
 .entry-content h1 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.875rem;
   line-height: 2.25rem;
 }
 
 .entry-content h2 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   line-height: 2rem;
 }
 
 .entry-content h3 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.25rem;
   line-height: 1.75rem;
 }
 
 .entry-content h4 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
 
 .entry-content h5 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
 
 .entry-content h6 {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -874,7 +866,6 @@ fieldset:has(input:focus) {
   .entry-content figure,
   .entry-content img,
   .entry-content hr {
-  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
@@ -1182,6 +1173,10 @@ fieldset:has(input:focus) {
 
 .mt-4 {
   margin-top: 1rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
 }
 
 .block {
@@ -1574,6 +1569,11 @@ fieldset:has(input:focus) {
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
 }
 
+.border-art-green {
+  --tw-border-opacity: 1;
+  border-color: rgb(74 169 30 / var(--tw-border-opacity, 1));
+}
+
 .border-aux-red {
   --tw-border-opacity: 1;
   border-color: rgb(219 60 2 / var(--tw-border-opacity, 1));
@@ -1633,6 +1633,11 @@ fieldset:has(input:focus) {
   background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
 }
 
+.bg-aux-green {
+  --tw-bg-opacity: 1;
+  background-color: rgb(160 207 103 / var(--tw-bg-opacity, 1));
+}
+
 .bg-aux-red {
   --tw-bg-opacity: 1;
   background-color: rgb(219 60 2 / var(--tw-bg-opacity, 1));
@@ -1665,6 +1670,14 @@ fieldset:has(input:focus) {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.bg-cover {
+  background-size: cover;
+}
+
+.bg-center {
+  background-position: center;
 }
 
 .p-0 {
@@ -2368,6 +2381,11 @@ fieldset:has(input:focus) {
     padding-right: 1.5rem;
   }
 
+  .lg\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
   .lg\:has-\[a\:focus\]\:border-transparent:has(a:focus) {
     border-color: transparent;
   }
@@ -2398,5 +2416,9 @@ fieldset:has(input:focus) {
 @media (min-width: 1280px) {
   .xl\:w-96 {
     width: 24rem;
+  }
+
+  .xl\:max-w-screen-xl {
+    max-width: 1280px;
   }
 }

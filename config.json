@@ -74,6 +74,11 @@
       "template": "about_full.pug",
       "output": "about/index.html",
       "title": "Overview"
+    },
+    {
+      "template": "holidays_full.pug",
+      "output": "holidays/index.html",
+      "title": "Holidays and Fare-free Days"
     }
   ],
   "webpageTitle": "Asheville Rides Transit",

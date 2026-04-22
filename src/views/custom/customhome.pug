@@ -138,6 +138,7 @@ div(class="")
 
 script.
     window.config = !{JSON.stringify(config)};
+    console.log('Config:', window.config);
     const routeDirectionStops = !{JSON.stringify(routeDirectionStops)};
     const gtfsRealtimeUrls = {realtimeTripUpdates: window.config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: window.config.agencies[0].realtimeVehiclePositions, realtimeAlerts: window.config.agencies[0].realtimeAlerts};
     const directions = window.config.timetablePage.directions;

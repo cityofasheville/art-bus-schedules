@@ -92,12 +92,17 @@ function formatAlertAsHtml(alert) {
   $alert.html(`
     <summary class="list-none flex gap-4 align-middle justify-between py-3 px-4 cursor-pointer border-l-4 border-aux-red">
       <div class="flex flex-col text-art-blue gap-1">
+        
         ${routeSwatchesHtml}
+
         <div class="flex items-center gap-2">
           <span class="text-lg font-medium">${alert.title}</span>
-          ${statusBadge}
         </div>
+
         <div class="text-sm text-gray-600">${timespanText}</div>
+                 
+        <div class="">${statusBadge}</div>
+        
       </div>
       <div class="flex items-center">
         <span class="bi bi-chevron-down text-xl" aria-hidden="true"></span>
@@ -199,6 +204,27 @@ function renderRouteSelector() {
     isFirst = false;
   });
 
+  // Add "All Alerts" option at the end
+  const totalAlertCount =
+    processedAlerts.systemWide.length +
+    Object.values(processedAlerts.byRoute).reduce((sum, alerts) => sum + alerts.length, 0);
+  const $allTab = jQuery('<button>')
+    .attr('role', 'tab')
+    .attr('id', 'alert-tab-all')
+    .attr('aria-selected', isFirst ? 'true' : 'false')
+    .attr('aria-controls', 'alerts-display-container')
+    .attr('tabindex', isFirst ? '0' : '-1')
+    .attr('type', 'button')
+    .attr('data-route-id', 'all')
+    .addClass(
+      'route-color-swatch-large cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-art-blue focus:ring-2 focus:ring-offset-2 focus:ring-art-blue transition-all',
+    )
+    .css({ 'background-color': '#4b5563', color: '#FFFFFF' })
+    .attr('aria-label', `All alerts (${totalAlertCount} alert${totalAlertCount > 1 ? 's' : ''})`)
+    .attr('title', `All alerts (${totalAlertCount})`)
+    .text('All');
+  $routeList.append($allTab);
+
   // Attach event handlers using event delegation on the tablist
   $routeList
     .off('click keydown') // Remove any existing handlers
@@ -281,7 +307,25 @@ function displayAlertsForRoute(routeId) {
   let alerts = [];
   let headerText = '';
 
-  if (routeId === 'system-wide') {
+  if (routeId === 'all') {
+    // Combine all alerts, avoiding duplicates by alert id
+    const seenIds = new Set();
+    processedAlerts.systemWide.forEach((alert) => {
+      if (!seenIds.has(alert.id)) {
+        alerts.push(alert);
+        seenIds.add(alert.id);
+      }
+    });
+    Object.values(processedAlerts.byRoute).forEach((routeAlerts) => {
+      routeAlerts.forEach((alert) => {
+        if (!seenIds.has(alert.id)) {
+          alerts.push(alert);
+          seenIds.add(alert.id);
+        }
+      });
+    });
+    headerText = 'All Service Alerts';
+  } else if (routeId === 'system-wide') {
     alerts = processedAlerts.systemWide;
     headerText = 'System-wide Alerts';
   } else {

@@ -111,11 +111,11 @@
   }
 
   .entry-content ul {
-    @apply my-6 list-disc pl-10
+    @apply mb-6 list-disc pl-10
   }
 
   .entry-content li {
-    @apply my-4
+    @apply mb-4
   }
 
   .entry-content blockquote {
@@ -123,27 +123,27 @@
   }
 
   .entry-content h1 {
-    @apply my-6 text-3xl
+    @apply mb-6 text-3xl
   }
 
   .entry-content h2 {
-    @apply my-6 text-2xl
+    @apply mb-6 text-2xl
   }
 
   .entry-content h3 {
-    @apply my-6 text-xl
+    @apply mb-6 text-xl
   }
 
   .entry-content h4 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
   .entry-content h5 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
   .entry-content h6 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
 
@@ -152,7 +152,7 @@
   .entry-content figure,
   .entry-content img,
   .entry-content hr {
-    @apply my-6;
+    @apply mb-6;
   }
 
   .entry-content figcaption {

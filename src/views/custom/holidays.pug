@@ -1,12 +1,15 @@
 div(class="relative w-full bg-aux-green border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
   div(class="w-full max-w-screen-lg mx-auto p-4 z-10")
     h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
-      span!=config.wordpress.ada.title.rendered
+      span!=config.wordpress.holidays.title.rendered
 
 div(class="entry-content w-full max-w-screen-lg mx-auto px-4 py-8")
-  div!=config.wordpress.ada.content.rendered
+  div!=config.wordpress.holidays.content.rendered
 
 
 //- div.entry-content.max-w-screen-lg.mx-auto.border-b.p-4
-//-   h1!=config.wordpress.ada.title.rendered
-//-   div!=config.wordpress.ada.content.rendered
+//-   h1!=config.wordpress.holidays.title.rendered
+//-   div!=config.wordpress.holidays.content.rendered
+
+  //- h1!= "Holidays page (to come)"
+  //- div!= "Placeholder content for the Holidays page. Current page content in WordPress is crashing the build."
