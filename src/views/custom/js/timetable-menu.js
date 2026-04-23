@@ -320,20 +320,10 @@ function updateStopInfoContainer(stopId, timetableId) {
   // Build the stop info HTML
   const html = jQuery('<div>');
 
-  // Stop name
-  jQuery('<div>').addClass('font-semibold text-lg mb-2').text(stop.stop_name).appendTo(html);
+  const stop_heading = `${stop.stop_name}` + (stop.stop_code ? ` (${stop.stop_code})` : '');
 
-  // Stop code if available
-  if (stop.stop_code) {
-    jQuery('<div>')
-      .addClass('mb-2')
-      .html(
-        `Stop Code: <strong>${stop.stop_code}</strong><br />
-            <a class="underline hover:no-underline" href="/real-time-departures/?stop_id=${stop.stop_id}">View Real-Time Departures</a>
-          `,
-      )
-      .appendTo(html);
-  }
+  // Stop name
+  jQuery('<div>').addClass('font-semibold text-lg mb-2').text(stop_heading).appendTo(html);
 
   // Get route IDs for this stop from geojson
   let routeIds = [];
@@ -350,24 +340,10 @@ function updateStopInfoContainer(stopId, timetableId) {
     }
   }
 
-  // Routes served
-  if (routeIds.length > 0 && typeof routeData !== 'undefined') {
-    jQuery('<div>')
-      .addClass('mb-2')
-      .html([
-        jQuery('<span>').addClass('text-gray-600').text('Routes Served: '),
-        jQuery('<span>')
-          .addClass('route-list')
-          .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
-      ])
-      .appendTo(html);
-  }
+  const rt_departures_link = stop.stop_id ? `/real-time-departures/?stop_id=${stop.stop_id}` : null;
 
   // Real-time departures if available
-  // Injecting upcoming departures into the stop popup is currently disabled as it included arrivals from other routes that serve the same stop (gotta confirm this),
-  // which can be confusing without additional context (such as route names or a filter to only show arrivals for the currently viewed route)
-  // The code is left here for easy re-enabling in the future when we can optimize it further
-  if (false && typeof tripUpdates !== 'undefined' && tripUpdates) {
+  if (typeof tripUpdates !== 'undefined' && tripUpdates) {
     const stopTimeUpdates = {
       0: [],
       1: [],
@@ -399,9 +375,21 @@ function updateStopInfoContainer(stopId, timetableId) {
 
     if (stopTimeUpdates['0'].length > 0 || stopTimeUpdates['1'].length > 0) {
       const departuresDiv = jQuery('<div>').addClass('mb-2');
+
+      // Get route info from the timetable element's data-route-id and look up in routeData
+      const timetableEl = jQuery(`.timetable`).first();
+      const timetableRouteId = timetableEl.data('route-id');
+      // route_id may be a single ID or multiple IDs joined by '_'
+      const firstRouteId = timetableRouteId ? String(timetableRouteId).split('_')[0] : null;
+      const route =
+        firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
+      const routeLabel = route ? ` ${route.route_short_name}` : '';
+
       jQuery('<div>')
         .addClass('text-gray-600 mb-1')
-        .text('Upcoming Departures:')
+        .html(
+          `Upcoming ${routeLabel ? `${routeLabel}` : ''} Departures ${rt_departures_link ? `<a class="underline hover:no-underline" href="${rt_departures_link}">View All</a>` : ''}:`,
+        )
         .appendTo(departuresDiv);
 
       for (const direction of ['0', '1']) {
@@ -432,6 +420,19 @@ function updateStopInfoContainer(stopId, timetableId) {
 
       departuresDiv.appendTo(html);
     }
+  }
+
+  // Routes served
+  if (routeIds.length > 0 && typeof routeData !== 'undefined') {
+    jQuery('<div>')
+      .addClass('mb-2')
+      .html([
+        jQuery('<span>').addClass('text-gray-600').text('Routes Served: '),
+        jQuery('<span>')
+          .addClass('route-list')
+          .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
+      ])
+      .appendTo(html);
   }
 
   // Streetview link

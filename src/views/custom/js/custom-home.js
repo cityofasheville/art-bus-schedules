@@ -326,30 +326,30 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     </div>
     </div>`;
     html += `<table class="w-full arrivals-table my-4">`;
-    html += `<thead><tr><th class="w-[115px] text-center pr-3">Route</th><th class="text-left px-4">Arrivals</th></tr></thead>`;
+    html += `<thead><tr><th class="w-[80px] sm:w-[115px] text-center pr-1 sm:pr-3 text-sm sm:text-base">Route</th><th class="text-left px-2 sm:px-4 text-sm sm:text-base">Arrivals</th></tr></thead>`;
     html += `<tbody>`;
     for (const groupKey in groupedArrivals) {
       html += `<tr class="odd:bg-white even:bg-slate-100">`;
-      html += `<td class="align-middle pl-2 pr-3 py-2">
+      html += `<td class="align-middle pl-1 sm:pl-2 pr-1 sm:pr-3 py-2">
         <div class="flex items-center justify-items-center px-0">
           <a href="/${groupedArrivals[groupKey][0].route_short_name}/?direction_id=${
             groupedArrivals[groupKey][0].direction_id
           }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
             groupedArrivals[groupKey][0].timetable_id
           }" class="mx-auto text-center">
-          <span class="route-color-swatch-large" style="background-color: #${
+          <span class="route-color-swatch-responsive" style="background-color: #${
             groupedArrivals[groupKey][0].route_color
           };color: #${groupedArrivals[groupKey][0].route_text_color};">${
             groupedArrivals[groupKey][0].route_short_name
           }</span>
-          <span class="block direction text-gray-700 text-sm">${
+          <span class="block direction text-gray-700 text-xs sm:text-sm">${
             groupedArrivals[groupKey][0].direction_name || ''
           }</span>
           </a>
         </div>
       </td>`;
       html += `<td class="align-middle py-2">
-      <div class="flex items-center divide-x divide-slate-200 gap-4 px-0">`;
+      <div class="flex items-center divide-x divide-slate-200 gap-2 sm:gap-4 px-0">`;
 
       let arrivalsProcessed = 0;
       for (const arrival of groupedArrivals[groupKey]) {
@@ -358,11 +358,11 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
           timeStyle: 'short',
         });
         html += `
-            <span class="w-24 text-center ${
+            <span class="w-16 sm:w-24 text-center ${
               arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
             } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
-            <span class="text-2xl text-gray-700">${arrival.time_from_now}</span> min<br />
-            <span class="text-xs text-gray-500">
+            <span class="text-lg sm:text-2xl text-gray-700">${arrival.time_from_now}</span> <span class="text-xs sm:text-base">min</span><br />
+            <span class="text-[10px] sm:text-xs text-gray-500">
                         (${formattedTime})
             </span>
             </span>

@@ -184,7 +184,7 @@ async function updateAlerts() {
     );
 
     if (!alerts) {
-      $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+      $('#timetable_alert_count').removeClass('border-red-600 border-4').text('').hide();
       return;
     }
 
@@ -280,7 +280,7 @@ async function updateAlerts() {
     // Remove previously posted GTFS-RT alerts
     jQuery('.timetable-alerts-list .timetable-alert').remove();
 
-    $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+    $('#timetable_alert_count').removeClass('border-red-600 border-4').text('').hide();
 
     if (formattedAlerts.length > 0) {
       // Count active vs upcoming
@@ -297,7 +297,7 @@ async function updateAlerts() {
       }
       const statusText = statusParts.join(', ');
 
-      $('#timetable_alert_count').addClass('border-red-600').text(statusText).show();
+      $('#timetable_alert_count').addClass('border-red-600 border-4').text(statusText).show();
       // Remove the empty message if present
       jQuery('.timetable-alert-empty').hide();
 
@@ -306,7 +306,7 @@ async function updateAlerts() {
       }
     } else {
       // Show "No alerts" status and empty message
-      $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
+      $('#timetable_alert_count').removeClass('border-red-600 border-4').text('No alerts').show();
       jQuery('.timetable-alert-empty').show();
     }
   } catch (error) {
@@ -316,7 +316,7 @@ async function updateAlerts() {
 
 jQuery(() => {
   console.log('Timetable Alerts JS loaded', gtfsRealtimeUrls);
-  // $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
+  // $('#timetable_alert_count').removeClass('border-red-600 border-4').text('No alerts').show();
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
     const alertUpdateInterval = 60 * 1000; // Every Minute
     updateAlerts();

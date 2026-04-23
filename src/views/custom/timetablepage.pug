@@ -55,7 +55,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
 
     each timetable in timetablePage.consolidatedTimetables
       if config.showMap
-        .coa-timetable-map-container.relative(id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}`)
+        div(class="coa-timetable-map-container relative" id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id)
           include timetable_map.pug
 
     div(id="timetable_menu_container")

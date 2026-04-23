@@ -38,7 +38,7 @@
   border-radius: 4px;
 } */
 
-.route-color-swatch {
+/* .route-color-swatch {
   min-width: 29px;
   height: 29px;
   border-radius: 15px;
@@ -67,10 +67,16 @@
   flex-shrink: 0;
   font-weight: bold;
   color: white;
-}
+} */
 
 .select2-container {
-  max-width: 200px !important;
+  max-width: 210px !important;
+}
+
+@media screen and (min-width: 330px) {
+  .select2-container {
+    max-width: 250px !important;
+  }
 }
 
 @media screen and (min-width: 480px) {
