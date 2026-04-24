@@ -111,11 +111,11 @@
   }
 
   .entry-content ul {
-    @apply my-6 list-disc pl-10
+    @apply mb-6 list-disc pl-10
   }
 
   .entry-content li {
-    @apply my-4
+    @apply mb-4
   }
 
   .entry-content blockquote {
@@ -123,36 +123,37 @@
   }
 
   .entry-content h1 {
-    @apply my-6 text-3xl
+    @apply mb-6 text-3xl
   }
 
   .entry-content h2 {
-    @apply my-6 text-2xl
+    @apply mb-6 text-2xl
   }
 
   .entry-content h3 {
-    @apply my-6 text-xl
+    @apply mb-6 text-xl
   }
 
   .entry-content h4 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
   .entry-content h5 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
   .entry-content h6 {
-    @apply my-6 text-lg
+    @apply mb-6 text-lg
   }
 
 
   .entry-content p,
   .entry-content pre,
   .entry-content figure,
+  .entry-content table,
   .entry-content img,
   .entry-content hr {
-    @apply my-6;
+    @apply mb-6;
   }
 
   .entry-content figcaption {
@@ -183,6 +184,25 @@
 
   .full-height-minus-nav {
     height: calc(100vh - 9rem);
+  }
+
+  .route-color-swatch {
+    @apply min-w-[29px] h-[29px] rounded-full inline-flex items-center justify-center text-xs tracking-[-0.5px] px-[2px] shrink-0 font-bold text-white;
+  }
+
+  /* Responsive variant for contexts that need larger swatches on sm+ */
+  .route-color-swatch-responsive {
+    @apply min-w-[29px] h-[29px] rounded-full inline-flex items-center justify-center text-xs tracking-[-0.5px] px-[2px] shrink-0 font-bold text-white;
+  }
+
+  @screen xs {
+    .route-color-swatch-responsive {
+      @apply min-w-[46px] h-[46px] text-xl tracking-[-1px] px-1.5;
+    }
+  }
+
+  .route-color-swatch-large {
+    @apply min-w-[46px] h-[46px] rounded-full inline-flex items-center justify-center text-xl font-bold tracking-[-1px] px-1.5 shrink-0 text-white;
   }
 
 }

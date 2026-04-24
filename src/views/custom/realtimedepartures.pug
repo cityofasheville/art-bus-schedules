@@ -11,23 +11,27 @@ include formatting_functions.pug
 
 //- .relative.w-full.h-full.flex.flex-col
 //- div(class="h-full w-full relative")
-h1(class="sr-only")=pageTitleToUse
+//- h1(class="sr-only")=pageTitleToUse
+  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+div(class="relative w-full border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
+  div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
+    h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
+      span=pageTitleToUse
+
+div(class="w-full min-h-128 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center")
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-div(class="w-full min-h-128 relative flex-grow flex items-start justify-center")
-  img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
-
   //-  px-6 lg:px-12
-  div(class="w-full max-w-7xl mx-6 flex items-center justify-center lg:justify-center  my-12")
+  div(class="w-full max-w-7xl px-4 flex items-center justify-center lg:justify-center my-12")
     div(id="container_real_time_departures" class="w-full sm:w-[32rem] lg:w-[48rem] z-10")
       div(class="w-full min-h-64 z-10 bg-aux-gray border rounded-lg shadow-lg p-0 overflow-hidden")
-        h2(class="p-4 px-4 text-white text-2xl m-0 rounded-t-sm bg-art-green")
+        h2(id="tr_departures_heading" class="p-4 px-4 text-white text-2xl m-0 rounded-t-sm bg-art-green")
           i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
           span(class="inline-block")="Real-time Departures"
         div(class="p-4")
-          fieldset#departure_interface_selector.p-4.border.shadow-md
-            //- legend="Find real-time departures for a stop"
-            div(class=`w-full grid grid-cols-3 btn-group rounded-xl`)
+          fieldset(id="departure_interface_selector" class="mb-6")
+            legend(class="sr-only")="Find real-time departures"
+            div(class=`w-full grid grid-cols-3 btn-group rounded-xl mb-6` role="radiogroup" aria-label="Select interface for finding real-time departures")
               label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
                 input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
                 span= "By Stop"
@@ -38,7 +42,7 @@ div(class="w-full min-h-128 relative flex-grow flex items-start justify-center")
                 input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
                 span= "By Route"
 
-            div(id="container_search_stop" class="departure-interface p-4")
+            div(id="container_search_stop" class="departure-interface")
               p.mb-4="Select a stop to see real time departure information"
               select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
                 option(value="") Select a stop
@@ -70,7 +74,7 @@ div(class="w-full min-h-128 relative flex-grow flex items-start justify-center")
                 select#stop-by-route-select-dropdown.border.p-2.w-full(disabled)
                   option(value="") Select a stop
 
-          output#results-container.max-w-screen-lg.mx-auto.block.py-6 
+          output(id="results-container" class="max-w-screen-lg mx-auto block")
 
 script.
     window.config = !{JSON.stringify(config)};

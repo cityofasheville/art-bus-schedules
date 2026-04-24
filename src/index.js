@@ -81,6 +81,7 @@ async function getWordPressData() {
       howToRideResponse,
       faresAndPassesResponse,
       transitConnectResponse,
+      holidaysResponse,
       adaResponse,
       bikesResponse,
       passportResponse,
@@ -90,6 +91,9 @@ async function getWordPressData() {
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'),
+      fetch(
+        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/141640?_fields=title,content,acf',
+      ),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content,acf'),
       fetch(
@@ -122,6 +126,7 @@ async function getWordPressData() {
       howToRideData,
       faresAndPassesData,
       transitConnectData,
+      holidaysData,
       transitNewsData,
       adaData,
       bikesData,
@@ -131,6 +136,7 @@ async function getWordPressData() {
       howToRideResponse.json(),
       faresAndPassesResponse.json(),
       transitConnectResponse.json(),
+      holidaysResponse.json(),
       transitNewsResponse.json(),
       adaResponse.json(),
       bikesResponse.json(),
@@ -142,6 +148,7 @@ async function getWordPressData() {
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
     returnedData.transitAbout = transitConnectData;
+    returnedData.holidays = holidaysData;
     returnedData.transitNews = transitNewsData;
     returnedData.ada = adaData;
     returnedData.bikesOnBuses = bikesData;

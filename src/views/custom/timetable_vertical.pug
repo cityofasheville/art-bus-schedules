@@ -44,7 +44,7 @@ div(class="table-container max-h-[600px]" id=`table-container-${formatHtmlId(tim
 
           th(class=`stop-header ${stop.is_timepoint? 'font-bold' : 'font-normal'} sticky top-0 bg-aux-gray z-10` scope="col" data-is-timepoint=`${stop.is_timepoint}` width=`${(100 / columnCount).toFixed(2)}%`)
             include timetable_stop_name.pug
-            i(class="bi bi-clock-fill ml-1 text-gray-500" aria-hidden="true")
+            //- i(class="bi bi-clock-fill ml-1 text-gray-500" aria-hidden="true")
 
         if timetable.has_continues_as_route
           th.stop-header.continues-as Continues as route

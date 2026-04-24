@@ -13,6 +13,10 @@ let rtPositionsPaused = false;
 let previousVehicleCount = null;
 let dataFetchTimestamp = null; // Timestamp (in seconds) when GTFS-RT data was fetched
 
+// Configuration flag: when true, only show vehicle markers that match the
+// direction_id of the currently visible map. When false, show all vehicles.
+const filterVehiclesByDirection = true;
+
 console.log('timetable-map script loaded');
 
 function formatRouteColor(route) {
@@ -95,7 +99,7 @@ function getStopPopupHtml(feature, stop) {
 
   jQuery('<div>').addClass('popup-title').text(stop.stop_name).appendTo(html);
 
-  if (stop.stop_code ?? false) {
+  if (stop.stop_code && false) {
     jQuery('<div>')
       .html([
         jQuery('<div>').addClass('popup-label')
@@ -109,7 +113,7 @@ function getStopPopupHtml(feature, stop) {
   // Injecting upcoming departures into the stop popup is currently disabled as it included arrivals from other routes that serve the same stop,
   // which can be confusing without additional context (such as route names or a filter to only show arrivals for the currently viewed route)
   // The code is left here for easy re-enabling in the future when we can optimize it further
-  if (false && tripUpdates) {
+  if (false || tripUpdates) {
     const stopTimeUpdates = {
       0: [],
       1: [],
@@ -624,8 +628,8 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
   // Create a DOM element for each marker
   const el = document.createElement('div');
   el.className = 'vehicle-marker';
-  el.style.width = '20px';
-  el.style.height = '20px';
+  el.style.width = '30px';
+  el.style.height = '30px';
 
   if (vehicleDirectionArrow) {
     el.innerHTML = vehicleDirectionArrow;
@@ -782,8 +786,26 @@ async function updateArrivals({ withMap = true } = {}) {
     });
 
     if (withMap) {
+      // Get the direction_id from the visible map container for filtering
+      const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
+      const mapDirectionId = visibleMapContainer.length
+        ? String(visibleMapContainer.data('direction-id'))
+        : null;
+
       for (const vehiclePosition of vehiclePositions) {
         const vehicleId = vehiclePosition.vehicle.vehicle.id;
+
+        // Get direction_id from the vehicle's trip
+        const vehicleDirectionId =
+          vehiclePosition.vehicle.trip.direction_id !== undefined
+            ? String(vehiclePosition.vehicle.trip.direction_id)
+            : null;
+
+        // If filtering is enabled, skip vehicles that don't match the map's direction
+        const shouldShowVehicle =
+          !filterVehiclesByDirection ||
+          mapDirectionId === null ||
+          vehicleDirectionId === mapDirectionId;
 
         let vehicleTripUpdate = tripUpdates?.find(
           (tripUpdate) =>
@@ -797,6 +819,15 @@ async function updateArrivals({ withMap = true } = {}) {
         }
 
         let vehicleMarker = vehicleMarkers[vehicleId];
+
+        // If vehicle should not be shown, remove it if it exists and skip
+        if (!shouldShowVehicle) {
+          if (vehicleMarker) {
+            vehicleMarker.remove();
+            delete vehicleMarkers[vehicleId];
+          }
+          continue;
+        }
 
         if (vehicleMarker === undefined) {
           // If not on map, add it
@@ -844,21 +875,87 @@ function toggleMap(id) {
     const bounds = getBounds(geojson);
     fitMapToBounds(maps[id], bounds);
 
-    // Update vehicle markers to use the current visible map
+    // Get the direction_id for the new visible map container
+    const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
+    const mapDirectionId = visibleMapContainer.length
+      ? String(visibleMapContainer.data('direction-id'))
+      : null;
+
+    // Update vehicle markers to use the current visible map, applying direction filter
     for (const [vehicleId, vehicleMarker] of Object.entries(vehicleMarkers)) {
-      const vehiclePosition = vehiclePositions.find(
+      const vehiclePosition = vehiclePositions?.find(
         (vehiclePosition) => vehiclePosition.vehicle.vehicle.id === vehicleId,
       );
 
-      const vehicleTripUpdate = tripUpdates.find((tripUpdate) => {
+      if (!vehiclePosition) {
+        // Vehicle no longer in feed, remove it
+        vehicleMarker.remove();
+        delete vehicleMarkers[vehicleId];
+        continue;
+      }
+
+      // Check if vehicle matches the current map's direction
+      const vehicleDirectionId =
+        vehiclePosition.vehicle.trip.direction_id !== undefined
+          ? String(vehiclePosition.vehicle.trip.direction_id)
+          : null;
+
+      const shouldShowVehicle =
+        !filterVehiclesByDirection ||
+        mapDirectionId === null ||
+        vehicleDirectionId === mapDirectionId;
+
+      if (!shouldShowVehicle) {
+        // Remove marker if it doesn't match the direction
+        vehicleMarker.remove();
+        delete vehicleMarkers[vehicleId];
+        continue;
+      }
+
+      const vehicleTripUpdate = tripUpdates?.find((tripUpdate) => {
         // console.log('tripUpdate', tripUpdate);
-        tripUpdate?.trip_update?.vehicle?.id === vehicleId;
+        return tripUpdate?.trip_update?.vehicle?.id === vehicleId;
       });
 
       attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[id]);
 
       // Move marker to the current visible map
       vehicleMarker.addTo(maps[id]);
+    }
+
+    // Add any vehicles that match the new direction but weren't previously shown
+    if (filterVehiclesByDirection && vehiclePositions) {
+      for (const vehiclePosition of vehiclePositions) {
+        const vehicleId = vehiclePosition.vehicle.vehicle.id;
+
+        // Skip if marker already exists
+        if (vehicleMarkers[vehicleId]) {
+          continue;
+        }
+
+        const vehicleDirectionId =
+          vehiclePosition.vehicle.trip.direction_id !== undefined
+            ? String(vehiclePosition.vehicle.trip.direction_id)
+            : null;
+
+        const shouldShowVehicle = mapDirectionId === null || vehicleDirectionId === mapDirectionId;
+
+        if (shouldShowVehicle) {
+          let vehicleTripUpdate = tripUpdates?.find(
+            (tripUpdate) =>
+              tripUpdate.trip_update.trip.trip_id === vehiclePosition.vehicle.trip.trip_id,
+          );
+
+          if (!vehicleTripUpdate) {
+            vehicleTripUpdate = tripUpdates?.find(
+              (tripUpdate) => tripUpdate.trip_update.vehicle?.id === vehicleId,
+            );
+          }
+
+          addVehicleMarker(vehiclePosition, vehicleTripUpdate);
+          attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[id]);
+        }
+      }
     }
   }
 }

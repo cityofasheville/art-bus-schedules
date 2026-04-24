@@ -1,4 +1,4 @@
-include formatting_functions.pug
+include ../formatting_functions.pug
 //- -const alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
 -
 -// Build a route/direction -> stops mapping using trips and stopTimes
@@ -14,11 +14,30 @@ div(class="")
   //- h1(class="sr-only")=pageTitleToUse
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-  div(class="w-full min-h-128 relative flex items-center justify-start")
-    img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
+div(class="relative w-full border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
+  div(class="w-full max-w-screen-lg mx-auto p-4 z-10")
+    h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
+      span="ART Service Alerts"
 
+//- div(class="w-full max-w-screen-lg mx-auto px-4 py-8")
+div(class="w-full min-h-128 px-4 py-8 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center")
+  div(class="w-full bg-aux-gray max-w-screen-lg mx-auto p-6 rounded-lg")
+    div(class=" w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
+      h2(class="py-4 text-black text-2xl m-0")
+        i(class="inline-block bi bi-bell-fill mr-2" aria-hidden="true")
+        span(class="inline-block")="Service Alert Listing"
 
-  div(class="w-full bg-aux-gray p-6 lg:p-12 border-t-[16px] border-b-[16px] border-aux-red")
+      div(class="timetable-alerts")
+        //- Route selector - clickable swatches for affected routes
+        nav#alerts-route-selector(aria-label="Filter alerts by route" class="mb-6")
+          p#alerts-loading-message(class="text-gray-600") Checking for service alerts...
+          div#alerts-route-list(class="flex flex-wrap gap-3" role="tablist" aria-label="Routes with active alerts")
+          
+        //- Target container for displaying alerts for selected route
+        div#alerts-display-container(role="tabpanel" aria-live="polite" class="min-h-24")
+          p#alerts-select-prompt(class="text-gray-600 hidden") Select a route above to view its alerts.
+
+  //- div(class="w-full bg-aux-gray p-6 lg:p-12 border-t-[16px] border-b-[16px] border-aux-red")
     div(class="w-full max-w-7xl mx-auto ")
       div(class=" w-full max-w-screen-sm lg:max-w-full mx-auto p-0 mb-6 lg:mb-0")
         //- div(class="w-full py-1 bg-art-green rounded-t-sm")
