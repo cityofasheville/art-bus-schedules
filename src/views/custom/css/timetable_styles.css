@@ -49,7 +49,8 @@ a:hover {
   color: #F1F5FB;
 } */
 
-div[data-stops='all-stops'] col[data-is-timepoint='true'] {
+div[data-stops='all-stops'] col[data-is-timepoint='true'],
+div[data-stops='all-stops'] col[data-is-timepoint='true'] th {
   border-top: 4px solid #1C2634;
 }
 

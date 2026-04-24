@@ -4,7 +4,8 @@ td.stop-time(class=`${stoptime.classes.join(' ')}`)
   if stoptime.skipped && timetable.noServiceSymbol !== null
     a(href=`#note-${timetable.timetable_id}-no-service`).symbol= timetable.noServiceSymbol
   if stoptime.interpolated && timetable.interpolatedStopSymbol !== null
-    a(href=`#note-${timetable.timetable_id}-interpolated-stop`).symbol= timetable.interpolatedStopSymbol
+    span(title="Estimated" class="ml-1 symbol symbol-timetable" aria-describedby=`note-${timetable.timetable_id}-interpolated-stop`)= timetable.interpolatedStopSymbol
+    //- a(href=`#note-${timetable.timetable_id}-interpolated-stop`).symbol= timetable.interpolatedStopSymbol
   if stoptime.requestPickup && timetable.requestPickupSymbol !== null
     a(href=`#note-${timetable.timetable_id}-request-pickup`).symbol= timetable.requestPickupSymbol
   if stoptime.noPickup && timetable.noPickupSymbol !== null

@@ -79,16 +79,20 @@ async function getWordPressData() {
   try {
     const [
       howToRideResponse,
+      reportIssuesResponse,
       faresAndPassesResponse,
       transitConnectResponse,
       holidaysResponse,
       adaResponse,
       bikesResponse,
+      wifiTermsResponse,
+      wifiFaqsResponse,
       passportResponse,
       policiesAndTipsResponse,
       transitNewsResponse,
     ] = await Promise.all([
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/492?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'),
       fetch(
@@ -96,6 +100,12 @@ async function getWordPressData() {
       ),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content,acf'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content,acf'),
+      fetch(
+        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/92483?_fields=title,content,acf',
+      ),
+      fetch(
+        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/93145?_fields=title,content,acf',
+      ),
       fetch(
         'https://www.ashevillenc.gov/wp-json/wp/v2/departments/99420?_fields=title,content,acf',
       ),
@@ -121,30 +131,63 @@ async function getWordPressData() {
     if (!transitNewsResponse.ok) {
       throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
     }
+    if (!holidaysResponse.ok) {
+      throw new Error(`HTTP error fetching Holidays! status: ${holidaysResponse.status}`);
+    }
+    if (!adaResponse.ok) {
+      throw new Error(`HTTP error fetching ADA! status: ${adaResponse.status}`);
+    }
+    if (!bikesResponse.ok) {
+      throw new Error(`HTTP error fetching Bikes on Buses! status: ${bikesResponse.status}`);
+    }
+    if (!passportResponse.ok) {
+      throw new Error(`HTTP error fetching Passport! status: ${passportResponse.status}`);
+    }
+    if (!policiesAndTipsResponse.ok) {
+      throw new Error(
+        `HTTP error fetching Policies and Tips! status: ${policiesAndTipsResponse.status}`,
+      );
+    }
+    if (!transitNewsResponse.ok) {
+      throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
+    }
+    if (!wifiTermsResponse.ok) {
+      throw new Error(`HTTP error fetching Wi-Fi Terms! status: ${wifiTermsResponse.status}`);
+    }
+    if (!wifiFaqsResponse.ok) {
+      throw new Error(`HTTP error fetching Wi-Fi FAQs! status: ${wifiFaqsResponse.status}`);
+    }
 
     const [
       howToRideData,
+      reportIssuesData,
       faresAndPassesData,
       transitConnectData,
       holidaysData,
       transitNewsData,
       adaData,
       bikesData,
+      wifiTermsData,
+      wifiFaqsData,
       passportData,
       policiesAndTipsData,
     ] = await Promise.all([
       howToRideResponse.json(),
+      reportIssuesResponse.json(),
       faresAndPassesResponse.json(),
       transitConnectResponse.json(),
       holidaysResponse.json(),
       transitNewsResponse.json(),
       adaResponse.json(),
       bikesResponse.json(),
+      wifiTermsResponse.json(),
+      wifiFaqsResponse.json(),
       passportResponse.json(),
       policiesAndTipsResponse.json(),
     ]);
 
     returnedData.howToRide = howToRideData;
+    returnedData.reportIssues = reportIssuesData;
     returnedData.faresAndPasses = faresAndPassesData;
     returnedData.transitConnect = transitConnectData.acf;
     returnedData.transitAbout = transitConnectData;
@@ -152,6 +195,8 @@ async function getWordPressData() {
     returnedData.transitNews = transitNewsData;
     returnedData.ada = adaData;
     returnedData.bikesOnBuses = bikesData;
+    returnedData.wifiTerms = wifiTermsData;
+    returnedData.wifiFaqs = wifiFaqsData;
     returnedData.passport = passportData;
     returnedData.policiesAndTips = policiesAndTipsData;
     returnedData.title = 'HC title';
