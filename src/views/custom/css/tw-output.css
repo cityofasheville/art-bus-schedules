@@ -1001,6 +1001,12 @@ fieldset:has(input:focus) {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.symbol-timetable {
+  cursor: pointer;
+  text-align: center;
+  font-weight: 700;
+}
+
 .\!container {
   width: 100% !important;
 }
@@ -1621,6 +1627,11 @@ fieldset:has(input:focus) {
   border-width: 4px;
 }
 
+.border-x {
+  border-left-width: 1px;
+  border-right-width: 1px;
+}
+
 .border-b {
   border-bottom-width: 1px;
 }
@@ -1824,11 +1835,6 @@ fieldset:has(input:focus) {
   padding-right: 0px;
 }
 
-.px-12 {
-  padding-left: 3rem;
-  padding-right: 3rem;
-}
-
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -1892,6 +1898,11 @@ fieldset:has(input:focus) {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .pb-2 {
@@ -2106,6 +2117,10 @@ fieldset:has(input:focus) {
   text-decoration-line: underline;
 }
 
+.no-underline {
+  text-decoration-line: none;
+}
+
 .opacity-0 {
   opacity: 0;
 }
@@ -2161,6 +2176,26 @@ fieldset:has(input:focus) {
 
 .duration-200 {
   transition-duration: 200ms;
+}
+
+@media (min-width: 480px) {
+  .xs\:route-color-swatch-large {
+    display: inline-flex;
+    height: 46px;
+    min-width: 46px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    --tw-text-opacity: 1;
+    color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  }
 }
 
 .last\:border-b-0:last-child {
@@ -2270,6 +2305,18 @@ fieldset:has(input:focus) {
 .has-\[button\:hover\]\:border-art-blue:has(button:hover) {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
+}
+
+@media (min-width: 480px) {
+  .xs\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .xs\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -2428,12 +2475,27 @@ fieldset:has(input:focus) {
     flex-direction: row;
   }
 
+  .md\:border-x-0 {
+    border-left-width: 0px;
+    border-right-width: 0px;
+  }
+
   .md\:p-12 {
     padding: 3rem;
   }
 
+  .md\:px-12 {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+
   .md\:text-right {
     text-align: right;
+  }
+
+  .md\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 }
 

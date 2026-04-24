@@ -401,7 +401,7 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
 
   if (!vehiclePositions || vehiclePositions.length === 0) {
     container.append(
-      jQuery('<p>').addClass('p-4 text-gray-500').text('No active vehicles at this time.'),
+      jQuery('<p>').addClass('p-4 text-gray-700').text('No active vehicles at this time.'),
     );
     return;
   }
@@ -504,7 +504,7 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     }
 
     jQuery('<p>')
-      .addClass('text-xs text-gray-400 mt-2 mb-0')
+      .addClass('text-xs text-gray-700 mt-2 mb-0')
       .text(`Updated: ${lastUpdated.toLocaleTimeString()}`)
       .appendTo(vehicleCard);
 
@@ -628,8 +628,8 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
   // Create a DOM element for each marker
   const el = document.createElement('div');
   el.className = 'vehicle-marker';
-  el.style.width = '30px';
-  el.style.height = '30px';
+  el.style.width = '25px';
+  el.style.height = '25px';
 
   if (vehicleDirectionArrow) {
     el.innerHTML = vehicleDirectionArrow;

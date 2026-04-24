@@ -205,4 +205,8 @@
     @apply min-w-[46px] h-[46px] rounded-full inline-flex items-center justify-center text-xl font-bold tracking-[-1px] px-1.5 shrink-0 text-white;
   }
 
+  .symbol-timetable {
+    @apply text-center font-bold cursor-pointer;
+  }
+
 }

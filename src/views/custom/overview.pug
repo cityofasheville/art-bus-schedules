@@ -63,26 +63,26 @@ div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
                           span(class="sr-only") to
                           i(class="bi bi-arrow-right mx-1 text-gray-500" aria-hidden="true")
 
-div(id="all_routes_map" class="timetable-overview flex flex-col-reverse md:flex-row border hidden")
+div(id="all_routes_map" class="timetable-overview flex flex-col-reverse px-6 mb-12 md:flex-row hidden")
   if !timetablePages || !timetablePages.length
     h1 No timetables found
   else
-    div(class="overview-list md:max-h-none w-full md:max-w-sm overflow-y-scroll")
+    div(class="overview-list border-x md:border-x-0 md:max-h-none w-full md:max-w-sm overflow-y-scroll")
       each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
         h1.text-decoration-line-through= `${formatListForDisplay(agencies.map((agency) => agency.agency_name))} Routes`
         ul 
           each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
             if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
               li.coa-timetable-page-link-item
-                a.timetable-page-link(href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
+                a(class="flex gap-2 no-underline hover:no-underline hover-bg-aux-gray p-2")(href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                   - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                   each route in timetableRouteList
-                    .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
+                    span(class="route-color-swatch xs:route-color-swatch-large")(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
                   div
                     div(class="timetable-page-label mb-1")= timetablePage.timetable_page_label
                     - const routeDescParts = (timetableRouteList[0] && timetableRouteList[0].route_desc) ? timetableRouteList[0].route_desc.split(' - ') : []
                     each part, index in routeDescParts
-                      div.text-sm
+                      div(class="text-xs xs:text-sm")
                         span= part
                         if index < routeDescParts.length - 1
                           i(class="bi bi-arrow-right ml-1 text-gray-500" aria-hidden="true")
@@ -96,7 +96,7 @@ div(id="all_routes_map" class="timetable-overview flex flex-col-reverse md:flex-
                 button.zoom-to(data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                   i.bi.bi-zoom-in(aria-hidden="true")
     if config.showMap
-      div#system_map(class="overview-map w-100 md:flex-1 h-96 md:h-auto")
+      div#system_map(class="overview-map border w-100 md:flex-1 h-96 md:h-auto")
 
       //- Use !{variable} format to inject values from pug to client side js
       script.
