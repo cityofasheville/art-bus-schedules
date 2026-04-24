@@ -67,7 +67,7 @@ div(id="all_routes_map" class="timetable-overview flex flex-col-reverse px-6 mb-
   if !timetablePages || !timetablePages.length
     h1 No timetables found
   else
-    div(class="overview-list border-x md:border-x-0 md:max-h-none w-full md:max-w-sm overflow-y-scroll")
+    div(class="overview-list border-x md:border-x-0 border-x md:border-x-0 md:max-h-none w-full md:max-w-sm shadow-xl md:shadow-none overflow-y-scroll")
       each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
         h1.text-decoration-line-through= `${formatListForDisplay(agencies.map((agency) => agency.agency_name))} Routes`
         ul 
