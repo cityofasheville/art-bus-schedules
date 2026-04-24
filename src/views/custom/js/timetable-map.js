@@ -601,6 +601,10 @@ function attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, map
 
   vehicleMarkersEventListeners[vehiclePosition.vehicle.vehicle.id] = (event) => {
     event.stopPropagation();
+
+    // Close stop popup if open (stop remains highlighted)
+    closeStopPopup();
+
     if (vehiclePopup.isOpen()) {
       vehiclePopup.remove();
     }
@@ -985,15 +989,32 @@ function createMap(id) {
     center: bounds.getCenter(),
     zoom: 12,
     preserveDrawingBuffer: true,
+    cooperativeGestures: true,
   });
 
   map.initialize = () => fitMapToBounds(map, bounds);
 
-  map.scrollZoom.disable();
+  // cooperativeGestures handles scroll/touch behavior - no need to disable scrollZoom
   map.addControl(new maplibregl.NavigationControl());
   map.addControl(new maplibregl.FullscreenControl());
 
   map.on('load', () => {
+    // Set accessibility attributes on canvas
+    const canvas = map.getCanvas();
+    canvas.setAttribute('role', 'img');
+    // Get route info from timetable element for descriptive label
+    const timetableEl = jQuery(`.timetable`).first();
+    const routeId = timetableEl.data('route-id');
+    const firstRouteId = routeId ? String(routeId).split('_')[0] : null;
+    const route = firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
+    const routeLabel = route
+      ? `Route ${route.route_short_name}${route.route_long_name ? ' - ' + route.route_long_name : ''}`
+      : 'Bus route';
+    canvas.setAttribute(
+      'aria-label',
+      `Interactive map showing ${routeLabel} with stops and real-time vehicle locations`,
+    );
+
     fitMapToBounds(map, bounds);
     disablePointsOfInterest(map);
     addMapLayers(map, geojson, defaultRouteColor, lineLayout);
@@ -1224,6 +1245,11 @@ function showStopPopup(map, feature) {
   // Close any existing stop popup first
   closeStopPopup();
 
+  // Close vehicle popup if open
+  if (vehiclePopup && vehiclePopup.isOpen()) {
+    vehiclePopup.remove();
+  }
+
   stopPopup = new maplibregl.Popup()
     .setLngLat(feature.geometry.coordinates)
     .setHTML(getStopPopupHtml(feature, stopData[feature.properties.stop_id]))
@@ -1364,37 +1390,62 @@ function unHighlightTimetableStops(id) {
 }
 
 function setupTableHoverListeners(id, map) {
-  // Use click instead of hover for table cell highlighting
-  jQuery('th.stop-header, td.stop-time', jQuery(`#timetable_id_${id} table`)).on(
-    'click',
-    (event) => {
-      // Get the actual td or th element, not a child element that was clicked
-      const actualCell = jQuery(event.target).closest('td, th');
-      const stopId = getStopIdFromTableCell(actualCell);
+  const table = jQuery(`#timetable_id_${id} table`);
+  const stopHeaders = jQuery('th.stop-header:not(.continues-from):not(.continues-as)', table);
 
-      if (stopId !== undefined) {
-        const isAlreadyHighlighted = actualCell.hasClass('highlighted');
+  // Make stop headers keyboard accessible
+  stopHeaders.each(function () {
+    const header = jQuery(this);
+    header.attr({
+      tabindex: '0',
+      role: 'button',
+      'aria-pressed': 'false',
+    });
+  });
 
-        if (isAlreadyHighlighted) {
-          // Clear highlights using unified function
-          if (typeof clearStopSelection === 'function') {
-            clearStopSelection(id);
-          } else {
-            unHighlightTimetableStops(id);
-            unHighlightStop(map, id);
-          }
+  // Shared handler for both click and keyboard activation
+  function handleStopCellActivation(event) {
+    const actualCell = jQuery(event.target).closest('td, th');
+    const stopId = getStopIdFromTableCell(actualCell);
+
+    if (stopId !== undefined) {
+      const isAlreadyHighlighted = actualCell.hasClass('highlighted');
+
+      if (isAlreadyHighlighted) {
+        // Clear highlights using unified function
+        if (typeof clearStopSelection === 'function') {
+          clearStopSelection(id);
         } else {
-          // Use unified selectStop function to highlight everything
-          if (typeof selectStop === 'function') {
-            selectStop(stopId.toString(), id, { fromTable: true, showPopup: false });
-          } else {
-            highlightStop(map, id, [stopId.toString()]);
-            highlightTimetableStops(id, [stopId.toString()]);
-          }
+          unHighlightTimetableStops(id);
+          unHighlightStop(map, id);
         }
+        // Update aria-pressed for all headers
+        stopHeaders.attr('aria-pressed', 'false');
+      } else {
+        // Use unified selectStop function to highlight everything
+        if (typeof selectStop === 'function') {
+          selectStop(stopId.toString(), id, { fromTable: true, showPopup: false });
+        } else {
+          highlightStop(map, id, [stopId.toString()]);
+          highlightTimetableStops(id, [stopId.toString()]);
+        }
+        // Update aria-pressed
+        stopHeaders.attr('aria-pressed', 'false');
+        actualCell.attr('aria-pressed', 'true');
       }
-    },
-  );
+    }
+  }
+
+  // Click handler for mouse users
+  jQuery('th.stop-header, td.stop-time', table).on('click', handleStopCellActivation);
+
+  // Keyboard handler for Enter/Space on stop headers
+  stopHeaders.on('keydown', function (event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleStopCellActivation(event);
+    }
+  });
 }
 
 function getStopIdFromTableCell(cell) {
@@ -1436,7 +1487,7 @@ function createMaps() {
     const markerRadius = 10;
     const linearOffset = 15;
     vehiclePopup = new maplibregl.Popup({
-      closeOnClick: false,
+      closeOnClick: true,
       className: 'vehicle-popup',
       offset: {
         top: [0, 0],
@@ -1459,6 +1510,25 @@ function createMaps() {
 
   // Initialize pause button for RT positions container
   initRtPositionsPauseButton();
+
+  // Add document-level escape key handler to close popups
+  jQuery(document).on('keydown.timetableMap', function (event) {
+    if (event.key === 'Escape') {
+      let closedPopup = false;
+
+      // Close vehicle popup if open
+      if (vehiclePopup && vehiclePopup.isOpen()) {
+        vehiclePopup.remove();
+        closedPopup = true;
+      }
+
+      // Close stop popup if open
+      if (stopPopup) {
+        closeStopPopup();
+        closedPopup = true;
+      }
+    }
+  });
 }
 
 // function augmentArrivalInfo(arrival, stop_id) {

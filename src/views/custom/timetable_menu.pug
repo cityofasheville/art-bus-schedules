@@ -30,31 +30,33 @@ if timetablePage.consolidatedTimetables.length > 1
             a.btn-blue(href=`#timetable_id_${timetable.timetable_id}`)= timetable.timetable_label
 
   if config.menuType === 'radio'
-    .timetable-radio-menu
+    .timetable-radio-menu(role="group" aria-label="Timetable display options")
+      //- Live region to announce changes to screen readers
+      div(id="timetable_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
       -const uniqueDirectionTimetablesC = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
       -timetablePage.dayLists.sort();
-      fieldset#direction_name_selector.p-4.border.shadow-md
-        legend="CoA Service Direction"
+      fieldset#direction_name_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container coa_main_map_container")
+        legend="Service Direction"
         div(class=`w-full grid grid-cols-${uniqueDirectionTimetablesC.length} btn-group`)
           each timetable, idx in uniqueDirectionTimetablesC
             label.relative.btn-gray.text-center.cursor-pointer(for=`radio_dir_${timetable.direction_id}`)
               input(class="opacity-0 absolute top-0 left-0" type="radio" name="directionId" value=timetable.direction_id id=`radio_dir_${timetable.direction_id}`)
               span=timetable.direction_name
-      fieldset#day_list_selector.p-4.border.shadow-md
+      fieldset#day_list_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container coa_main_map_container")
         legend="Day of Week"
         div(class=`w-full grid grid-cols-${timetablePage.dayLists.length} btn-group`)
           each dayList, idx in timetablePage.dayLists
             label.relative.btn-gray.text-center.cursor-pointer(for=`radio_day_${dayList}`)
               input(class="opacity-0 absolute top-0 left-0" type="radio" name="dayList" value=dayList id=`radio_day_${dayList}`)
               span=`${dayList === 'Sun' ? 'Sun / Hol' : dayList}`
-      fieldset#timepoint_selector.p-4.border.shadow-md
-        legend="Stops"
+      fieldset#timepoint_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container")
+        legend="Timetable Stops"
         div(class=`w-full grid grid-cols-2 btn-group`)
           label.relative.btn-gray.text-center.cursor-pointer(for="radio_timepoints_only")
-            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="timepoints_only" checked=true id="radio_timepoints_only")
+            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="timepoints_only" id="radio_timepoints_only")
             span= "Timepoints Only"
           label.relative.btn-gray.text-center.cursor-pointer(for="radio_all_stops")
-            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="all_stops" checked=false id="radio_all_stops")
+            input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="all_stops" id="radio_all_stops")
             span= "All Stops"
 
              

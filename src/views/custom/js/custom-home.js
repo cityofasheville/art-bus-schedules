@@ -2,6 +2,17 @@
 
 let tripUpdates;
 
+/**
+ * Announces a status message to screen readers via the live region
+ * @param {string} message - The message to announce
+ */
+function announceDepartureStatus(message) {
+  const statusEl = jQuery('#departure_status');
+  if (statusEl.length) {
+    statusEl.text(message);
+  }
+}
+
 function showSelectedInterface() {
   jQuery('#departure_interface_selector input[name="departure_interface"]').each(
     (index, element) => {
@@ -416,8 +427,15 @@ jQuery(() => {
 
   showSelectedInterface();
 
-  jQuery('#departure_interface_selector input[name="departure_interface"]').change(() => {
+  jQuery('#departure_interface_selector input[name="departure_interface"]').change(function () {
     showSelectedInterface();
+    const selectedValue = jQuery(this).val();
+    const labels = {
+      search_stop: 'Search by stop',
+      favorites: 'Favorite stops',
+      choose_route: 'Search by route',
+    };
+    announceDepartureStatus('Showing ' + (labels[selectedValue] || selectedValue));
   });
   console.log('Route data and stop data loaded:', routeData, directions, routeDirectionStops);
   const favorite_stops = getFavoriteStops();

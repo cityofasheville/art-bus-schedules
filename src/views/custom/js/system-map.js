@@ -127,6 +127,7 @@ function createSystemMap() {
     style: mapStyleUrl,
     center: bounds.getCenter(),
     zoom: 12,
+    cooperativeGestures: true,
   });
   const routes = {};
 
@@ -140,13 +141,21 @@ function createSystemMap() {
   // Store map globally for external access
   window.systemMap = map;
 
-  map.scrollZoom.disable();
+  // cooperativeGestures handles scroll/touch behavior - no need to disable scrollZoom
   map.addControl(new maplibregl.NavigationControl());
   map.addControl(new maplibregl.FullscreenControl());
 
-  addGeocoder(map, bounds);
+  // addGeocoder(map, bounds);
 
   map.on('load', () => {
+    // Set accessibility attributes on canvas
+    const canvas = map.getCanvas();
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute(
+      'aria-label',
+      'Interactive transit system map showing all bus routes and stops',
+    );
+
     fitMapToBounds(map, bounds);
     disablePointsOfInterest(map);
     addMapLayers(map, geojson, defaultRouteColor, lineLayout);
@@ -198,6 +207,10 @@ function addGeocoder(map, bounds) {
       {
         maplibregl,
         zoom: 12,
+        showResultsWhileTyping: true,
+        minLength: 3,
+        debounceSearch: 300,
+        placeholder: 'Search for a place or address',
       },
     ),
     'top-left',
@@ -469,6 +482,21 @@ function addRouteLabels(map, geojson) {
 function setupEventListeners(map, routes) {
   map.on('mousemove', (event) => handleMouseMove(event, map, routes));
   map.on('click', (event) => handleClick(event, map));
+
+  // Set pointer cursor on stop hover (works regardless of manual highlight state)
+  map.on('mouseenter', 'stops', () => {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+  map.on('mouseenter', 'stops-highlighted', () => {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+  map.on('mouseleave', 'stops', () => {
+    map.getCanvas().style.cursor = '';
+  });
+  map.on('mouseleave', 'stops-highlighted', () => {
+    map.getCanvas().style.cursor = '';
+  });
+
   setupTableHoverListeners(map);
 }
 
@@ -646,6 +674,13 @@ function setupTableHoverListeners(map) {
 
     jQuery(document).on('keydown', function (event) {
       if (event.key === 'Escape') {
+        // First check for open popups and close them
+        const openPopups = jQuery('.maplibregl-popup');
+        if (openPopups.length > 0) {
+          openPopups.remove();
+          return;
+        }
+        // No popups open, so unhighlight routes
         map._manualHighlight = false;
         unHighlightRoutes(map, true);
       }
