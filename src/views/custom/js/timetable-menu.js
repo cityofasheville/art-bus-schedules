@@ -1,6 +1,17 @@
 /* global jQuery */
 /* eslint no-unused-vars: "off" */
 
+/**
+ * Announces a status message to screen readers via the live region
+ * @param {string} message - The message to announce
+ */
+function announceStatus(message) {
+  const statusEl = jQuery('#timetable_status');
+  if (statusEl.length) {
+    statusEl.text(message);
+  }
+}
+
 function showSelectedTimetable() {
   if (jQuery('.timetable').length === 1) {
     showTimetable(jQuery('.timetable').data('timetable-id'));
@@ -146,6 +157,8 @@ jQuery(() => {
 
   const initialDirection = getUrlParam('direction_id');
   const initialDayList = getUrlParam('day_list');
+  const initialTimepoints = getUrlParam('timepoints');
+  const initialStopId = getUrlParam('stop_id');
 
   const today_day_of_week = new Date().getDay();
 
@@ -188,38 +201,68 @@ jQuery(() => {
     jQuery(`input[name="dayList"][value="${default_timetable_day}"]`).prop('checked', true);
   }
 
-  console.log(`Setting initial stops to timepopints only view`);
-  jQuery(`input[name="timepoints"][value="timepoints_only"]`).prop('checked', true);
+  if (
+    initialTimepoints &&
+    (initialTimepoints === 'timepoints_only' || initialTimepoints === 'all_stops')
+  ) {
+    console.log('Setting initial timepoints to', initialTimepoints);
+    jQuery(`input[name="timepoints"][value="${initialTimepoints}"]`).prop('checked', true);
+  } else {
+    console.log('Setting initial stops to timepoints only view');
+    jQuery(`input[name="timepoints"][value="timepoints_only"]`).prop('checked', true);
+  }
 
   showSelectedTimetable();
-  hideTimepointColumns();
 
-  jQuery('#day_list_selector input[name="dayList"]').change(() => {
+  // Apply timepoints visibility based on initial state
+  if (jQuery('#timepoint_selector input[name="timepoints"]:checked').val() === 'all_stops') {
+    showAllTimepoints();
+  } else {
+    hideTimepointColumns();
+  }
+
+  // If a stop_id was passed in URL, select it in the visible timetable
+  if (initialStopId) {
+    const visibleTimetable = jQuery('.timetable:visible').first();
+    if (visibleTimetable.length) {
+      const timetableId = visibleTimetable.data('timetable-id');
+      console.log('Selecting initial stop:', initialStopId, 'in timetable:', timetableId);
+      selectStop(initialStopId, timetableId, {
+        fromDropdown: false,
+        showPopup: false, // Don't show popup on page load to avoid capturing keyboard focus
+        updateUrl: false,
+      });
+    }
+  }
+
+  jQuery('#day_list_selector input[name="dayList"]').change(function () {
+    const dayLabel = jQuery(this).val() === 'Sun' ? 'Sunday / Holiday' : jQuery(this).val();
+    setUrlParam('day_list', jQuery(this).val());
     showSelectedTimetable();
+    announceStatus(`Showing ${dayLabel} schedule`);
   });
 
-  jQuery('#direction_name_selector input[name="directionId"]').change(() => {
+  jQuery('#direction_name_selector input[name="directionId"]').change(function () {
+    const directionLabel = jQuery(this).siblings('span').text();
+    setUrlParam('direction_id', jQuery(this).val());
     showSelectedTimetable();
+    announceStatus(`Showing ${directionLabel} direction`);
   });
 
   // const isTimepoint = jQuery('#timepoint_selector input[name="timepoints"]:checked').val();
   // const timetableMain = jQuery('.timetable-main');
 
-  jQuery('#timepoint_selector input[name="timepoints"]').change(() => {
-    if (
-      jQuery('#timepoint_selector input[name="timepoints"]:checked').val() === 'timepoints_only'
-    ) {
+  jQuery('#timepoint_selector input[name="timepoints"]').change(function () {
+    const selectedValue = jQuery(this).val();
+    setUrlParam('timepoints', selectedValue);
+    if (selectedValue === 'timepoints_only') {
       showSelectedTimetable();
       hideTimepointColumns();
-      // if (timetableMain) {
-      //   timetableMain.attr('data-stops', 'timepoints-only');
-      // }
+      announceStatus('Showing timepoints only');
     } else {
       showSelectedTimetable();
       showAllTimepoints();
-      // if (timetableMain) {
-      //   timetableMain.attr('data-stops', 'all-stops');
-      // }
+      announceStatus('Showing all stops');
     }
   });
 
@@ -237,8 +280,11 @@ jQuery(() => {
     const timetableId = jQuery(this).data('timetable-id');
 
     if (!stopId) {
-      // Clear selection
+      // Clear selection and remove from URL
       clearStopSelection(timetableId);
+      const url = new URL(window.location);
+      url.searchParams.delete('stop_id');
+      window.history.replaceState({}, '', url);
       return;
     }
 
@@ -464,14 +510,21 @@ function updateStopInfoContainer(stopId, timetableId) {
  * @param {boolean} options.fromMap - If true, called from map click
  * @param {boolean} options.fromTable - If true, called from table click
  * @param {boolean} options.showPopup - If true, show the stop popup on the map
+ * @param {boolean} options.updateUrl - If true (default), update the URL with stop_id param
  */
 function selectStop(stopId, timetableId, options = {}) {
+  const { updateUrl = true } = options;
   const tableContainer = document.getElementById(`table-container-${timetableId}`);
   const table = document.getElementById(`timetable_main_${timetableId}`);
 
   if (!tableContainer || !table) {
     console.warn(`Could not find table container or table for timetable: ${timetableId}`);
     return;
+  }
+
+  // Update URL with stop_id (unless explicitly disabled, e.g., on initial page load)
+  if (updateUrl) {
+    setUrlParam('stop_id', stopId);
   }
 
   // Close any existing map popup, then optionally show new one
@@ -511,6 +564,7 @@ function selectStop(stopId, timetableId, options = {}) {
   if (!isTimepoint && isTimepointsOnlyMode) {
     // Switch to "all stops" view
     jQuery('#timepoint_selector input[name="timepoints"][value="all_stops"]').prop('checked', true);
+    setUrlParam('timepoints', 'all_stops');
     showSelectedTimetable();
     showAllTimepoints();
 

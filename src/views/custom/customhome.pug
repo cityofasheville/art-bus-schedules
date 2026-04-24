@@ -25,18 +25,21 @@ div(class="")
             i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
             span(class="inline-block")="Real-time Departures"
           div(class="p-4")
-            fieldset#departure_interface_selector.p-4.border.shadow-md
-              //- legend="Find real-time departures for a stop"
-              div(class=`w-full grid grid-cols-3 btn-group rounded-xl`)
-                label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
-                  input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
-                  span= "By Stop"
-                label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
-                  input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
-                  span= "Favorites"
-                label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
-                  input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
-                  span= "By Route"
+            div(role="group" aria-label="Departure lookup options")
+              //- Live region to announce changes to screen readers
+              div(id="departure_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
+              fieldset#departure_interface_selector.p-4.border.shadow-md(aria-controls="container_search_stop container_favorites container_choose_route")
+                //- legend="Find real-time departures for a stop"
+                div(class=`w-full grid grid-cols-3 btn-group rounded-xl`)
+                  label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
+                    input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
+                    span= "By Stop"
+                  label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
+                    input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
+                    span= "Favorites"
+                  label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
+                    input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
+                    span= "By Route"
 
               div(id="container_search_stop" class="departure-interface p-4")
                 p.mb-4="Select a stop to see real time departure information"

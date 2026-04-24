@@ -54,6 +54,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
     div(class="relative")
       a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
 
+    div#coa_main_map_container
 
     each timetable in timetablePage.consolidatedTimetables
       if config.showMap
@@ -63,7 +64,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
     div(id="timetable_menu_container")
       include timetable_menu.pug
 
-    div#coa_timetable_container
+    div#coa_main_timetable_container
       //- include timetable_menu.pug
 
       each timetable in timetablePage.consolidatedTimetables

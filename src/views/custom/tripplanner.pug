@@ -102,7 +102,10 @@ style.
 script.
   $(document).ready(function() {
 
-    const GEOCODER_URL = 'https://gis.ashevillenc.gov/server/rest/services/Geocoders/simplicity/GeocodeServer/suggest';
+    // Nominatim geocoder with Asheville area bounding box
+    const GEOCODER_URL = 'https://nominatim.openstreetmap.org/search';
+    // Bounding box for Asheville/Buncombe County area: west, south, east, north
+    const VIEWBOX = '-82.8,35.4,-82.3,35.7';
     const DEBOUNCE_DELAY = 300;
     const MIN_CHARS = 3;
 
@@ -175,15 +178,15 @@ script.
         suggestions_for_input.html('<li class="autocomplete-loading">Searching...</li>').addClass('show');
         
         try {
-          const url = `${GEOCODER_URL}?text=${encodeURIComponent(query)}&maxSuggestions=10&f=pjson`;
+          const url = `${GEOCODER_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=10&viewbox=${VIEWBOX}&bounded=1`;
           const response = await fetch(url);
           const data = await response.json();
           
-          currentSuggestions = data.suggestions || [];
+          currentSuggestions = data || [];
           highlightedIndex = -1;
           
           if (currentSuggestions.length === 0) {
-            suggestions_for_input.html('<li class="autocomplete-no-results">No addresses found</li>');
+            suggestions_for_input.html('<li class="autocomplete-no-results">No locations found</li>');
           } else {
             renderSuggestions();
           }
@@ -195,7 +198,11 @@ script.
 
       function renderSuggestions() {
         const html = currentSuggestions.map((suggestion, index) => {
-          return `<li role="option" data-index="${index}" aria-selected="false">${escapeHtml(toTitleCase(suggestion.text))}</li>`;
+          // Use display_name from Nominatim, truncate if too long
+          const displayText = suggestion.display_name.length > 80 
+            ? suggestion.display_name.substring(0, 80) + '...' 
+            : suggestion.display_name;
+          return `<li role="option" data-index="${index}" aria-selected="false">${escapeHtml(displayText)}</li>`;
         }).join('');
         
         suggestions_for_input.html(html).addClass('show');
@@ -218,7 +225,8 @@ script.
       }
 
       function selectSuggestion(suggestion) {
-        input_target.val(toTitleCase(suggestion.text));
+        // Use display_name from Nominatim
+        input_target.val(suggestion.display_name);
         hideSuggestions();
         input_target.trigger('change');
       }
@@ -232,10 +240,6 @@ script.
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-      }
-
-      function toTitleCase(text) {
-        return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
       }
 
       $(document).on('click', function(e) {
