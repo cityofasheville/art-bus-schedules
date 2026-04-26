@@ -44,14 +44,8 @@ a:hover {
 
 /* Timetable Styles */
 
-/* div[data-stops='all-stops'] th[data-is-timepoint='true'] {
-  background-color: #1C2634;
-  color: #F1F5FB;
-} */
-
-div[data-stops='all-stops'] col[data-is-timepoint='true'],
-div[data-stops='all-stops'] col[data-is-timepoint='true'] th {
-  border-top: 4px solid #1C2634;
+div[data-stops='all-stops'] th[data-is-timepoint='true'] {
+  box-shadow: inset 0 4px 0 0 #1C2634;
 }
 
 div.timetable i.bi-clock-fill {
@@ -327,7 +321,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   margin: 20px 0;
 }
 
-.timetable-page .timetable .table-container::-webkit-scrollbar {
+/* .timetable-page .timetable .table-container::-webkit-scrollbar {
   -webkit-appearance: none;
   height: 8px;
 }
@@ -340,7 +334,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
 .timetable-page .timetable .table-container::-webkit-scrollbar-thumb {
   border-radius: 4px;
   background-color: rgba(156, 156, 156, 0.8);
-}
+} */
 
 .timetable-page .timetable .table-container table {
   text-indent: 0;

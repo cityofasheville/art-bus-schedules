@@ -15,7 +15,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
               p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
         div()
           each route in timetableRouteList
-            a(href=`${route.route_url}` class="btn-gray")=`View ${route.route_short_name} Map & Schedule (PDF)`
+            a(href=`${route.route_url}` class="btn-gray btn-sm")=`View ${route.route_short_name} Map & Schedule (PDF)`
       if config.effectiveDate
         .effective-date= `Effective ${config.effectiveDate}`
 
@@ -52,7 +52,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
         div(id="rt_positions_list")
 
     div(class="relative")
-      a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip to timetable
+      a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip map, continue to timetable
 
     div#coa_main_map_container
 
@@ -61,7 +61,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
         div(class="coa-timetable-map-container relative" id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id)
           include timetable_map.pug
 
-    div(id="timetable_menu_container")
+    div(id="timetable_menu_container" )
       include timetable_menu.pug
 
     div#coa_main_timetable_container
@@ -121,18 +121,5 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
       timetablePageFromServer.dayLists.sort();
       console.log('GTFS data from server', timetablePageFromServer);
       const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
-      //- console.log('GTFS Realtime URLs:', gtfsRealtimeUrls);
-      //- console.log('Route Data:', routeData);
-      //- console.log('Stop Data:', stopData);
-      //- console.log('Route IDs on Page:', routeIds);
-      //- console.log('Trip IDs on Page:', tripIds);
-      //- console.log('Stop IDs on Page:', stopIds);
+     
       createMaps();
-      //- $(document).ready(function() {
-        //- const initialTimetable = getUrlParam('timetable_id');
-        //- if (initialTimetable) {
-        //-   jQuery('.timetable').hide();
-        //-   jQuery('.coa-timetable-map-container').hide();
-        //-   showTimetable(initialTimetable);
-        //- } 
-      //- });

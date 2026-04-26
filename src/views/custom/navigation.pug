@@ -5,11 +5,17 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
     div(class="flex justify-between w-full items-end px-4")
       #header-logo(class="w-full py-4 lg:w-auto text-center sm:text-left")
         a(href="/")
-          img(class="inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
-          h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
+          img(class="inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
+          //- h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
+          <span class="sr-only">Asheville Rides Transit Home</span>
 
       div(class="lg:hidden w-full sm:w-auto  flex items-end justify-end sm:justify-end py-4")
-        button#hamburger(class="min-w-max text-art-blue font-semibold align-middle" aria-expanded="false")
+        button#hamburger(
+          class="min-w-max text-art-blue font-semibold align-middle"
+          aria-expanded="false"
+          aria-controls="top-menu-container"
+          aria-label="Toggle navigation menu"
+        )
           i.bi.bi-list.text-xl(aria-hidden="true")
           i.bi.bi-x-lg.text-xl(aria-hidden="true")
           span(class="inline-block text-xl pl-2")="Menu"

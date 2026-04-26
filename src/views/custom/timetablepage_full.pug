@@ -4,25 +4,28 @@ block content
 
 block append extraHeader
 
-  script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
-  script(src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" crossorigin="anonymous")
-
+  script(src=`/vendor/js/jquery.min.3.7.1.js`)
+  script(src=`/vendor/js/tom-select.complete.min.2.6.0.js`)
+  
   if ((config.hasGtfsRealtimeVehiclePositions || config.hasGtfsRealtimeTripUpdates) && config.showMap) || config.hasGtfsRealtimeAlerts
     script(src=`/js/pbf.js`)
     script(src=`/js/gtfs-realtime.browser.proto.js`)
 
   if config.showMap
-    link(href="https://unpkg.com/maplibre-gl@^4.7.1/dist/maplibre-gl.css" rel="stylesheet")
-    script(src="https://unpkg.com/maplibre-gl@^4.7.1/dist/maplibre-gl.js")
+    link(href=`/vendor/css/maplibre-gl.4.7.1.css` rel="stylesheet")
+    script(src=`/vendor/js/maplibre-gl.4.7.1.js`)
+
+    script(src=`/js/map-utils.js`)
     script(src=`/js/timetable-map.js`)
 
   if config.hasGtfsRealtimeAlerts
     script(src=`/js/anchorme.min.js`)
+    
     script(src=`/js/timetable-alerts.js`)
 
   if config.menuType === 'radio'
     script(src=`/js/timetable-menu.js`)
     
   link(rel="stylesheet" href=`/css/timetable_styles.css`)
-  link(rel="stylesheet" href=`https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css`)
 
+  link(rel="stylesheet" href=`/vendor/css/tom-select.2.6.0.css`)

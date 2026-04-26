@@ -210,7 +210,11 @@ function toggleFavoriteStop(stop_id) {
 
   if (defaultStops.includes(stop_id)) {
     defaultStops = defaultStops.filter((id) => id !== stop_id);
-    $(`#favorite-stop-select-dropdown option[value="${stop_id}"]`).remove();
+    // Use Tom Select API to remove the option
+    if (typeof favoriteStopSelectInstance !== 'undefined' && favoriteStopSelectInstance) {
+      favoriteStopSelectInstance.removeOption(stop_id);
+      favoriteStopSelectInstance.refreshOptions(false);
+    }
     if (defaultStops.length === 0) {
       jQuery('#favorite_stops_select_container').hide();
       jQuery('#favorite_instructions_container').show();
@@ -218,13 +222,12 @@ function toggleFavoriteStop(stop_id) {
   } else {
     defaultStops.push(stop_id);
     let this_stop = stopData[stop_id];
-    let new_option_element = new Option(
-      `${this_stop.stop_name} (${this_stop.stop_code})`,
-      stop_id,
-      true,
-      true,
-    );
-    $('#favorite-stop-select-dropdown').append(new_option_element);
+    let displayText = `${this_stop.stop_name} (${this_stop.stop_code})`;
+    // Use Tom Select API to add the option
+    if (typeof favoriteStopSelectInstance !== 'undefined' && favoriteStopSelectInstance) {
+      favoriteStopSelectInstance.addOption({ value: stop_id, text: displayText });
+      favoriteStopSelectInstance.refreshOptions(false);
+    }
     jQuery('#favorite_instructions_container').hide();
     jQuery('#favorite_stops_select_container').show();
   }
@@ -325,7 +328,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
         <h3 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
           thisStop.stop_name
         } (${thisStop.stop_code})</h3>
-        <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise"></i></button></div>
+        <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span class="sr-only">Reload arrivals</span></button></div>
     </div>
     <div>
       <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon_${stop_id}" class="bi ${
@@ -370,8 +373,10 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
         });
         html += `
             <span class="w-16 sm:w-24 text-center ${
-              arrivalsProcessed === 2 ? 'hidden sm:inline-block' : ''
-            } ${arrivalsProcessed > 2 ? 'hidden md:inline-block' : ''}">
+              arrivalsProcessed === 2 ? 'hidden xs:inline-block' : ''
+            }
+              ${arrivalsProcessed === 3 ? 'hidden md:inline-block' : ''}
+              ${arrivalsProcessed > 3 ? 'hidden lg:inline-block' : ''}">
             <span class="text-lg sm:text-2xl text-gray-700">${arrival.time_from_now}</span> <span class="text-xs sm:text-base">min</span><br />
             <span class="text-[10px] sm:text-xs text-gray-500">
                         (${formattedTime})
@@ -438,24 +443,46 @@ jQuery(() => {
     announceDepartureStatus('Showing ' + (labels[selectedValue] || selectedValue));
   });
   console.log('Route data and stop data loaded:', routeData, directions, routeDirectionStops);
+
+  // Populate favorites dropdown - defer to allow Tom Select to initialize first
+  setTimeout(function () {
+    populateFavoriteStops();
+  }, 0);
+});
+
+/**
+ * Populates the favorite stops dropdown from localStorage
+ * Uses Tom Select API if available, otherwise falls back to DOM manipulation
+ */
+function populateFavoriteStops() {
   const favorite_stops = getFavoriteStops();
-  // console.log('Favorite stops from localStorage:', favorite_stops);
 
   if (favorite_stops.length > 0) {
     favorite_stops.forEach((stop_id) => {
       let this_stop = stopData[stop_id];
-      let new_option_element = new Option(
-        `${this_stop.stop_name} (${this_stop.stop_code})`,
-        stop_id,
-        true,
-        true,
-      );
-      $('#favorite-stop-select-dropdown').append(new_option_element);
+      if (!this_stop) return; // Skip if stop data not found
+
+      let displayText = `${this_stop.stop_name} (${this_stop.stop_code})`;
+
+      // Use Tom Select API if available
+      if (typeof favoriteStopSelectInstance !== 'undefined' && favoriteStopSelectInstance) {
+        favoriteStopSelectInstance.addOption({ value: stop_id, text: displayText });
+      } else {
+        // Fallback to DOM manipulation
+        let new_option_element = new Option(displayText, stop_id, false, false);
+        $('#favorite-stop-select-dropdown').append(new_option_element);
+      }
     });
-    $('#favorite-stop-select-dropdown').val('').trigger('change');
+
+    // Refresh Tom Select to show new options
+    if (typeof favoriteStopSelectInstance !== 'undefined' && favoriteStopSelectInstance) {
+      favoriteStopSelectInstance.refreshOptions(false);
+    }
 
     jQuery('#favorite_instructions_container').hide();
+    jQuery('#favorite_stops_select_container').show();
   } else {
     jQuery('#favorite_stops_select_container').hide();
+    jQuery('#favorite_instructions_container').show();
   }
-});
+}

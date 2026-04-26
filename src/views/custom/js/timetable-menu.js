@@ -1,5 +1,8 @@
-/* global jQuery */
+/* global jQuery, TomSelect */
 /* eslint no-unused-vars: "off" */
+
+// Global object to store Tom Select instances by timetable ID
+const stopSearchSelects = {};
 
 /**
  * Announces a status message to screen readers via the live region
@@ -266,29 +269,30 @@ jQuery(() => {
     }
   });
 
-  // Initialize stop search dropdowns with select2
+  // Initialize stop search dropdowns with Tom Select for accessibility
   jQuery('.stop-search-dropdown').each(function () {
-    jQuery(this).select2({
-      width: '100%',
+    const selectEl = this;
+    const timetableId = jQuery(selectEl).data('timetable-id');
+
+    stopSearchSelects[timetableId] = new TomSelect(selectEl, {
+      create: false,
+      openOnFocus: true,
+      maxOptions: null,
+      sortField: { field: 'text', direction: 'asc' },
       placeholder: 'Select a stop on this route',
+      dropdownParent: 'body',
+      onChange: function (value) {
+        if (!value) {
+          // Clear selection and remove from URL
+          clearStopSelection(timetableId);
+          const url = new URL(window.location);
+          url.searchParams.delete('stop_id');
+          window.history.replaceState({}, '', url);
+          return;
+        }
+        selectStop(value, timetableId, { fromDropdown: true, showPopup: false });
+      },
     });
-  });
-
-  // Handle stop search selection
-  jQuery('.stop-search-dropdown').on('change', function () {
-    const stopId = jQuery(this).val();
-    const timetableId = jQuery(this).data('timetable-id');
-
-    if (!stopId) {
-      // Clear selection and remove from URL
-      clearStopSelection(timetableId);
-      const url = new URL(window.location);
-      url.searchParams.delete('stop_id');
-      window.history.replaceState({}, '', url);
-      return;
-    }
-
-    selectStop(stopId, timetableId, { fromDropdown: true, showPopup: false });
   });
 });
 
@@ -314,10 +318,9 @@ function clearStopSelection(timetableId) {
     closeStopPopup();
   }
 
-  // Reset dropdown
-  const dropdown = jQuery(`#stop-search-${timetableId}`);
-  if (dropdown.length) {
-    dropdown.val('').trigger('change.select2');
+  // Reset dropdown using Tom Select API
+  if (stopSearchSelects[timetableId]) {
+    stopSearchSelects[timetableId].clear(true); // true = silent, no change event
   }
 
   // Reset stop info container
@@ -613,9 +616,11 @@ function selectStop(stopId, timetableId, options = {}) {
 
   // Update the dropdown selection (unless called from dropdown to avoid loops)
   if (!options.fromDropdown) {
-    const dropdown = jQuery(`#stop-search-${timetableId}`);
-    if (dropdown.length && dropdown.val() !== stopId) {
-      dropdown.val(stopId).trigger('change.select2');
+    if (stopSearchSelects[timetableId]) {
+      const currentVal = stopSearchSelects[timetableId].getValue();
+      if (currentVal !== stopId) {
+        stopSearchSelects[timetableId].setValue(stopId, true); // true = silent, no change event
+      }
     }
   }
 

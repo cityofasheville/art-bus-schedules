@@ -7,29 +7,17 @@ html(lang="en")
     meta(name="viewport" content="initial-scale=1.0, width=device-width")
 
     block extraHeader
-      script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
-      script(src="https://unpkg.com/lodash@4.17.21/lodash.min.js" crossorigin="anonymous")
+      script(src=`/vendor/js/jquery.min.3.7.1.js`)
+      script(src=`/vendor/js/lodash.min.4.17.21.js`)
       script(src=`/js/dropdown-menus.js`)
-      link(rel="stylesheet" href=`https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css`)
+      link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css")
       link(rel="stylesheet" href=`/css/global.css`)
       link(rel="stylesheet" href=`/css/tw-output.css`)
 
   body(class="flex flex-col min-h-screen")
-    //- div(class="relative")
     header
       a(href="#main_content" class="absolute mx-auto top-0 sr-only focus:not-sr-only") Skip to main content
-      //- div(class="")
       include navigation.pug
-    //- header.main-header
-    //-   .header-layout
-    //-     if config.logo_url
-    //-       .logo
-    //-         a(href="/")
-    //-           img(src=`${config.logo_url}` alt=`${config.webpageTitle || 'Transit '} logo`)
-    //-     .nav-items
-    //-       a(href="/map/") System Map
-    //-       a(href="/fares-and-passes/") Fares and Passes
-    //-       a(href="/plan-your-trip/") Plan Your Trip
 
 
     main#main_content(class="flex-grow flex flex-col")
@@ -47,12 +35,11 @@ html(lang="en")
               h2(class="text-3xl") Stay in the Loop!
             iframe(width="100%" height="200" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
           div(class="order-1 md:order-2 flex items-end justify-center")
-            img(class="inline-block w-80 xl:w-96 h-auto", src=`${config.footer_logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} logo`)
+            img(class="inline-block w-80 xl:w-96 h-auto", src=`${config.footer_logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} footer logo`)
 
 
       nav(id="footer-nav" class="bg-gray-800 text-white p-8 md:p-12" aria-label="Footer navigation")
         div(class="max-w-screen-xl mx-auto")
-          //- 3-column grid on desktop, stacked on mobile
           div(class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8")
             //- Column 1: Routes & Fares
             div
@@ -106,7 +93,7 @@ html(lang="en")
           //- Footer bottom row
           div(class="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between gap-4")
             div(class="flex items-center gap-6")
-              img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/09/city-of-asheville-logo-white.svg" class="w-48 h-auto" alt="City of Asheville logo")
+              img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/09/city-of-asheville-logo-white.svg" class="w-48 h-auto" alt="City of Asheville footer logo")
             div(class="text-center md:text-right text-gray-300 text-sm")
               if config.webpageTitle
                 p(class="mb-1") &copy; #{new Date().getFullYear()} Asheville Rides Transit
