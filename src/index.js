@@ -337,6 +337,9 @@ await fs.copyFile(
   buildPath + 'art-logo-white-no-text.png',
 );
 
+// Copy vendor assets (CSS and JS libraries)
+await fs.cp(templatePath + 'vendor', buildPath + 'vendor', { recursive: true });
+
 // art-logo-white-no-text.png
 // const htmlSourceFolder = buildPath + folderPath.relativePath;
 // const defaultHomePagePath = buildPath;

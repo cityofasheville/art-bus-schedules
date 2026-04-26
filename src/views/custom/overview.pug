@@ -39,7 +39,7 @@ div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
   table(class="w-full border border-collapse")
     thead
       tr
-        th(class="text-left p-2 border-b-2 border-gray-300" scope="col" width="150px") Route Name
+        th(class="text-left p-2 border-b-2 border-gray-300 w-36 sm:w-48" scope="col") Route Name
         th(class="text-left p-2 border-b-2 border-gray-300" scope="col") Service Area
     tbody
       each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
@@ -50,10 +50,10 @@ div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
             tr
               td(class="p-2 border-b border-gray-200")
                 //- div(class="flex items-center gap-2")
-                a(class="flex items-center gap-2" href=`/${timetablePage.timetable_page_id}` aria-describedby=`desc_${timetablePage.timetable_page_id}`)
+                a(class="flex flex-col sm:flex-row items-center gap-2" href=`/${timetablePage.timetable_page_id}` aria-describedby=`desc_${timetablePage.timetable_page_id}`)
                   - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                   each route in tableRouteList
-                    .route-color-swatch(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
+                    .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
                   span()= timetablePage.timetable_page_label
               td(class="p-2 border-b border-gray-200")
                 div(id=`desc_${timetablePage.timetable_page_id}` class="flex flex-wrap gap-1 items-center")
@@ -89,13 +89,7 @@ div(class="px-6 mb-12")
                           span= part
                           if index < routeDescParts.length - 1
                             i(class="bi bi-arrow-right ml-1 text-gray-500" aria-hidden="true")
-                  //- div.timetable-page-link(href=`${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
-                  //-   - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-                  //-   each route in timetableRouteList
-                  //-     .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
-                  //-   div
-                  //-     .timetable-page-label= timetablePage.timetable_page_label
-                  //-     .badge-gray= timetablePage.dayList
+                            
                   button.zoom-to(data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                     i.bi.bi-zoom-in(aria-hidden="true")
       if config.showMap

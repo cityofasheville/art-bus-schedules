@@ -71,11 +71,11 @@
   }
 
   .btn-blue {
-    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-aux-gray bg-art-blue hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-aux-gray bg-art-blue hocus:bg-art-green hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
   }
 
   .btn-gray {
-    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-slate-800 bg-aux-gray hocus:bg-slate-300 border border-slate-500 rounded-md shadow-sm;
+    @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-aux-black bg-aux-gray hocus:bg-art-green border border-slate-500 rounded-md shadow-sm;
   }
 
   .btn-group>*:not(:last-child) {
@@ -89,11 +89,11 @@
   }
 
   label:has(input:focus) {
-    @apply bg-art-green font-semibold;
+    @apply bg-art-blue;
   }
 
-  fieldset:has(input:focus) {
-    @apply border-art-blue;
+  fieldset.radio-group:has(input:focus) {
+    @apply outline outline-2 outline-offset-2 outline-blue-500;
   }
 
   .entry-content a {
@@ -206,7 +206,7 @@
   }
 
   .symbol-timetable {
-    @apply text-center font-bold cursor-pointer;
+    @apply text-center font-bold px-1.5 cursor-pointer;
   }
 
 }

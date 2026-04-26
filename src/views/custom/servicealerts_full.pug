@@ -1,14 +1,14 @@
 extends layout
 block content
-  include partials/servicealerts.pug
+  include servicealerts.pug
 
 block append extraHeader
-  script(src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous")
-  script(src="https://unpkg.com/lodash@4.17.21/lodash.min.js" crossorigin="anonymous")
+  script(src=`/vendor/js/jquery.min.3.7.1.js`)
+  script(src=`/vendor/js/lodash.min.4.17.21.js`)
+
   script(src=`/js/pbf.js`)
   script(src=`/js/gtfs-realtime.browser.proto.js`)
-  //- script(src=`/js/timetable-map.js`)
   script(src=`/js/anchorme.min.js`)
-  //- script(src=`/js/service-alerts.js`)
-  script(src=`/js/customhome-alerts.js`)
+  
+  script(src=`/js/service-alerts.js`)
   

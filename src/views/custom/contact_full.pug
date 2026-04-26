@@ -1,3 +1,6 @@
 extends layout
 block content
   include contact.pug
+
+block append extraHeader
+  script(src=`/js/heading-normalize.js`)

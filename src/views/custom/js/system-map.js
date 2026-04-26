@@ -1,4 +1,4 @@
-/* global document, jQuery, _, maplibregl, geojson, mapStyleUrl */
+/* global document, jQuery, _, maplibregl, geojson, mapStyleUrl, loadMapStyleWithWorkingFonts */
 /* eslint prefer-arrow-callback: "off", no-unused-vars: "off" */
 
 function formatRouteColor(route) {
@@ -109,7 +109,7 @@ function getBounds(geojson) {
   return bounds;
 }
 
-function createSystemMap() {
+async function createSystemMap() {
   const defaultRouteColor = '#000000';
   const lineLayout = {
     'line-join': 'round',
@@ -122,9 +122,10 @@ function createSystemMap() {
   }
 
   const bounds = getBounds(geojson);
+  const mapStyle = await loadMapStyleWithWorkingFonts(mapStyleUrl);
   const map = new maplibregl.Map({
     container: 'system_map',
-    style: mapStyleUrl,
+    style: mapStyle,
     center: bounds.getCenter(),
     zoom: 12,
     cooperativeGestures: true,

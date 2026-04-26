@@ -30,26 +30,26 @@ if timetablePage.consolidatedTimetables.length > 1
             a.btn-blue(href=`#timetable_id_${timetable.timetable_id}`)= timetable.timetable_label
 
   if config.menuType === 'radio'
-    .timetable-radio-menu(role="group" aria-label="Timetable display options")
+    div(class="timetable-radio-menu" role="group" aria-label="Timetable display options")
       //- Live region to announce changes to screen readers
       div(id="timetable_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
       -const uniqueDirectionTimetablesC = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
       -timetablePage.dayLists.sort();
-      fieldset#direction_name_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container coa_main_map_container")
+      fieldset(id="direction_name_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
         legend="Service Direction"
         div(class=`w-full grid grid-cols-${uniqueDirectionTimetablesC.length} btn-group`)
           each timetable, idx in uniqueDirectionTimetablesC
             label.relative.btn-gray.text-center.cursor-pointer(for=`radio_dir_${timetable.direction_id}`)
               input(class="opacity-0 absolute top-0 left-0" type="radio" name="directionId" value=timetable.direction_id id=`radio_dir_${timetable.direction_id}`)
               span=timetable.direction_name
-      fieldset#day_list_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container coa_main_map_container")
+      fieldset(id="day_list_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
         legend="Day of Week"
         div(class=`w-full grid grid-cols-${timetablePage.dayLists.length} btn-group`)
           each dayList, idx in timetablePage.dayLists
             label.relative.btn-gray.text-center.cursor-pointer(for=`radio_day_${dayList}`)
               input(class="opacity-0 absolute top-0 left-0" type="radio" name="dayList" value=dayList id=`radio_day_${dayList}`)
               span=`${dayList === 'Sun' ? 'Sun / Hol' : dayList}`
-      fieldset#timepoint_selector.p-4.border.shadow-md(aria-controls="coa_main_timetable_container")
+      fieldset(id="timepoint_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container")
         legend="Timetable Stops"
         div(class=`w-full grid grid-cols-2 btn-group`)
           label.relative.btn-gray.text-center.cursor-pointer(for="radio_timepoints_only")
@@ -58,31 +58,3 @@ if timetablePage.consolidatedTimetables.length > 1
           label.relative.btn-gray.text-center.cursor-pointer(for="radio_all_stops")
             input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="all_stops" id="radio_all_stops")
             span= "All Stops"
-
-             
-  //- if config.menuType === 'radioo'
-  //-   .timetable-radio-menu.my-12
-  //-     -const uniqueDirectionTimetables = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
-  //-     div(hidden=uniqueDirectionTimetables.length <= 1)
-  //-       #direction_name_selector
-  //-         h3 Service Direction
-  //-         each timetable, idx in uniqueDirectionTimetables
-  //-           label(class=idx === 0 ? 'btn-blue' : 'btn-gray')
-  //-             input.hidden(type="radio" name="directionId" autocomplete="off" value=timetable.direction_id )
-  //-             span= timetable.direction_name || timetable.timetable_label
-  //-     div(hidden=timetablePage.dayLists.length <= 1)
-  //-       #day_list_selector
-  //-         h3 Day of Week
-  //-         each dayList, idx in timetablePage.dayLists
-  //-           label(class=idx === 0 ? 'btn-blue' : 'btn-gray')
-  //-             input.hidden(type="radio" name="dayList" autocomplete="off" value=dayList checked=(idx === 0))
-  //-             span= dayList
-  //-     div 
-  //-       #timepoint_selector 
-  //-         h3 Stops
-  //-         label(class="btn-blue")
-  //-           input.hidden(type="radio" name="timepoints" autocomplete="off" value="timepoints_only" checked=true)
-  //-           span= "Timepoint Stops"
-  //-         label(class="btn-gray")
-  //-           input.hidden(type="radio" name="timepoints" autocomplete="off" value="all_stops" checked=false)
-  //-           span= "All Stops"

@@ -9,72 +9,15 @@ include formatting_functions.pug
 -config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
 -config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
 
-//- .relative.w-full.h-full.flex.flex-col
-//- div(class="h-full w-full relative")
-//- h1(class="sr-only")=pageTitleToUse
-  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 div(class="relative w-full border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
   div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
     h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
       span=pageTitleToUse
 
 div(class="w-full min-h-128 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center")
-  //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-  //-  px-6 lg:px-12
   div(class="w-full max-w-7xl px-4 flex items-center justify-center lg:justify-center my-12")
-    div(id="container_real_time_departures" class="w-full sm:w-[32rem] lg:w-[48rem] z-10")
-      div(class="w-full min-h-64 z-10 bg-aux-gray border rounded-lg shadow-lg p-0 overflow-hidden")
-        h2(id="tr_departures_heading" class="p-4 px-4 text-white text-2xl m-0 rounded-t-sm bg-art-green")
-          i(class="inline-block bi bi-clock-history mr-2" aria-hidden="true")
-          span(class="inline-block")="Real-time Departures"
-        div(class="p-4")
-          fieldset(id="departure_interface_selector" class="mb-6")
-            legend(class="sr-only")="Find real-time departures"
-            div(class=`w-full grid grid-cols-3 btn-group rounded-xl mb-6` role="radiogroup" aria-label="Select interface for finding real-time departures")
-              label.relative.btn-gray.text-center.cursor-pointer(for="radio_search_stop")
-                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="search_stop" checked="true" id="radio_search_stop")
-                span= "By Stop"
-              label.relative.btn-gray.text-center.cursor-pointer(for="radio_favorites")
-                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="favorites" checked=false id="radio_favorites")
-                span= "Favorites"
-              label.relative.btn-gray.text-center.cursor-pointer(for="radio_choose_route")
-                input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
-                span= "By Route"
-
-            div(id="container_search_stop" class="departure-interface")
-              p.mb-4="Select a stop to see real time departure information"
-              select#stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-                option(value="") Select a stop
-                each stop in alphabetical_stops
-                  option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
-
-            div(id="container_favorites" class="departure-interface p-4")
-              div(id="favorite_stops_select_container" class="mb-4")
-                p.mb-4="Select one of your favorite stops to see real time departure information"
-                select#favorite-stop-select-dropdown.border.p-2(class="max-w-full" onchange="handleStopSelection(event)")
-                  option(value="") Select a favorite stop
-              div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."
-                  
-            div(id="container_choose_route" class="departure-interface p-4")
-              p.mb-4="Choose a route, direction, and stop to see real time departure information"
-              
-              div.mb-4
-                label(for="route-select-dropdown") Route
-                select#route-select-dropdown.border.p-2.w-full
-                  option(value="") Select a route
-
-              div.mb-4
-                label(for="direction-select-dropdown") Direction
-                select#direction-select-dropdown.border.p-2.w-full(disabled)
-                  option(value="") Select a direction
-
-              div.mb-4
-                label(for="stop-by-route-select-dropdown") Stop
-                select#stop-by-route-select-dropdown.border.p-2.w-full(disabled)
-                  option(value="") Select a stop
-
-          output(id="results-container" class="max-w-screen-lg mx-auto block")
+    include realtimedepartures_widget.pug
 
 script.
     window.config = !{JSON.stringify(config)};
@@ -189,45 +132,63 @@ script.
       }
     }
 
+    // Tom Select instances (stored globally for access from custom-home.js)
+    var stopSelectInstance;
+    var favoriteStopSelectInstance;
+
     $(document).ready(function() {
       // Initialize By Route dropdowns
       initRouteDropdown();
       $('#route-select-dropdown').on('change', onRouteChange);
       $('#direction-select-dropdown').on('change', onDirectionChange);
       $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
-      $('#stop-select-dropdown').select2({
-        //- width: 'element',
-        width: '100%'
-      });
-      $('#favorite-stop-select-dropdown').select2({
-        //- width: 'element',
-        width: '100%' 
+
+      // Initialize Tom Select for stop dropdown with accessibility features
+      stopSelectInstance = new TomSelect('#stop-select-dropdown', {
+        create: false,
+        openOnFocus: true,
+        maxOptions: null,
+        sortField: { field: 'text', direction: 'asc' },
+        dropdownParent: 'body',
+        // Accessibility: ensure proper ARIA labels
+        render: {
+          option: function(data, escape) {
+            return '<div class="option" role="option">' + escape(data.text) + '</div>';
+          }
+        },
+        onChange: function(value) {
+          if (value) {
+            handleStopSelection({ target: { value: value } });
+          }
+        }
       });
 
-      // prevent select2 from auto-focusing the search input when the dropdown opens, which causes mobile keyboard to pop up immediately
-      // need to support tab navigation to the search input. the input is not naturally next in the tab order. Maybe we only want to prevent auto-focus if the user is not using keyboard navigation?
-
-      //- $('#stop-select-dropdown').on('select2:open', function() {
-      //-   $('.select2-search input').prop('focus', 0);
-      //- });          
-      //- $('#favorite-stop-select-dropdown').on('select2:open', function() {
-      //-   $('.select2-search input').prop('focus', 0);
-      //- });
+      // Initialize Tom Select for favorite stops dropdown
+      favoriteStopSelectInstance = new TomSelect('#favorite-stop-select-dropdown', {
+        create: false,
+        openOnFocus: true,
+        sortField: { field: 'text', direction: 'asc' },
+        dropdownParent: 'body',
+        render: {
+          option: function(data, escape) {
+            return '<div class="option" role="option">' + escape(data.text) + '</div>';
+          }
+        },
+        onChange: function(value) {
+          if (value) {
+            handleStopSelection({ target: { value: value } });
+          }
+        }
+      });
 
       const initialStopId = getUrlParam('stop_id');
       console.log('Initial stop ID from URL:', initialStopId);
       if (initialStopId) {
         console.log('Setting initial stop selection to:', initialStopId);
-        $('#stop-select-dropdown').val(initialStopId).trigger('change');
-        $("#favorite-stop-select-dropdown").select2("val", "");
-        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
-        //- $('#favorite-stop-select-dropdown').val(initialStopId);
+        stopSelectInstance.setValue(initialStopId, true); // true = silent (no change event)
+        if (favoriteStopSelectInstance) {
+          favoriteStopSelectInstance.clear(true);
+        }
         fetchRealtimeDeparturesForStop(initialStopId);
-      } else {
-        //- $("#stop-select-dropdown").select2("val", "");
-        //- $("#favorite-stop-select-dropdown").select2("val", "");
-
-        //- $('#stop-select-dropdown').val('').trigger('change');
-        //- $('#favorite-stop-select-dropdown').val('').trigger('change');
       }
     });

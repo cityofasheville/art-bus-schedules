@@ -69,32 +69,84 @@
   color: white;
 } */
 
-.select2-container {
+/* Tom Select responsive width styles */
+/* .ts-wrapper {
   max-width: 210px !important;
 }
 
 @media screen and (min-width: 330px) {
-  .select2-container {
+  .ts-wrapper {
     max-width: 250px !important;
   }
 }
 
 @media screen and (min-width: 480px) {
-  .select2-container {
+  .ts-wrapper {
     max-width: 325px !important;
   }
 }
 
 @media screen and (min-width: 640px) {
-  .select2-container {
+  .ts-wrapper {
     max-width: 500px !important;
   }
 }
 
 @media screen and (min-width: 960px) {
-  .select2-container {
+  .ts-wrapper {
     max-width: none;
   }
+} */
+
+/* Tom Select dropdown styling - ensure visibility and proper alignment */
+.ts-dropdown {
+  z-index: 9999 !important;
+  position: absolute !important;
+  box-sizing: border-box !important;
+  margin-top: 2px;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border: 1px solid #d1d5db;
+  background-color: white;
+}
+
+.ts-dropdown-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Ensure the wrapper creates a proper stacking context */
+.ts-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* When dropdown is open, raise z-index of wrapper */
+.ts-wrapper.dropdown-active {
+  z-index: 9998;
+}
+
+/* Improve option styling - 40px min-height for WCAG 2.5.5 target size */
+.ts-dropdown .option {
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+  background-color: #e5e7eb;
+}
+
+/* Match dropdown width to control when appended to body */
+.ts-dropdown[style*="position: absolute"] {
+  min-width: 200px;
+}
+
+.ts-dropdown .option.selected {
+  background-color: #dbeafe;
 }
 
 /* .maplibregl-ctrl-top-left .maplibregl-ctrl {
