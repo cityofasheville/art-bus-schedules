@@ -17,16 +17,16 @@ div(id="container_real_time_departures" class="w-full max-w-[24rem] sm:max-w-[32
             input(class="opacity-0 absolute top-0 left-0" type="radio" name="departure_interface" value="choose_route" checked=false id="radio_choose_route")
             span= "By Route"
 
-      div(id="container_search_stop" class="departure-interface mb-4")
-        label(for="stop-select-dropdown" class="block mb-2") Select a stop to see real time departure information
+      div(id="container_search_stop" class="relative departure-interface mb-4")
+        label(id="stop-select-label" for="stop-select-dropdown" class="block mb-2") Select a stop to see real time departure information
         select#stop-select-dropdown.border(class="max-w-full" aria-label="Select a stop to see real time departure information")
           option(value="") Select a stop
           each stop in alphabetical_stops
             option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
 
-      div(id="container_favorites" class="departure-interface mb-4")
+      div(id="container_favorites" class="relative departure-interface mb-4")
         div(id="favorite_stops_select_container" class="mb-4")
-          label(for="favorite-stop-select-dropdown" class="block mb-2") Select one of your favorite stops to see real time departure information
+          label(id="favorite-stop-select-label" for="favorite-stop-select-dropdown" class="block mb-2") Select one of your favorite stops to see real time departure information
           select#favorite-stop-select-dropdown.border(class="max-w-full" aria-label="Select one of your favorite stops to see real time departure information")
             option(value="") Select a favorite stop
         div(id="favorite_instructions_container" class="mt-4")="Mark at least one favorite stop by clicking the star icon next to the stop name in the results."

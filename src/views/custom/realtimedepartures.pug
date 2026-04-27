@@ -147,12 +147,15 @@ script.
         openOnFocus: true,
         maxOptions: null,
         sortField: { field: 'text', direction: 'asc' },
-        dropdownParent: 'body',
+        dropdownParent: '#container_search_stop',
         // Accessibility: ensure proper ARIA labels
         render: {
           option: function(data, escape) {
             return '<div class="option" role="option">' + escape(data.text) + '</div>';
           }
+        },
+        onInitialize: function() {
+          this.control_input.setAttribute('aria-labelledby', 'stop-select-label');
         },
         onChange: function(value) {
           if (value) {
@@ -166,11 +169,14 @@ script.
         create: false,
         openOnFocus: true,
         sortField: { field: 'text', direction: 'asc' },
-        dropdownParent: 'body',
+        dropdownParent: '#container_favorites',
         render: {
           option: function(data, escape) {
             return '<div class="option" role="option">' + escape(data.text) + '</div>';
           }
+        },
+        onInitialize: function() {
+          this.control_input.setAttribute('aria-labelledby', 'favorite-stop-select-label');
         },
         onChange: function(value) {
           if (value) {

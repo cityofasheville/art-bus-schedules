@@ -280,7 +280,10 @@ jQuery(() => {
       maxOptions: null,
       sortField: { field: 'text', direction: 'asc' },
       placeholder: 'Select a stop on this route',
-      dropdownParent: 'body',
+      dropdownParent: `#stop-search-dropdown-container-${timetableId}`,
+      onInitialize: function () {
+        this.control_input.setAttribute('aria-labelledby', `stop-search-label-${timetableId}`);
+      },
       onChange: function (value) {
         if (!value) {
           // Clear selection and remove from URL

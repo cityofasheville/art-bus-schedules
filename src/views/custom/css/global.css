@@ -103,16 +103,20 @@
   z-index: 9999 !important;
   position: absolute !important;
   box-sizing: border-box !important;
-  margin-top: 2px;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  border: 1px solid #d1d5db;
-  background-color: white;
+  margin-top: 2px !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  border: 1px solid #d1d5db !important;
+  background-color: white !important;
+}
+
+.ts-dropdown.single {
+  margin: 0 !important;
 }
 
 .ts-dropdown-content {
-  max-height: 300px;
-  overflow-y: auto;
+  max-height: 300px !important;
+  overflow-y: auto !important;
 }
 
 /* Ensure the wrapper creates a proper stacking context */

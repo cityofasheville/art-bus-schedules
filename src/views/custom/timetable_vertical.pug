@@ -11,12 +11,13 @@
 
 div(id=`timetable_nav_${formatHtmlId(timetable.timetable_id)}` class="mb-4")
   div(class="grid grid-cols-1 lg:grid-cols-2 gap-4")
-    div(class="stop-selector-container")
-      label(for=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="block mb-2 font-semibold") Jump to a stop
-      select(id=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="stop-search-dropdown border p-2 w-full max-w-md" data-timetable-id=formatHtmlId(timetable.timetable_id))
-        option(value="") Select a stop on this route
-        each stop, idx in timetable.stops
-          option(value=stop.stop_id)= `${stop.stop_name}${stop.stop_code ? ' (' + stop.stop_code + ')' : ''}`
+    div(id=`stop-selector-container-${formatHtmlId(timetable.timetable_id)}` class="stop-selector-container")
+      label(id=`stop-search-label-${formatHtmlId(timetable.timetable_id)}` for=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="block mb-2 font-semibold") Jump to a stop
+      div(id=`stop-search-dropdown-container-${formatHtmlId(timetable.timetable_id)}` class="relative")
+        select(id=`stop-search-${formatHtmlId(timetable.timetable_id)}` class="stop-search-dropdown border p-2 w-full" data-timetable-id=formatHtmlId(timetable.timetable_id))
+          option(value="") Select a stop on this route
+          each stop, idx in timetable.stops
+            option(value=stop.stop_id)= `${stop.stop_name}${stop.stop_code ? ' (' + stop.stop_code + ')' : ''}`
     div(id=`stop-info-${formatHtmlId(timetable.timetable_id)}` class="stop-info-container p-3 bg-gray-50 rounded-lg border")
       div(class="stop-info-placeholder text-sm text-gray-600")
         p Select a stop from the dropdown, click a column in the table, or click a stop on the map to see stop details.
