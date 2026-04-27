@@ -20,13 +20,13 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
         .effective-date= `Effective ${config.effectiveDate}`
 
     if config.hasGtfsRealtimeAlerts
-      details(class="border my-6 rounded" role="region" aria-labelledby="service_alerts_heading")
+      details(class="border my-6 rounded" aria-labelledby="service_alerts_heading")
         summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
           div(class="flex items-start sm:items-center flex-col sm:flex-row gap-2 text-art-blue text-base md:text-lg font-semibold")
             div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
               i(class="bi bi-bell-fill" aria-hidden="true")
-              h2#service_alerts_heading(class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
-            span(id="timetable_alert_count" class="rounded-full text-center border-2 px-2")
+              h2(id="service_alerts_heading" class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
+            span(id="timetable_alert_count" class="rounded-full text-center border-2 px-2")="Checking alerts..."
           div(class="flex items-center gap-4")
             span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
               
@@ -35,13 +35,13 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
             div(class="timetable-alert-empty")
               | There are no service alerts at this time.
 
-    details(class="border my-6 rounded" role="region" aria-labelledby="rt_positions_heading")
+    details(class="border my-6 rounded" aria-labelledby="rt_positions_heading")
       summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
         div(class="flex items-start sm:items-center flex-col sm:flex-row gap-2 text-art-blue text-base md:text-lg font-semibold")
           div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
             i(class="bi bi-bus-front" aria-hidden="true")
             h2(id="rt_positions_heading" class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Realtime Bus Positions "
-          span(id="rt_positions_status" class="rounded-full text-center border-2 px-2" aria-live="polite" aria-atomic="true")
+          span(id="rt_positions_status" class="rounded-full text-center border-2 px-2" aria-live="polite" aria-atomic="true")="Checking buses..."
         div(class="flex items-center gap-4")
           span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
       div(id="rt_positions_container" class="border-t" aria-label="Real-time bus positions")

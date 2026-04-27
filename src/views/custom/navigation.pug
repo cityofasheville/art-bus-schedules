@@ -74,8 +74,8 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
 
                 //- Routes grid section - dynamically generated from route data
                 div(class="flex-1 min-w-0")
-                  h3(class="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3") Individual Routes
-                  ul(class="list-none flex flex-wrap gap-2")
+                  span(id="individual_routes_heading" class="inline-block text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3") Individual Routes
+                  ul(class="list-none flex flex-wrap gap-2" aria-describedby="individual_routes_heading")
                     - const routes = config.timetablePage && config.timetablePage.routes ? config.timetablePage.routes : []
                     - const sortedRoutes = routes.slice().sort((a, b) => (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {numeric: true}))
                     each route in sortedRoutes

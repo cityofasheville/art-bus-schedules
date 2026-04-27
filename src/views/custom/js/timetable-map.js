@@ -631,6 +631,16 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
   el.className = 'vehicle-marker';
   el.style.width = '25px';
   el.style.height = '25px';
+  el.setAttribute('role', 'img');
+
+  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
+    .parents('.timetable')
+    .data('direction-name');
+  const movingText = formatMovingText(vehiclePosition);
+  const labelParts = ['Bus'];
+  if (directionName) labelParts.push(directionName);
+  if (movingText) labelParts.push(movingText.toLowerCase());
+  el.setAttribute('aria-label', labelParts.join(' — '));
 
   if (vehicleDirectionArrow) {
     el.innerHTML = vehicleDirectionArrow;
@@ -702,6 +712,16 @@ function updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTrip
   } else {
     vehicleMarker.getElement().innerHTML = '';
   }
+
+  // Update aria-label with current movement info
+  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
+    .parents('.timetable')
+    .data('direction-name');
+  const movingText = formatMovingText(vehiclePosition);
+  const labelParts = ['Bus'];
+  if (directionName) labelParts.push(directionName);
+  if (movingText) labelParts.push(movingText.toLowerCase());
+  vehicleMarker.getElement().setAttribute('aria-label', labelParts.join(' — '));
 
   animateVehicleMarker(vehicleMarker, vehiclePosition);
 }

@@ -653,43 +653,6 @@ details[open] summary span.bi {
   line-height: 1.25rem;
 }
 
-.btn-art-green {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  border-width: 1px;
-  --tw-border-opacity: 1;
-  border-color: rgb(100 116 139 / var(--tw-border-opacity, 1));
-  --tw-bg-opacity: 1;
-  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
-  text-decoration-line: none;
-  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.btn-art-green:hover {
-  text-decoration-line: none;
-  --tw-bg-opacity: 1;
-  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
-}
-
-.btn-art-green:focus {
-  --tw-bg-opacity: 1;
-  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
-  --tw-text-opacity: 1;
-  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
-}
-
 .btn-blue {
   display: flex;
   align-items: center;
@@ -1371,10 +1334,6 @@ fieldset.radio-group:has(input:focus) {
   width: 4rem;
 }
 
-.w-24 {
-  width: 6rem;
-}
-
 .w-28 {
   width: 7rem;
 }
@@ -1397,10 +1356,6 @@ fieldset.radio-group:has(input:focus) {
 
 .w-80 {
   width: 20rem;
-}
-
-.w-\[115px\] {
-  width: 115px;
 }
 
 .w-\[80px\] {
@@ -1816,6 +1771,16 @@ fieldset.radio-group:has(input:focus) {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
+.bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+}
+
+.bg-aux-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(28 38 52 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -1967,10 +1932,6 @@ fieldset.radio-group:has(input:focus) {
 
 .pr-1 {
   padding-right: 0.25rem;
-}
-
-.pr-3 {
-  padding-right: 0.75rem;
 }
 
 .pt-2 {
