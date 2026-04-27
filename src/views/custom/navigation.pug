@@ -1,24 +1,23 @@
 nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Navigation")
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
-
   div(class="relative flex flex-col lg:flex-row items-end justify-between w-full")
-    div(class="flex justify-between w-full items-end px-4")
+    div(class="flex flex-col sm:flex-row justify-between w-full items-center sm:items-end px-4")
       #header-logo(class="w-full py-4 lg:w-auto text-center sm:text-left")
         a(href="/")
           img(class="inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
           //- h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
           <span class="sr-only">Asheville Rides Transit Home</span>
 
-      div(class="lg:hidden w-full sm:w-auto  flex items-end justify-end sm:justify-end py-4")
+      div(class="w-full sm:w-auto flex items-end gap-3 py-4")
         button#hamburger(
-          class="min-w-max text-art-blue font-semibold align-middle"
+          class="lg:hidden text-xl min-w-max text-art-blue font-semibold align-middle"
           aria-expanded="false"
           aria-controls="top-menu-container"
           aria-label="Toggle navigation menu"
         )
-          i.bi.bi-list.text-xl(aria-hidden="true")
-          i.bi.bi-x-lg.text-xl(aria-hidden="true")
-          span(class="inline-block text-xl pl-2")="Menu"
+          i.bi.bi-list(aria-hidden="true")
+          i.bi.bi-x-lg(aria-hidden="true")
+          span(class="inline-block pl-2")="Menu"
 
     div#top-menu-container(class="nav-items hidden lg:block w-full lg:w-auto border-t-4 border-art-blue lg:border-transparent bg-aux-gray lg:bg-transparent p-0")
       ul#menu-main-site-navigation(class="flex flex-col lg:flex-row justify-center lg:justify-start")
@@ -46,7 +45,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
               div(class="flex flex-col lg:flex-row gap-6")
                 //- Featured tiles section
-                ul(class="flex flex-row gap-4 lg:gap-6 items-stretch lg:border-r lg:border-slate-300 lg:pr-6 shrink-0 lg:shrink")
+                ul(class="flex flex-wrap gap-4 lg:gap-6 items-stretch lg:border-r lg:border-slate-300 lg:pr-6 shrink-0 lg:shrink")
                   li(class="min-w-0")
                     a(
                       class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
@@ -249,3 +248,12 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                     i(class="bi bi-envelope text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
                     span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Contact
 
+//- 
+//- div(id="feedback_link_container" class="fixed top-4 right-4 z-50")
+//-   a(
+//-     href="https://forms.ashevillenc.gov/form/art-website-feedback"
+//-     class="text-link ml-1 inline-flex items-center"
+//-     rel="noreferrer"
+//-   )
+//-     i(class="bi bi-lightbulb" aria-hidden="true")
+    //- span Send Feedback
