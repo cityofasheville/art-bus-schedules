@@ -737,6 +737,10 @@ th.stop-header:focus {
   outline-offset: -2px;
 }
 
+.maplibregl-cooperative-gesture-screen {
+  background: rgba(0, 0, 0, .6) !important;
+}
+
 @media print {
   body {
     -webkit-print-color-adjust: exact;

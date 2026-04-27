@@ -1,9 +1,12 @@
 include formatting_functions.pug
 
-div(class="relative w-full border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
-  div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
-    h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
-      span(id="all_bus_routes_and_schedules") All Bus Routes and Schedules
+//- div(class="relative w-full bg-art-blue border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
+//-   div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
+//-     h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
+//-       span(id="all_bus_routes_and_schedules") All Bus Routes and Schedules
+
+include page_heading
++page_heading('All Bus Routes and Schedules', 'max-w-screen-xl', 'all_bus_routes_and_schedules')
 
 //- div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
 //-   p Click on a route number below for detailed route maps and schedules
@@ -91,7 +94,9 @@ div(class="px-6 mb-12")
                             i(class="bi bi-arrow-right ml-1 text-gray-500" aria-hidden="true")
                             
                   button.zoom-to(data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
-                    i.bi.bi-zoom-in(aria-hidden="true")
+                    i(class="bi bi-zoom-in" aria-hidden="true")
+                    span(class="sr-only") Zoom to #{timetablePage.timetable_page_label} route map
+                    
       if config.showMap
         div(class="relative")
           a(href="#main_footer" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip map

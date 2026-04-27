@@ -9,10 +9,8 @@ include formatting_functions.pug
 -config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
 -config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
 
-div(class="relative w-full border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
-  div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
-    h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
-      span=pageTitleToUse
+include page_heading
++page_heading(pageTitleToUse, 'max-w-screen-xl')
 
 div(class="w-full min-h-128 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center")
 

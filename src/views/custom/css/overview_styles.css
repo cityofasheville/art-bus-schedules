@@ -249,3 +249,7 @@ button.zoom-to {
   min-width: 180px;
   width: unset
 }
+
+.maplibregl-cooperative-gesture-screen {
+  background: rgba(0, 0, 0, .6) !important;
+}
