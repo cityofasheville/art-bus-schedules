@@ -66,6 +66,10 @@
     @apply flex items-center justify-center px-2 py-1 text-sm;
   }
 
+  .btn {
+    @apply px-4 py-2 text-base;
+  }
+
   .btn-art-green {
     @apply flex items-center justify-center px-4 py-2 no-underline hover:no-underline text-white bg-art-green hocus:bg-slate-300 hocus:text-slate-900 border border-slate-500 rounded-md shadow-sm;
   }

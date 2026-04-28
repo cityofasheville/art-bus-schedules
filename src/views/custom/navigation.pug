@@ -2,7 +2,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
   div(class="relative flex flex-col lg:flex-row items-end justify-between w-full")
     div(class="flex flex-col xs:flex-row justify-between w-full items-center xs:items-end px-4")
-      #header-logo(class="w-full py-4 lg:w-auto text-center xs:text-left")
+      #header-logo(class="w-full xs:w-auto py-4 lg:w-auto text-center xs:text-left")
         a(href="/")
           img(class="block xs:hidden inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url_mobile}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
           img(class="hidden xs:block inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
@@ -46,21 +46,21 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
               div(class="flex flex-col lg:flex-row gap-6")
                 //- Featured tiles section
-                ul(class="flex flex-wrap gap-4 lg:gap-6 items-stretch lg:border-r lg:border-slate-300 lg:pr-6 shrink-0 lg:shrink")
+                ul(class="flex flex-wrap gap-4 lg:gap-6 items-stretch justify-center lg:border-r lg:border-slate-300 lg:pr-6 shrink-0 lg:shrink")
                   li(class="min-w-0")
                     a(
                       class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                       href="/routes-and-schedules/"
                     )
                       i(class="bi bi-map text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                      span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") All Routes & Schedules
+                      span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") All Routes & Schedules
                   li(class="min-w-0")
                     a(
                       class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                       href="/holidays/"
                     )
                       i(class="bi bi-calendar-event text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                      span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Holidays
+                      span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Holidays
                   li(class="min-w-0")
                     a(
                       class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
@@ -68,7 +68,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                       rel="noreferrer"
                     )
                       i(class="bi bi-universal-access text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                      span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Paratransit
+                      span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Paratransit
                         i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
                       span(class="sr-only") opens external site
 
@@ -109,21 +109,21 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
             aria-labelledby="submenu-fares-passes-trigger"
           )
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
-              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-start lg:justify-center")
+              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/fares-and-passes/"
                   )
                     i(class="bi bi-cash-coin text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Transit Fares & Passes
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Transit Fares & Passes
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/passport-program/"
                   )
                     i(class="bi bi-person-vcard text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Passport Program
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Passport Program
 
         li(class="min-w-max relative flex flex-col ")
           div(class="border-l-8 border-transparent has-[a:focus]:border-art-blue lg:has-[a:focus]:border-transparent has-[a:hover]:border-art-blue lg:has-[a:hover]:border-transparent w-full flex flex-row group")
@@ -150,56 +150,56 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
             aria-labelledby="submenu-rider-tools-trigger"
           )
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
-              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-start lg:justify-center")
+              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/how-to-ride/"
                   )
                     i(class="bi bi-signpost-2 text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") How To Ride
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") How To Ride
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/trip-planner/"
                   )
                     i(class="bi bi-compass text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Trip Planner
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Trip Planner
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/real-time-departures/"
                   )
                     i(class="bi bi-clock-history text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Real-time Departures
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Real-time Departures
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/policies-and-tips/"
                   )
                     i(class="bi bi-lightbulb text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Policies & Tips
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Policies & Tips
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/bikes-on-buses/"
                   )
                     i(class="bi bi-bicycle text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Bikes on Buses
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Bikes on Buses
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/wifi/"
                   )
                     i(class="bi bi-wifi text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Wi-Fi
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Wi-Fi
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/ada/"
                   )
                     i(class="bi bi-universal-access text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") ADA and Accessibility
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") ADA and Accessibility
 
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
@@ -222,14 +222,14 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
             aria-labelledby="submenu-about-trigger"
           )
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
-              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-start lg:justify-center")
+              ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
                     href="/about/"
                   )
                     i(class="bi bi-info-circle text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Overview
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Overview
                 li(class="min-w-0")
                   a(
                     class="group flex flex-col items-center justify-center w-28 sm:w-36 h-full bg-white rounded-lg shadow-md hover:shadow-lg hover:bg-art-blue transition-all duration-200 text-center p-3 sm:p-4"
@@ -238,7 +238,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                   )
                     i(class="bi bi-clipboard-check text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
                     span
-                      span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Projects
+                      span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Projects
                         i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
                       span(class="sr-only") opens external site
                 li(class="min-w-0")
@@ -247,5 +247,5 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                     href="/contact/"
                   )
                     i(class="bi bi-envelope text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
-                    span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Contact
+                    span(class="text-sm sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Contact
 
