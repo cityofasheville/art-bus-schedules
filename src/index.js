@@ -215,6 +215,7 @@ const templatePath = config.templatePath;
 const buildPath = config.outputPath;
 config.wordpress = await getWordPressData();
 config.logo_url = '/art-logo-blue-small.png';
+config.logo_url_mobile = '/art-logo-blue-small-no-text.png';
 config.footer_logo_url = '/art-logo-white-no-text.png';
 config.connect_icon_url = '/art-connect-icon.svg';
 config.webpageTitle = 'ART Transit System';
@@ -323,6 +324,10 @@ for (const page of config.customPages) {
 await fs.rm('./src/tmp', { recursive: true, force: true });
 await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
 await fs.copyFile(templatePath + 'art-logo-blue-small.png', buildPath + 'art-logo-blue-small.png');
+await fs.copyFile(
+  templatePath + 'art-logo-blue-small-no-text.png',
+  buildPath + 'art-logo-blue-small-no-text.png',
+);
 await fs.copyFile(
   templatePath + 'art-logo-white-small.png',
   buildPath + 'art-logo-white-small.png',

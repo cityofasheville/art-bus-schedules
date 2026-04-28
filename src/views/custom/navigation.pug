@@ -1,16 +1,17 @@
 nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Navigation")
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
   div(class="relative flex flex-col lg:flex-row items-end justify-between w-full")
-    div(class="flex flex-col sm:flex-row justify-between w-full items-center sm:items-end px-4")
-      #header-logo(class="w-full py-4 lg:w-auto text-center sm:text-left")
+    div(class="flex flex-col xs:flex-row justify-between w-full items-center xs:items-end px-4")
+      #header-logo(class="w-full py-4 lg:w-auto text-center xs:text-left")
         a(href="/")
-          img(class="inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
+          img(class="block xs:hidden inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url_mobile}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
+          img(class="hidden xs:block inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
           //- h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
           <span class="sr-only">Asheville Rides Transit Home</span>
 
-      div(class="w-full sm:w-auto flex items-end gap-3 py-4")
+      div(class="w-full xs:w-auto flex justify-center items-end gap-3 py-4")
         button#hamburger(
-          class="lg:hidden text-xl min-w-max text-art-blue font-semibold align-middle"
+          class="lg:hidden text-2xl min-w-max text-art-blue font-semibold align-middle"
           aria-expanded="false"
           aria-controls="top-menu-container"
           aria-label="Toggle navigation menu"
@@ -25,7 +26,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
             button#submenu-routes-schedules-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center"
+              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -90,7 +91,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
             button#submenu-fares-passes-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center"
+              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -131,7 +132,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
             button#submenu-rider-tools-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center"
+              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -203,7 +204,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
             button#submenu-about-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center"
+              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -248,12 +249,3 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                     i(class="bi bi-envelope text-2xl sm:text-4xl text-art-blue group-hover:text-white mb-2 transition-colors" aria-hidden="true")
                     span(class="text-xs sm:text-base font-semibold text-art-blue group-hover:text-white leading-tight transition-colors") Contact
 
-//- 
-//- div(id="feedback_link_container" class="fixed top-4 right-4 z-50")
-//-   a(
-//-     href="https://forms.ashevillenc.gov/form/art-website-feedback"
-//-     class="text-link ml-1 inline-flex items-center"
-//-     rel="noreferrer"
-//-   )
-//-     i(class="bi bi-lightbulb" aria-hidden="true")
-    //- span Send Feedback
