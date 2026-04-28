@@ -653,6 +653,43 @@ details[open] summary span.bi {
   line-height: 1.25rem;
 }
 
+.btn-art-green {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(100 116 139 / var(--tw-border-opacity, 1));
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  text-decoration-line: none;
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.btn-art-green:hover {
+  text-decoration-line: none;
+  --tw-bg-opacity: 1;
+  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
+}
+
+.btn-art-green:focus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(203 213 225 / var(--tw-bg-opacity, 1));
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity, 1));
+}
+
 .btn-blue {
   display: flex;
   align-items: center;
@@ -1090,16 +1127,44 @@ fieldset.radio-group:has(input:focus) {
   bottom: 0px;
 }
 
+.bottom-14 {
+  bottom: 3.5rem;
+}
+
+.bottom-4 {
+  bottom: 1rem;
+}
+
 .left-0 {
   left: 0px;
+}
+
+.right-0 {
+  right: 0px;
+}
+
+.right-2 {
+  right: 0.5rem;
+}
+
+.right-4 {
+  right: 1rem;
 }
 
 .top-0 {
   top: 0px;
 }
 
+.top-2 {
+  top: 0.5rem;
+}
+
 .z-10 {
   z-index: 10;
+}
+
+.z-40 {
+  z-index: 40;
 }
 
 .z-50 {
@@ -1290,6 +1355,10 @@ fieldset.radio-group:has(input:focus) {
   height: max-content;
 }
 
+.h-12 {
+  height: 3rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -1328,6 +1397,10 @@ fieldset.radio-group:has(input:focus) {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.w-12 {
+  width: 3rem;
 }
 
 .w-16 {
@@ -1387,10 +1460,6 @@ fieldset.radio-group:has(input:focus) {
   max-width: 100%;
 }
 
-.max-w-md {
-  max-width: 28rem;
-}
-
 .max-w-screen-lg {
   max-width: 1024px;
 }
@@ -1401,6 +1470,14 @@ fieldset.radio-group:has(input:focus) {
 
 .max-w-screen-xl {
   max-width: 1280px;
+}
+
+.max-w-\[48rem\] {
+  max-width: 48rem;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
 }
 
 .flex-1 {
@@ -1771,16 +1848,6 @@ fieldset.radio-group:has(input:focus) {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
-.bg-black {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
-}
-
-.bg-aux-black {
-  --tw-bg-opacity: 1;
-  background-color: rgb(28 38 52 / var(--tw-bg-opacity, 1));
-}
-
 .bg-gradient-to-r {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -2077,6 +2144,11 @@ fieldset.radio-group:has(input:focus) {
   color: rgb(209 213 219 / var(--tw-text-opacity, 1));
 }
 
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity, 1));
+}
+
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
@@ -2207,6 +2279,15 @@ fieldset.radio-group:has(input:focus) {
 }
 
 @media (min-width: 480px) {
+  .xs\:btn {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
   .xs\:route-color-swatch-large {
     display: inline-flex;
     height: 46px;
@@ -2243,6 +2324,21 @@ fieldset.radio-group:has(input:focus) {
 .hover\:bg-art-blue:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(0 93 170 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-art-green:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:text-aux-black:hover {
+  --tw-text-opacity: 1;
+  color: rgb(28 38 52 / var(--tw-text-opacity, 1));
+}
+
+.hover\:text-gray-600:hover {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity, 1));
 }
 
 .hover\:text-white:hover {
@@ -2336,13 +2432,46 @@ fieldset.radio-group:has(input:focus) {
 }
 
 @media (min-width: 480px) {
+  .xs\:block {
+    display: block;
+  }
+
   .xs\:inline-block {
     display: inline-block;
+  }
+
+  .xs\:hidden {
+    display: none;
+  }
+
+  .xs\:w-64 {
+    width: 16rem;
+  }
+
+  .xs\:w-auto {
+    width: auto;
+  }
+
+  .xs\:flex-row {
+    flex-direction: row;
+  }
+
+  .xs\:items-end {
+    align-items: flex-end;
+  }
+
+  .xs\:text-left {
+    text-align: left;
   }
 
   .xs\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+
+  .xs\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 

@@ -8,47 +8,46 @@ include page_heading
 +page_heading(pageTitleToUse, 'max-w-screen-xl')
 //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-div(class="w-full min-h-128 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center")
+div(class="w-full min-h-128 bg-gradient-to-r from-art-blue/30 via-art-white to-art-green/20 relative flex-grow flex items-start justify-center px-4")
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
 
-  div(class="relative z-10 w-full max-w-screen-sm lg:max-w-screen-md min-h-64 mx-auto bg-aux-white border rounded-lg shadow-lg overflow-hidden p-0 my-12")
-    h2(class="p-4 px-4 text-aux-black text-2xl m-0 rounded-t-sm bg-art-green")
+  div(class="relative z-10 w-full max-w-3xl min-h-64 mx-auto bg-aux-white border rounded-lg shadow-lg overflow-hidden my-12")
+    h2(class="p-4 px-4 text-aux-black text-lg xs:text-xl sm:text-2xl m-0 rounded-t-sm bg-art-green")
       i(class="inline-block bi bi-compass mr-2" aria-hidden="true")
       span(class="inline-block")="Trip Planner"
-    div(class="p-4")
-      form(id="trip_planner_form")
-        fieldset#trip_planner_fieldset.p-4
-          legend="Plan your trip with Google Maps"
-          //- input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="Enter your starting location or destination")
-          //- input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2 mt-4" placeholder="Enter your destination or starting location")
-          //- button(type="submit" id="trip_planner_submit_button" class="btn-blue")="Plan My Trip"
+    form(id="trip_planner_form" class="py-4")
+      fieldset#trip_planner_fieldset.p-4
+        legend="Plan your trip with Google Maps"
+        //- input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="Enter your starting location or destination")
+        //- input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2 mt-4" placeholder="Enter your destination or starting location")
+        //- button(type="submit" id="trip_planner_submit_button" class="btn-blue")="Plan My Trip"
 
-          div.autocomplete-wrapper.relative.mb-4
-            label(for="trip_planner_input_source") Start Address (Origin)
-            input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="36 Montford Ave" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_source_suggestions")
-            ul#trip_planner_input_source_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
+        div.autocomplete-wrapper.relative.mb-4
+          label(for="trip_planner_input_source") Start Address (Origin)
+          input(type="text" id="trip_planner_input_source" name="trip_planner_input_source" class="w-full border p-2" placeholder="36 Montford Ave" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_source_suggestions")
+          ul#trip_planner_input_source_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
 
-          div.autocomplete-wrapper.relative.mb-4
-            label(for="trip_planner_input_destination") End Address (Destination)
-            input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2" placeholder="70 Court Plaza" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_destination_suggestions")
-            ul#trip_planner_input_destination_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
+        div.autocomplete-wrapper.relative.mb-4
+          label(for="trip_planner_input_destination") End Address (Destination)
+          input(type="text" id="trip_planner_input_destination" name="trip_planner_input_destination" class="w-full border p-2" placeholder="70 Court Plaza" required autocomplete="off" aria-autocomplete="list" aria-controls="trip_planner_input_destination_suggestions")
+          ul#trip_planner_input_destination_suggestions.autocomplete-suggestions(role="listbox" aria-label="Address suggestions")
 
-          div
-            label(for="trip_planner_input_date") Departure Day
-            input(type="date" id="trip_planner_input_date" class="w-full border p-2 mb-4" name="trip_planner_input_date" )
+        div
+          label(for="trip_planner_input_date") Departure Day
+          input(type="date" id="trip_planner_input_date" class="w-full border p-2 mb-4" name="trip_planner_input_date" )
 
-          div
-            label(for="trip_planner_input_time") Departure Time
-            input(type="time" id="trip_planner_input_time" class="w-full border p-2 mb-4" name="trip_planner_input_time" )
+        div
+          label(for="trip_planner_input_time") Departure Time
+          input(type="time" id="trip_planner_input_time" class="w-full border p-2 mb-4" name="trip_planner_input_time" )
 
-          div
-            label(for="trip_planner_input_trip_preference") Trip Preference
-            select(id="trip_planner_input_trip_preference" class="w-full border p-2 mb-4" name="trip_planner_input_trip_preference" )
-              option(value="") Best route
-              option(value="fewer_transfers") Fewer transfers
-              option(value="less_walking") Less walking
+        div
+          label(for="trip_planner_input_trip_preference") Trip Preference
+          select(id="trip_planner_input_trip_preference" class="w-full border p-2 mb-4" name="trip_planner_input_trip_preference" )
+            option(value="") Best route
+            option(value="fewer_transfers") Fewer transfers
+            option(value="less_walking") Less walking
 
-          button(type="submit" class="btn-blue") Get Directions with Google Maps
+        button(type="submit" class="btn-blue") Get Directions with Google Maps
 
 style.
   .autocomplete-suggestions {
