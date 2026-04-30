@@ -1,8 +1,8 @@
 include formatting_functions.pug
 
-div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
+div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
   <!-- Timetable generated on #{new Date().toISOString()} using GTFS-to-HTML version #{config.gtfsToHtmlVersion} -->
-  .timetable-page(class=`menu-type-${config.menuType}`)
+  div(class=`timetable-page menu-type-${config.menuType}`)
     if config.showRouteTitle
       - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
       div(class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4")
@@ -10,69 +10,88 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
           each route in timetableRouteList
             .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
           div()
-            h1(class="mt-0 mb-2 py-0")= timetablePage.timetable_page_label
+            div(class="flex flex-wrap items-center gap-2 mb-2 pt-2")
+              h1(class="mt-0 mb-2 py-0")= timetablePage.timetable_page_label
+              div(class="timetable-link")
+                each route in timetableRouteList
+                  if route.route_url
+                    a(href=`${route.route_url}` class="text-link text-sm")=`Printable Map & Schedule (PDF)`
             if timetablePage.timetables[0].routes[0].route_desc
               p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
-        div()
-          each route in timetableRouteList
-            a(href=`${route.route_url}` class="btn-gray btn-sm")=`View ${route.route_short_name} Map & Schedule (PDF)`
+        //- each route in timetableRouteList
+        //-   if route.route_url
+        //-     a(href=`${route.route_url}` class="btn-gray btn-sm")=`View ${route.route_short_name} Map & Schedule (PDF)`
       if config.effectiveDate
         .effective-date= `Effective ${config.effectiveDate}`
 
-    if config.hasGtfsRealtimeAlerts
-      details(class="border my-6 rounded" aria-labelledby="service_alerts_heading")
-        summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
-          div(class="flex items-start sm:items-center flex-col sm:flex-row gap-2 text-art-blue text-base md:text-lg font-semibold")
-            div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
-              i(class="bi bi-bell-fill" aria-hidden="true")
-              h2(id="service_alerts_heading" class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Service Alerts"
-            span(id="timetable_alert_count" class="rounded-full text-center border-2 px-2")="Checking alerts..."
-          div(class="flex items-center gap-4")
-            span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
-              
-        div(class="timetable-alerts border-t border-slate-300")
-          div(class="timetable-alerts-list p-4")
-            div(class="timetable-alert-empty")
-              | There are no service alerts at this time.
+    div(id="route_alerts_container" class="mb-12")
+      if config.hasGtfsRealtimeAlerts
+        details(class="border my-6 rounded text-aux-black" aria-labelledby="service_alerts_heading")
+          summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
+            
+            div(class="flex items-start gap-2 text-base xs:text-lg md:text-xl ")
 
-    details(class="border my-6 rounded" aria-labelledby="rt_positions_heading")
-      summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
-        div(class="flex items-start sm:items-center flex-col sm:flex-row gap-2 text-art-blue text-base md:text-lg font-semibold")
-          div(class="flex items-center gap-2 text-art-blue text-lg font-semibold")
-            i(class="bi bi-bus-front" aria-hidden="true")
-            h2(id="rt_positions_heading" class="text-xl mb-0 font-semibold")= timetablePage.timetable_page_label + ": Realtime Bus Positions "
-          span(id="rt_positions_status" class="rounded-full text-center border-2 px-2" aria-live="polite" aria-atomic="true")="Checking buses..."
-        div(class="flex items-center gap-4")
-          span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
-      div(id="rt_positions_container" class="border-t" aria-label="Real-time bus positions")
-        div(class="flex justify-end px-4 mt-4")
-          button(id="rt_positions_pause" type="button" class="btn-gray btn-sm flex items-center gap-2" aria-pressed="false")
-            i(class="bi bi-pause-fill" aria-hidden="true")
-            span Pause Updates
-        div(id="rt_positions_list")
+              div(class="pt-0.5")
+                i(class="bi bi-bell-fill" aria-hidden="true")
+
+              div(class="flex flex-wrap gap-2 ")
+                h2(id="service_alerts_heading" class="mb-0 pt-0.5")= timetablePage.timetable_page_label + ": Service Alerts"
+                span(id="timetable_alert_count" class="rounded-lg border-2 px-2 text-sm xs:text-base md:text-lg")="Checking alerts..."
+            
+            div(class="flex items-center justify-center")
+              span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
+                
+          div(class="timetable-alerts border-t border-slate-300")
+            div(class="timetable-alerts-list p-4")
+              div(class="timetable-alert-empty")
+                | There are no service alerts at this time.
+
+      details(class="border my-6 rounded text-aux-black" aria-labelledby="rt_positions_heading")
+        summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
+          
+          div(class="flex items-start gap-2 text-base xs:text-lg md:text-xl")
+
+            div(class="pt-0.5")
+              i(class="bi bi-bus-front" aria-hidden="true")
+
+            div(class="flex flex-wrap gap-2")
+              h2(id="rt_positions_heading" class="mb-0 pt-0.5")= timetablePage.timetable_page_label + ": Realtime Bus Positions "
+              span(id="rt_positions_status" class="rounded-lg border-2 px-2 text-sm xs:text-base md:text-lg" aria-live="polite" aria-atomic="true")="Checking buses..."
+          
+          div(class="flex items-center justify-center")
+            span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
+        
+        div(id="rt_positions_container" class="border-t" aria-label="Real-time bus positions")
+          div(class="flex justify-end px-4 mt-4")
+            button(id="rt_positions_pause" type="button" class="btn-gray btn-sm flex items-center gap-2" aria-pressed="false")
+              i(class="bi bi-pause-fill" aria-hidden="true")
+              span Pause Updates
+          div(id="rt_positions_list")
+
+    include timetable_menu_route.pug
 
     div(class="relative")
-      a(href="#timetable_menu_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip map, continue to timetable
+      a(href="#coa_main_timetable_container" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip map, continue to timetable
 
-    div#coa_main_map_container
-
-    each timetable in timetablePage.consolidatedTimetables
-      if config.showMap
-        div(class="coa-timetable-map-container relative" id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id)
-          include timetable_map.pug
-
-    div(id="timetable_menu_container" )
-      include timetable_menu.pug
-
-    div#coa_main_timetable_container
-      //- include timetable_menu.pug
+    div(id="coa_main_map_container" class="mb-12")
 
       each timetable in timetablePage.consolidatedTimetables
-        div(id=`timetable_id_${formatHtmlId(timetable.timetable_id)}` class="timetable my-6" data-day-list=timetable.dayList data-direction-name=timetable.direction_name || timetable.timetable_label data-timetable-id=`${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id data-route-id=timetable.route_ids.join('_') data-stops="timepoints-only")
+        if config.showMap
+          div(class="coa-timetable-map-container relative border border-slate-300 rounded-lg shadow-lg overflow-hidden" id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id)
+            if config.showRouteTitle
+              .timetable-label
+                h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Route Map: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
+            include timetable_map.pug
+
+    div(id="coa_main_timetable_container" class="mb-12")
+      include timetable_menu_stops.pug
+
+      each timetable in timetablePage.consolidatedTimetables
+        div(id=`timetable_id_${formatHtmlId(timetable.timetable_id)}` class="timetable my-6 border border-slate-300 rounded-lg shadow-lg overflow-hidden" data-day-list=timetable.dayList data-direction-name=timetable.direction_name || timetable.timetable_label data-timetable-id=`${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id data-route-id=timetable.route_ids.join('_') data-stops="timepoints-only")
 
           if config.showRouteTitle
             .timetable-label
-              h2= `${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
+              h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Timetable: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
                 each note in getNotesForTimetableLabel(timetable.notes)
                   include timetable_note_symbol.pug
               if timetable.service_notes !== null
@@ -85,7 +104,7 @@ div(class="w-full max-w-screen-lg xl:max-w-screen-xl mx-auto px-4 py-8")
           else if timetable.orientation === 'vertical'
             include timetable_vertical.pug
 
-          .timetable-footer
+          div(class="timetable-footer p-4")
             if hasNotesOrNotices(timetable)
               .notes
                 if timetable.requestPickupSymbolUsed

@@ -1448,6 +1448,10 @@ fieldset.radio-group:has(input:focus) {
   min-width: max-content;
 }
 
+.max-w-3xl {
+  max-width: 48rem;
+}
+
 .max-w-7xl {
   max-width: 80rem;
 }
@@ -1470,14 +1474,6 @@ fieldset.radio-group:has(input:focus) {
 
 .max-w-screen-xl {
   max-width: 1280px;
-}
-
-.max-w-\[48rem\] {
-  max-width: 48rem;
-}
-
-.max-w-3xl {
-  max-width: 48rem;
 }
 
 .flex-1 {
@@ -1554,6 +1550,10 @@ fieldset.radio-group:has(input:focus) {
 
 .items-center {
   align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
 }
 
 .items-stretch {
@@ -1740,6 +1740,10 @@ fieldset.radio-group:has(input:focus) {
   border-top-width: 16px;
 }
 
+.border-l {
+  border-left-width: 1px;
+}
+
 .border-art-blue {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
@@ -1792,6 +1796,11 @@ fieldset.radio-group:has(input:focus) {
 
 .border-transparent {
   border-color: transparent;
+}
+
+.border-aux-green {
+  --tw-border-opacity: 1;
+  border-color: rgb(160 207 103 / var(--tw-border-opacity, 1));
 }
 
 .bg-amber-100 {
@@ -2007,6 +2016,14 @@ fieldset.radio-group:has(input:focus) {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pt-1 {
+  padding-top: 0.25rem;
+}
+
+.pt-0\.5 {
+  padding-top: 0.125rem;
 }
 
 .text-left {
@@ -2473,6 +2490,16 @@ fieldset.radio-group:has(input:focus) {
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
+
+  .xs\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .xs\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -2662,6 +2689,11 @@ fieldset.radio-group:has(input:focus) {
     line-height: 1.75rem;
   }
 
+  .md\:text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
   .md\:shadow-none {
     --tw-shadow: 0 0 #0000;
     --tw-shadow-colored: 0 0 #0000;
@@ -2725,10 +2757,6 @@ fieldset.radio-group:has(input:focus) {
 
   .lg\:max-w-full {
     max-width: 100%;
-  }
-
-  .lg\:max-w-screen-md {
-    max-width: 768px;
   }
 
   .lg\:shrink {

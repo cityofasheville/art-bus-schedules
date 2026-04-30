@@ -142,21 +142,9 @@ script.
       $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
 
       // Initialize Tom Select for stop dropdown with accessibility features
-      stopSelectInstance = new TomSelect('#stop-select-dropdown', {
-        create: false,
-        openOnFocus: true,
-        maxOptions: null,
-        sortField: { field: 'text', direction: 'asc' },
+      stopSelectInstance = createAccessibleTomSelect('#stop-select-dropdown', {
         dropdownParent: '#container_search_stop',
-        // Accessibility: ensure proper ARIA labels
-        render: {
-          option: function(data, escape) {
-            return '<div class="option" role="option">' + escape(data.text) + '</div>';
-          }
-        },
-        onInitialize: function() {
-          this.control_input.setAttribute('aria-labelledby', 'stop-select-label');
-        },
+        labelId: 'stop-select-label',
         onChange: function(value) {
           if (value) {
             handleStopSelection({ target: { value: value } });
@@ -165,19 +153,9 @@ script.
       });
 
       // Initialize Tom Select for favorite stops dropdown
-      favoriteStopSelectInstance = new TomSelect('#favorite-stop-select-dropdown', {
-        create: false,
-        openOnFocus: true,
-        sortField: { field: 'text', direction: 'asc' },
+      favoriteStopSelectInstance = createAccessibleTomSelect('#favorite-stop-select-dropdown', {
         dropdownParent: '#container_favorites',
-        render: {
-          option: function(data, escape) {
-            return '<div class="option" role="option">' + escape(data.text) + '</div>';
-          }
-        },
-        onInitialize: function() {
-          this.control_input.setAttribute('aria-labelledby', 'favorite-stop-select-label');
-        },
+        labelId: 'favorite-stop-select-label',
         onChange: function(value) {
           if (value) {
             handleStopSelection({ target: { value: value } });

@@ -161,6 +161,13 @@ async function createSystemMap() {
     disablePointsOfInterest(map);
     addMapLayers(map, geojson, defaultRouteColor, lineLayout);
     setupEventListeners(map, routes);
+
+    // Collapse the attribution control by default
+    const attribDetails = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+    if (attribDetails && attribDetails.tagName === 'DETAILS') {
+      attribDetails.removeAttribute('open');
+      attribDetails.classList.remove('maplibregl-compact-show');
+    }
   });
 }
 
