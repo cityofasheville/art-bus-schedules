@@ -1,0 +1,11 @@
+if timetablePage.consolidatedTimetables.length > 1
+  div(class="timetable-radio-menu" class="mb-6" role="group" aria-label="Timetable Stop Visibility options")
+    fieldset(id="timepoint_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container")
+      legend="Timetable Stop Visibility"
+      div(class=`w-full grid grid-cols-2 btn-group`)
+        label(class="relative btn-gray text-center cursor-pointer" for="radio_timepoints_only")
+          input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="timepoints_only" id="radio_timepoints_only")
+          span= "Timepoints Only"
+        label(class="relative btn-gray text-center cursor-pointer" for="radio_all_stops")
+          input(class="opacity-0 absolute top-0 left-0" type="radio" name="timepoints" value="all_stops" id="radio_all_stops")
+          span= "All Stops"

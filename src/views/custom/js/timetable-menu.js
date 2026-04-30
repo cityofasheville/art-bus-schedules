@@ -1,4 +1,4 @@
-/* global jQuery, TomSelect */
+/* global jQuery, TomSelect, createAccessibleTomSelect */
 /* eslint no-unused-vars: "off" */
 
 // Global object to store Tom Select instances by timetable ID
@@ -218,7 +218,8 @@ jQuery(() => {
   showSelectedTimetable();
 
   // Apply timepoints visibility based on initial state
-  if (jQuery('#timepoint_selector input[name="timepoints"]:checked').val() === 'all_stops') {
+  const initialTimepointMode = getUrlParam('timepoints') || 'timepoints_only';
+  if (initialTimepointMode === 'all_stops') {
     showAllTimepoints();
   } else {
     hideTimepointColumns();
@@ -274,19 +275,12 @@ jQuery(() => {
     const selectEl = this;
     const timetableId = jQuery(selectEl).data('timetable-id');
 
-    stopSearchSelects[timetableId] = new TomSelect(selectEl, {
-      create: false,
-      openOnFocus: true,
-      maxOptions: null,
-      sortField: { field: 'text', direction: 'asc' },
-      placeholder: 'Select a stop on this route',
+    stopSearchSelects[timetableId] = createAccessibleTomSelect(selectEl, {
       dropdownParent: `#stop-search-dropdown-container-${timetableId}`,
-      onInitialize: function () {
-        this.control_input.setAttribute('aria-labelledby', `stop-search-label-${timetableId}`);
-      },
+      labelId: `stop-search-label-${timetableId}`,
+      placeholder: 'Select a stop on this route',
       onChange: function (value) {
         if (!value) {
-          // Clear selection and remove from URL
           clearStopSelection(timetableId);
           const url = new URL(window.location);
           url.searchParams.delete('stop_id');
@@ -573,14 +567,6 @@ function selectStop(stopId, timetableId, options = {}) {
     setUrlParam('timepoints', 'all_stops');
     showSelectedTimetable();
     showAllTimepoints();
-
-    // Update button styling
-    jQuery('#timepoint_selector input[name="timepoints"]').each((index, element) => {
-      jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-    });
   }
 
   // Remove existing highlights from this table

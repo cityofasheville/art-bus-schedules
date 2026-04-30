@@ -153,6 +153,49 @@
   background-color: #dbeafe;
 }
 
+/* Tom Select dropdown toggle button */
+.ts-control .ts-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #d1d5db;
+  cursor: pointer;
+  color: #6b7280;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.ts-control .ts-toggle-btn:hover {
+  color: #111827;
+  background-color: #f3f4f6;
+}
+
+.ts-control .ts-toggle-btn:focus-visible {
+  outline: 2px solid #005daa;
+  outline-offset: -2px;
+  color: #111827;
+}
+
+.ts-wrapper.dropdown-active .ts-toggle-btn i {
+  transform: rotate(180deg);
+}
+
+.ts-control .ts-toggle-btn i {
+  transition: transform 0.2s;
+}
+
+/* Ensure ts-control has space for the toggle button */
+.ts-wrapper.has-items .ts-control,
+.ts-wrapper .ts-control {
+  padding-right: 2.75rem !important;
+}
+
 /* .maplibregl-ctrl-top-left .maplibregl-ctrl {
   display: none;
 } */

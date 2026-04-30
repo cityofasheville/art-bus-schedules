@@ -371,14 +371,33 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     return;
   }
 
-  // Update the status with bus count
+  // Update the status with bus count and directions
   const statusEl = jQuery('#rt_positions_status');
   if (statusEl.length && previousVehicleCount !== currentVehicleCount) {
-    const statusText =
-      currentVehicleCount === 0
-        ? 'No active buses'
-        : `${currentVehicleCount} active ${currentVehicleCount === 1 ? 'bus' : 'buses'}`;
-    statusEl.text(statusText);
+    if (currentVehicleCount === 0) {
+      statusEl.removeClass('border-aux-green').text('No active buses');
+    } else {
+      // Gather unique direction names from active vehicles
+      const directions = new Set();
+      for (const vp of vehiclePositions) {
+        const dirName = jQuery('.timetable #trip_id_' + vp.vehicle.trip.trip_id)
+          .parents('.timetable')
+          .data('direction-name');
+        if (dirName) {
+          directions.add(dirName);
+        }
+      }
+
+      const busText = `${currentVehicleCount} active ${currentVehicleCount === 1 ? 'bus' : 'buses'}`;
+      if (directions.size > 0) {
+        const dirList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }).format([
+          ...directions,
+        ]);
+        statusEl.addClass('border-aux-green').text(`${busText} – ${dirList}`);
+      } else {
+        statusEl.addClass('border-aux-green').text(busText);
+      }
+    }
     previousVehicleCount = currentVehicleCount;
   }
 
@@ -526,7 +545,7 @@ function initRtPositionsPauseButton() {
       pauseBtn.attr('aria-pressed', 'true');
       icon.removeClass('bi-pause-fill').addClass('bi-play-fill');
       text.text('Resume Updates');
-      statusEl.text('updates paused');
+      statusEl.removeClass('border-aux-green').text('Updates paused');
     } else {
       pauseBtn.attr('aria-pressed', 'false');
       icon.removeClass('bi-play-fill').addClass('bi-pause-fill');
@@ -1037,6 +1056,13 @@ async function createMap(id) {
     disablePointsOfInterest(map);
     addMapLayers(map, geojson, defaultRouteColor, lineLayout);
     setupEventListeners(map, id);
+
+    // Collapse the attribution control by default
+    const attribDetails = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+    if (attribDetails && attribDetails.tagName === 'DETAILS') {
+      attribDetails.removeAttribute('open');
+      attribDetails.classList.remove('maplibregl-compact-show');
+    }
   });
 
   return map;
