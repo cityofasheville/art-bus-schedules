@@ -249,6 +249,10 @@ jQuery(() => {
   jQuery('#direction_name_selector input[name="directionId"]').change(function () {
     const directionLabel = jQuery(this).siblings('span').text();
     setUrlParam('direction_id', jQuery(this).val());
+    const visibleTimetable = jQuery('.timetable:visible').first();
+    if (visibleTimetable.length) {
+      clearStopSelection(visibleTimetable.data('timetable-id'));
+    }
     showSelectedTimetable();
     announceStatus(`Showing ${directionLabel} direction`);
   });
@@ -282,9 +286,6 @@ jQuery(() => {
       onChange: function (value) {
         if (!value) {
           clearStopSelection(timetableId);
-          const url = new URL(window.location);
-          url.searchParams.delete('stop_id');
-          window.history.replaceState({}, '', url);
           return;
         }
         selectStop(value, timetableId, { fromDropdown: true, showPopup: false });
@@ -314,6 +315,11 @@ function clearStopSelection(timetableId) {
   if (typeof closeStopPopup === 'function') {
     closeStopPopup();
   }
+
+  // Remove stop_id from URL
+  const url = new URL(window.location);
+  url.searchParams.delete('stop_id');
+  window.history.replaceState({}, '', url);
 
   // Reset dropdown using Tom Select API
   if (stopSearchSelects[timetableId]) {

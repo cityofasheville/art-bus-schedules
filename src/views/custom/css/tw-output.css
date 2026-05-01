@@ -1456,6 +1456,10 @@ fieldset.radio-group:has(input:focus) {
   max-width: 80rem;
 }
 
+.max-w-80 {
+  max-width: 20rem;
+}
+
 .max-w-\[24rem\] {
   max-width: 24rem;
 }
@@ -1474,18 +1478,6 @@ fieldset.radio-group:has(input:focus) {
 
 .max-w-screen-xl {
   max-width: 1280px;
-}
-
-.max-w-60 {
-  max-width: 15rem;
-}
-
-.max-w-80 {
-  max-width: 20rem;
-}
-
-.max-w-40 {
-  max-width: 10rem;
 }
 
 .flex-1 {
@@ -1982,6 +1974,10 @@ fieldset.radio-group:has(input:focus) {
   padding-bottom: 2rem;
 }
 
+.pb-12 {
+  padding-bottom: 3rem;
+}
+
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -2200,6 +2196,11 @@ fieldset.radio-group:has(input:focus) {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -2660,10 +2661,6 @@ fieldset.radio-group:has(input:focus) {
 
   .md\:flex-row {
     flex-direction: row;
-  }
-
-  .md\:flex-row-reverse {
-    flex-direction: row-reverse;
   }
 
   .md\:border-x-0 {
