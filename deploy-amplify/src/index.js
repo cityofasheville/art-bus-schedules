@@ -1,29 +1,84 @@
-import { AmplifyClient, StartJobCommand } from "@aws-sdk/client-amplify";
+import { AmplifyClient, StartJobCommand, GetJobCommand } from "@aws-sdk/client-amplify";
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 
-// Initialize the client. It will automatically use the Lambda's IAM execution role.
-const client = new AmplifyClient({ region: "us-east-1" }); // Replace with your region
+const amplifyClient = new AmplifyClient({ region: "us-east-1" });
+const secretsClient = new SecretsManagerClient({ region: "us-east-1" });
+
+// Cached at cold start to avoid a Secrets Manager call on every request.
+let cachedApiKey = null;
+
+async function getApiKey() {
+  if (cachedApiKey) return cachedApiKey;
+  const command = new GetSecretValueCommand({ SecretId: process.env.API_KEY_SECRET_NAME });
+  const response = await secretsClient.send(command);
+  cachedApiKey = JSON.parse(response.SecretString).API_KEY;
+  return cachedApiKey;
+}
+
+const respond = (statusCode, body) => ({
+  statusCode,
+  body: JSON.stringify(body),
+});
+
+function authenticate(event, apiKey) {
+  const authHeader = event.headers?.authorization ?? event.headers?.Authorization ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  return token === apiKey;
+}
+
+async function startBuild() {
+  const command = new StartJobCommand({
+    appId: process.env.appId,
+    branchName: process.env.branch,
+    jobType: "RELEASE",
+  });
+  const response = await amplifyClient.send(command);
+  const jobId = response.jobSummary.jobId;
+  console.log("Amplify build started, jobId:", jobId);
+  return jobId;
+}
+
+async function getJobStatus(jobId) {
+  const command = new GetJobCommand({
+    appId: process.env.appId,
+    branchName: process.env.branch,
+    jobId,
+  });
+  const response = await amplifyClient.send(command);
+  const status = response.job.summary.status;
+  console.log(`Job ${jobId} status: ${status}`);
+  return status;
+}
 
 export const handler = async (event) => {
-  const params = {
-    appId: process.env.appId,        // e.g., d1234567890
-    branchName: process.env.branch,  // target branch
-    jobType: "RELEASE"               // RELEASE triggers a new deployment
-  };
-
   try {
-    const command = new StartJobCommand(params);
-    const response = await client.send(command);
-    
-    console.log("Successfully triggered Amplify build:", response.jobSummary.jobId);
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Build started successfully!" }),
-    };
+
+    //Authenticate request
+    const apiKey = await getApiKey();
+    if (!authenticate(event, apiKey)) {
+      return respond(401, { message: "Unauthorized" });
+    }
+
+    const segments = event.rawPath.split("/");
+    const route = segments[1];
+
+    // Start route
+    if (route === "start") {
+      const jobId = await startBuild();
+      return respond(200, { jobId });
+    }
+
+    // Status route
+    if (route === "status") {
+      const jobId = segments[2];
+      if (!jobId) return respond(400, { message: "jobId is required" });
+      const status = await getJobStatus(jobId);
+      return respond(200, { jobId, status });
+    }
+
+    return respond(404, { message: "Not found" });
   } catch (error) {
-    console.error("Error triggering Amplify build:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: "Failed to start build." }),
-    };
+    console.error("Unhandled error:", error);
+    return respond(500, { message: "Internal server error" });
   }
 };
