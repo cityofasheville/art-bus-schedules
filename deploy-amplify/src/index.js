@@ -64,8 +64,15 @@ export const handler = async (event) => {
 
     // Start route
     if (route === "start") {
-      const jobId = await startBuild();
-      return respond(200, { jobId });
+      try {
+        const jobId = await startBuild();
+        return respond(200, { jobId });
+      } catch (error) {
+        if (error.name === "LimitExceededException") {
+          return respond(409, { message: "A build is already pending or running." });
+        }
+        throw error;
+      }
     }
 
     // Status route
