@@ -112,7 +112,7 @@ const amplify_role_settings = (config) => {
 data "aws_iam_policy_document" "policy_amplify" {
     statement {
         effect = "Allow"
-        actions = ["amplify:StartJob"]
+        actions = ["amplify:StartJob","amplify:GetJob"]
         resources = ["*"]
       }
 }
