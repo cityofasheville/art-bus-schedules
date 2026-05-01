@@ -5,11 +5,11 @@
 include page_heading
 +page_heading("Contact ART")
 
-div(class="w-full max-w-screen-lg mx-auto px-4 py-8")
+div(class="w-full max-w-screen-lg mx-auto px-4 pt-8")
   
   //- p(class="text-lg mb-8")!= contactUs.what_we_do
 
-  div(class="grid grid-cols-1 md:grid-cols-2 gap-8")
+  div(class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12")
     
     //- Contact Information
     div(class="bg-white rounded-lg shadow-md p-6")
@@ -62,5 +62,11 @@ div(class="w-full max-w-screen-lg mx-auto px-4 py-8")
               span(class="font-semibold block")= info.title
               span= info.details
 
-div(class="entry-content w-full max-w-screen-lg mx-auto px-4 py-8")
+  div(id="stay-in-the-loop" class="w-full max-w-80 mb-12")
+    div(class="flex items-center gap-3 mb-6")
+      img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
+      h2(class="text-2xl") Stay in the Loop!
+    iframe(width="100%" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
+
+div(class="entry-content w-full max-w-screen-lg mx-auto px-4 mb-12")
   div!=config.wordpress.reportIssues.content.rendered
