@@ -145,6 +145,7 @@ script.
       stopSelectInstance = createAccessibleTomSelect('#stop-select-dropdown', {
         dropdownParent: '#container_search_stop',
         labelId: 'stop-select-label',
+        //- focusToggleOnOpen: true, 
         onChange: function(value) {
           if (value) {
             handleStopSelection({ target: { value: value } });

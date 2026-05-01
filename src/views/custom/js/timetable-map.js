@@ -388,8 +388,9 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
         }
       }
 
+      const showDirectionsInStatus = !filterVehiclesByDirection;
       const busText = `${currentVehicleCount} active ${currentVehicleCount === 1 ? 'bus' : 'buses'}`;
-      if (directions.size > 0) {
+      if (directions.size > 0 && showDirectionsInStatus) {
         const dirList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }).format([
           ...directions,
         ]);
@@ -553,7 +554,24 @@ function initRtPositionsPauseButton() {
       // Immediately update when resuming
       previousVehicleCount = null; // Reset to force status update
       if (vehiclePositions && tripUpdates) {
-        updateRtPositionsContainer(vehiclePositions, tripUpdates);
+        if (filterVehiclesByDirection) {
+          const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
+          const directionId = visibleMapContainer.length
+            ? String(visibleMapContainer.data('direction-id'))
+            : null;
+          if (directionId !== null) {
+            const filteredPositions = vehiclePositions.filter(
+              (vp) =>
+                vp.vehicle.trip.direction_id !== undefined &&
+                String(vp.vehicle.trip.direction_id) === directionId,
+            );
+            updateRtPositionsContainer(filteredPositions, tripUpdates);
+          } else {
+            updateRtPositionsContainer(vehiclePositions, tripUpdates);
+          }
+        } else {
+          updateRtPositionsContainer(vehiclePositions, tripUpdates);
+        }
       }
     }
   });
@@ -898,8 +916,26 @@ async function updateArrivals({ withMap = true } = {}) {
       }
     }
 
-    // Update the text-based vehicle positions container
-    updateRtPositionsContainer(vehiclePositions, tripUpdates);
+    // Update the text-based vehicle positions container, applying direction filter
+    if (filterVehiclesByDirection) {
+      const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
+      const directionId = visibleMapContainer.length
+        ? String(visibleMapContainer.data('direction-id'))
+        : null;
+
+      if (directionId !== null) {
+        const filteredPositions = vehiclePositions.filter(
+          (vp) =>
+            vp.vehicle.trip.direction_id !== undefined &&
+            String(vp.vehicle.trip.direction_id) === directionId,
+        );
+        updateRtPositionsContainer(filteredPositions, tripUpdates);
+      } else {
+        updateRtPositionsContainer(vehiclePositions, tripUpdates);
+      }
+    } else {
+      updateRtPositionsContainer(vehiclePositions, tripUpdates);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -920,6 +956,19 @@ function toggleMap(id) {
     const mapDirectionId = visibleMapContainer.length
       ? String(visibleMapContainer.data('direction-id'))
       : null;
+
+    // Update the RT positions heading with the current direction name
+    if (filterVehiclesByDirection) {
+      const visibleTimetable = jQuery('.timetable:visible');
+      const directionNameForHeading = visibleTimetable.data('direction-name');
+      const headingEl = jQuery('#rt_positions_heading');
+      if (headingEl.length && headingEl.data('base-label')) {
+        const baseLabel = headingEl.data('base-label');
+        headingEl.text(
+          directionNameForHeading ? `${baseLabel} (${directionNameForHeading})` : baseLabel,
+        );
+      }
+    }
 
     // Update vehicle markers to use the current visible map, applying direction filter
     for (const [vehicleId, vehicleMarker] of Object.entries(vehicleMarkers)) {
@@ -995,6 +1044,20 @@ function toggleMap(id) {
           addVehicleMarker(vehiclePosition, vehicleTripUpdate);
           attachVehicleMarkerClickHandler(vehiclePosition, vehicleTripUpdate, maps[id]);
         }
+      }
+    }
+
+    // Update the text-based container to match the new direction
+    if (vehiclePositions && tripUpdates) {
+      if (filterVehiclesByDirection && mapDirectionId !== null) {
+        const filteredPositions = vehiclePositions.filter(
+          (vp) =>
+            vp.vehicle.trip.direction_id !== undefined &&
+            String(vp.vehicle.trip.direction_id) === mapDirectionId,
+        );
+        updateRtPositionsContainer(filteredPositions, tripUpdates);
+      } else {
+        updateRtPositionsContainer(vehiclePositions, tripUpdates);
       }
     }
   }
@@ -1520,8 +1583,23 @@ function getStopIdFromTableCell(cell) {
 }
 
 async function createMaps() {
+  // Store the base heading text so we can append direction names later
+  const headingEl = jQuery('#rt_positions_heading');
+  if (headingEl.length && !headingEl.data('base-label')) {
+    headingEl.data('base-label', headingEl.text().trim());
+  }
+
   for (const id of Object.keys(geojsons)) {
     maps[id] = await createMap(id);
+  }
+
+  // Set initial heading with current direction name
+  if (filterVehiclesByDirection) {
+    const visibleTimetable = jQuery('.timetable:visible');
+    const initialDirectionName = visibleTimetable.data('direction-name');
+    if (headingEl.length && headingEl.data('base-label') && initialDirectionName) {
+      headingEl.text(`${headingEl.data('base-label')} (${initialDirectionName})`);
+    }
   }
 
   // GTFS-Realtime Vehicle Positions
