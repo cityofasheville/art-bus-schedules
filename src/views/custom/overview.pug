@@ -80,10 +80,10 @@ div(class="px-6 mb-12")
             each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
               if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
                 li.coa-timetable-page-link-item
-                  a(class="flex gap-2 no-underline hover:no-underline hover-bg-aux-gray p-2")(href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
+                  a(class="flex gap-2 no-underline hover:no-underline hover-bg-aux-gray p-2" href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                     - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                     each route in timetableRouteList
-                      span(class="route-color-swatch xs:route-color-swatch-large")(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
+                      span(class="route-color-swatch xs:route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
                     div
                       div(class="timetable-page-label mb-1")= timetablePage.timetable_page_label
                       - const routeDescParts = (timetableRouteList[0] && timetableRouteList[0].route_desc) ? timetableRouteList[0].route_desc.split(' - ') : []

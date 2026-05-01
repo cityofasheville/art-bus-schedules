@@ -12,10 +12,18 @@
  * @param {function} options.onChange - Callback when value changes
  * @param {string} [options.placeholder] - Placeholder text
  * @param {number|null} [options.maxOptions] - Max options to display (null = unlimited)
+ * @param {boolean} [options.focusToggleOnOpen=true] - If true, focus stays on the toggle button when it opens the list. If false, focus moves to the text input (Tom Select default).
  * @returns {TomSelect} The Tom Select instance
  */
 function createAccessibleTomSelect(selector, options) {
-  const { dropdownParent, labelId, onChange, placeholder, maxOptions = null } = options;
+  const {
+    dropdownParent,
+    labelId,
+    onChange,
+    placeholder,
+    maxOptions = null,
+    focusToggleOnOpen = false,
+  } = options;
 
   return new TomSelect(selector, {
     create: false,
@@ -40,17 +48,42 @@ function createAccessibleTomSelect(selector, options) {
       this.control.appendChild(toggleBtn);
 
       const self = this;
+
+      // Override onBlur on the instance so that when focus moves to our
+      // toggle button, Tom Select doesn't close the dropdown. The original
+      // blur event listener (an arrow function: t=>e.onBlur(t)) looks up
+      // onBlur via property access, so overriding it here takes effect.
+      const originalOnBlur = self.onBlur.bind(self);
+      self.onBlur = function (e) {
+        if (e && e.relatedTarget === toggleBtn) {
+          return; // Don't close when focus goes to our button
+        }
+        originalOnBlur(e);
+      };
+
       toggleBtn.addEventListener('mousedown', function (e) {
         e.preventDefault();
         e.stopPropagation();
       });
+
       toggleBtn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         if (self.isOpen) {
           self.close();
+          if (focusToggleOnOpen) {
+            toggleBtn.focus();
+          }
         } else {
-          self.open();
+          if (focusToggleOnOpen) {
+            // Set internal state without focusing the input (avoids mobile keyboard)
+            self.isFocused = true;
+            self.open();
+            toggleBtn.focus();
+          } else {
+            self.control_input.focus();
+            self.open();
+          }
         }
       });
     },

@@ -5,6 +5,16 @@ import pug from 'pug';
 import fs, { readFile } from 'fs/promises';
 import path from 'path';
 import Database from 'better-sqlite3';
+import sanitizeHtml from 'sanitize-html';
+
+const sanitizeOptions = {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe']),
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'title'],
+  },
+  allowedIframeHostnames: ['www.youtube.com', 'www.youtube-nocookie.com'],
+};
 
 function runQuery(db, query) {
   const prep = db.prepare(query);
@@ -81,7 +91,7 @@ async function getWordPressData() {
       howToRideResponse,
       reportIssuesResponse,
       faresAndPassesResponse,
-      transitConnectResponse,
+      transitHomepageResponse,
       holidaysResponse,
       adaResponse,
       bikesResponse,
@@ -91,25 +101,17 @@ async function getWordPressData() {
       policiesAndTipsResponse,
       transitNewsResponse,
     ] = await Promise.all([
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content,acf'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/492?_fields=title,content,acf'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/492?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content'),
       fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'),
-      fetch(
-        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/141640?_fields=title,content,acf',
-      ),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content,acf'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content,acf'),
-      fetch(
-        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/92483?_fields=title,content,acf',
-      ),
-      fetch(
-        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/93145?_fields=title,content,acf',
-      ),
-      fetch(
-        'https://www.ashevillenc.gov/wp-json/wp/v2/departments/99420?_fields=title,content,acf',
-      ),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/488?_fields=title,content,acf'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/141640?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/92483?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/93145?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/99420?_fields=title,content'),
+      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/488?_fields=title,content'),
       fetch(
         'https://www.ashevillenc.gov/wp-json/wp/v2/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
       ),
@@ -123,9 +125,9 @@ async function getWordPressData() {
         `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`,
       );
     }
-    if (!transitConnectResponse.ok) {
+    if (!transitHomepageResponse.ok) {
       throw new Error(
-        `HTTP error fetching Fares and Passes! status: ${transitConnectResponse.status}`,
+        `HTTP error fetching Fares and Passes! status: ${transitHomepageResponse.status}`,
       );
     }
     if (!transitNewsResponse.ok) {
@@ -162,7 +164,7 @@ async function getWordPressData() {
       howToRideData,
       reportIssuesData,
       faresAndPassesData,
-      transitConnectData,
+      transitHomepageData,
       holidaysData,
       transitNewsData,
       adaData,
@@ -175,7 +177,7 @@ async function getWordPressData() {
       howToRideResponse.json(),
       reportIssuesResponse.json(),
       faresAndPassesResponse.json(),
-      transitConnectResponse.json(),
+      transitHomepageResponse.json(),
       holidaysResponse.json(),
       transitNewsResponse.json(),
       adaResponse.json(),
@@ -186,21 +188,112 @@ async function getWordPressData() {
       policiesAndTipsResponse.json(),
     ]);
 
-    returnedData.howToRide = howToRideData;
-    returnedData.reportIssues = reportIssuesData;
-    returnedData.faresAndPasses = faresAndPassesData;
-    returnedData.transitConnect = transitConnectData.acf;
-    returnedData.transitAbout = transitConnectData;
-    returnedData.holidays = holidaysData;
-    returnedData.transitNews = transitNewsData;
-    returnedData.ada = adaData;
-    returnedData.bikesOnBuses = bikesData;
-    returnedData.wifiTerms = wifiTermsData;
-    returnedData.wifiFaqs = wifiFaqsData;
-    returnedData.passport = passportData;
-    returnedData.policiesAndTips = policiesAndTipsData;
-    returnedData.title = 'HC title';
-    returnedData.content = 'HC content';
+    returnedData.howToRide = {
+      content: {
+        rendered: sanitizeHtml(howToRideData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(howToRideData.title.rendered),
+      },
+    };
+
+    returnedData.reportIssues = {
+      content: {
+        rendered: sanitizeHtml(reportIssuesData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(reportIssuesData.title.rendered),
+      },
+    };
+
+    returnedData.faresAndPasses = {
+      content: {
+        rendered: sanitizeHtml(faresAndPassesData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(faresAndPassesData.title.rendered),
+      },
+    };
+
+    returnedData.transitConnect = transitHomepageData.acf;
+
+    returnedData.transitAbout = {
+      content: {
+        rendered: sanitizeHtml(transitHomepageData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(transitHomepageData.title.rendered),
+      },
+    };
+
+    returnedData.holidays = {
+      content: {
+        rendered: sanitizeHtml(holidaysData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(holidaysData.title.rendered),
+      },
+    };
+
+    returnedData.transitNews = transitNewsData.map((post) => ({
+      ...post,
+      title: { ...post.title, rendered: sanitizeHtml(post.title.rendered) },
+      excerpt: { ...post.excerpt, rendered: sanitizeHtml(post.excerpt.rendered, sanitizeOptions) },
+    }));
+
+    returnedData.ada = {
+      content: {
+        rendered: sanitizeHtml(adaData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(adaData.title.rendered),
+      },
+    };
+
+    returnedData.bikesOnBuses = {
+      content: {
+        rendered: sanitizeHtml(bikesData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(bikesData.title.rendered),
+      },
+    };
+
+    returnedData.wifiTerms = {
+      content: {
+        rendered: sanitizeHtml(wifiTermsData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(wifiTermsData.title.rendered),
+      },
+    };
+
+    returnedData.wifiFaqs = {
+      content: {
+        rendered: sanitizeHtml(wifiFaqsData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(wifiFaqsData.title.rendered),
+      },
+    };
+
+    returnedData.passport = {
+      content: {
+        rendered: sanitizeHtml(passportData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(passportData.title.rendered),
+      },
+    };
+
+    returnedData.policiesAndTips = {
+      content: {
+        rendered: sanitizeHtml(policiesAndTipsData.content.rendered, sanitizeOptions),
+      },
+      title: {
+        rendered: sanitizeHtml(policiesAndTipsData.title.rendered),
+      },
+    };
   } catch (error) {
     console.error('Failed to fetch data from WordPress API:', error.message);
     return defaultData;
