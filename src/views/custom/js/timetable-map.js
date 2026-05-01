@@ -97,8 +97,13 @@ function getStopPopupHtml(feature, stop) {
   const routeIds = JSON.parse(feature.properties.route_ids);
   const html = jQuery('<div>');
 
-  jQuery('<div>').addClass('popup-title').text(stop.stop_name).appendTo(html);
+  jQuery('<div>')
+    .addClass('popup-title')
+    .text(`${stop.stop_name}${stop.stop_code ? ` (${stop.stop_code})` : ''}`)
+    .appendTo(html);
 
+  // Temporarily hide stop code and real-time departures link
+  // Upcoming departures still show for current route, but trying to reduce popup clutter
   if (stop.stop_code && false) {
     jQuery('<div>')
       .html([
@@ -1098,34 +1103,39 @@ async function createMap(id) {
   map.addControl(new maplibregl.NavigationControl());
   map.addControl(new maplibregl.FullscreenControl());
 
-  map.on('load', () => {
-    // Set accessibility attributes on canvas
-    const canvas = map.getCanvas();
-    canvas.setAttribute('role', 'img');
-    // Get route info from timetable element for descriptive label
-    const timetableEl = jQuery(`.timetable`).first();
-    const routeId = timetableEl.data('route-id');
-    const firstRouteId = routeId ? String(routeId).split('_')[0] : null;
-    const route = firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
-    const routeLabel = route
-      ? `Route ${route.route_short_name}${route.route_long_name ? ' - ' + route.route_long_name : ''}`
-      : 'Bus route';
-    canvas.setAttribute(
-      'aria-label',
-      `Interactive map showing ${routeLabel} with stops and real-time vehicle locations`,
-    );
+  await new Promise((resolve) => {
+    map.on('load', () => {
+      // Set accessibility attributes on canvas
+      const canvas = map.getCanvas();
+      canvas.setAttribute('role', 'img');
+      // Get route info from timetable element for descriptive label
+      const timetableEl = jQuery(`.timetable`).first();
+      const routeId = timetableEl.data('route-id');
+      const firstRouteId = routeId ? String(routeId).split('_')[0] : null;
+      const route =
+        firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
+      const routeLabel = route
+        ? `Route ${route.route_short_name}${route.route_long_name ? ' - ' + route.route_long_name : ''}`
+        : 'Bus route';
+      canvas.setAttribute(
+        'aria-label',
+        `Interactive map showing ${routeLabel} with stops and real-time vehicle locations`,
+      );
 
-    fitMapToBounds(map, bounds);
-    disablePointsOfInterest(map);
-    addMapLayers(map, geojson, defaultRouteColor, lineLayout);
-    setupEventListeners(map, id);
+      fitMapToBounds(map, bounds);
+      disablePointsOfInterest(map);
+      addMapLayers(map, geojson, defaultRouteColor, lineLayout);
+      setupEventListeners(map, id);
 
-    // Collapse the attribution control by default
-    const attribDetails = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
-    if (attribDetails && attribDetails.tagName === 'DETAILS') {
-      attribDetails.removeAttribute('open');
-      attribDetails.classList.remove('maplibregl-compact-show');
-    }
+      // Collapse the attribution control by default
+      const attribDetails = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+      if (attribDetails && attribDetails.tagName === 'DETAILS') {
+        attribDetails.removeAttribute('open');
+        attribDetails.classList.remove('maplibregl-compact-show');
+      }
+
+      resolve();
+    });
   });
 
   return map;
@@ -1591,6 +1601,22 @@ async function createMaps() {
 
   for (const id of Object.keys(geojsons)) {
     maps[id] = await createMap(id);
+  }
+
+  // If a stop was already selected before maps loaded (e.g. from URL param), apply the map highlight now
+  const initialStopId = new URLSearchParams(window.location.search).get('stop_id');
+  if (initialStopId) {
+    const visibleTimetable = jQuery('.timetable:visible').first();
+    if (visibleTimetable.length) {
+      const timetableId = visibleTimetable.data('timetable-id');
+      if (maps[timetableId]) {
+        maps[timetableId].setFilter('stops-highlighted', [
+          'any',
+          ['in', 'stop_id', initialStopId],
+          ['in', 'parent_station', initialStopId],
+        ]);
+      }
+    }
   }
 
   // Set initial heading with current direction name

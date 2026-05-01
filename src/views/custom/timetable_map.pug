@@ -2,17 +2,17 @@
   .map(id=`map_timetable_id_${formatHtmlId(timetable.timetable_id)}`)
   .map-legend
     .legend-item.legend-direction
-      .text-lg.font-semibold
-        <b>#{timetable.direction_name || timetable.timetable_label}</b>
+      .text-lg
+        <span>#{timetable.direction_name || timetable.timetable_label}</span>
     .legend-item
       .legend-icon
         .stop-marker
       .legend-text 
-        <b>Stops</b>
+        <span>Stops</span>
     .legend-item.vehicle-legend-item(style="display: none;")
       .legend-icon
         .vehicle-marker
           .vehicle-marker-arrow
       .legend-text
-        <b>Current Vehicle Locations</b><br />
-        <small>Click or tap to see arrival times.</small>
+        <span>Current Vehicle Locations</span><br />
+        <span>Click or tap to see arrival times.</span>

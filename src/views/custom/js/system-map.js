@@ -55,16 +55,31 @@ function formatStopPopup(feature) {
   const routes = JSON.parse(feature.properties.routes);
   const html = jQuery('<div>');
 
-  jQuery('<div>').addClass('popup-title').text(feature.properties.stop_name).appendTo(html);
+  jQuery('<div>')
+    .addClass('popup-title')
+    .text(
+      `${feature.properties.stop_name}${feature.properties.stop_code ? ` (${feature.properties.stop_code})` : ''}`,
+    )
+    .appendTo(html);
 
-  if (feature.properties.stop_code ?? false) {
-    jQuery('<div>')
-      .html([
-        jQuery('<div>').addClass('popup-label').text('Stop Code:'),
-        jQuery('<strong>').text(feature.properties.stop_code),
-      ])
-      .appendTo(html);
-  }
+  // if (feature.properties.stop_code ?? false) {
+  //   jQuery('<div>')
+  //     .html([
+  //       jQuery('<div>').addClass('popup-label').text('Stop Code:'),
+  //       jQuery('<strong>').text(feature.properties.stop_code),
+  //     ])
+  //     .appendTo(html);
+  // }
+
+  jQuery('<div>')
+    .html([
+      jQuery('<div>')
+        // .addClass('btn-gray btn-sm mb-2')
+        .html(
+          `<a class="mb-2 text-sm" href="/real-time-departures/?stop_id=${feature.properties.stop_id}">View Realtime Departures</a>`,
+        ),
+    ])
+    .appendTo(html);
 
   jQuery('<div>').addClass('popup-label').text('Routes Served:').appendTo(html);
 
@@ -518,7 +533,10 @@ function handleMouseMove(event, map, routes) {
   });
   if (features.length > 0) {
     map.getCanvas().style.cursor = 'pointer';
-    highlightRoutes(map, _.compact(_.uniq(features.map((feature) => feature.properties.route_id))));
+    highlightRoutes(
+      map,
+      [...new Set(features.map((feature) => feature.properties.route_id))].filter(Boolean),
+    );
 
     if (features.some((feature) => feature.layer.id === 'stops')) {
       highlightStop(
@@ -563,9 +581,12 @@ function showStopPopup(map, feature) {
 }
 
 function showRoutePopup(map, features, lngLat) {
-  const routes = _.orderBy(
-    _.uniqBy(features, (feature) => feature.properties.route_short_name),
-    (feature) => Number.parseInt(feature.properties.route_short_name, 10),
+  const routes = [
+    ...new Map(features.map((f) => [f.properties.route_short_name, f])).values(),
+  ].sort(
+    (a, b) =>
+      Number.parseInt(a.properties.route_short_name, 10) -
+      Number.parseInt(b.properties.route_short_name, 10),
   );
 
   new maplibregl.Popup().setLngLat(lngLat).setHTML(formatRoutePopup(routes)).addTo(map);
