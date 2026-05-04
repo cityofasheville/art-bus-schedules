@@ -163,17 +163,50 @@ jQuery(() => {
   const initialTimepoints = getUrlParam('timepoints');
   const initialStopId = getUrlParam('stop_id');
 
-  const today_day_of_week = new Date().getDay();
+  const today = new Date();
+  const today_day_of_week = today.getDay();
+  const todayStr =
+    today.getFullYear().toString() +
+    (today.getMonth() + 1).toString().padStart(2, '0') +
+    today.getDate().toString().padStart(2, '0');
 
   let default_timetable_day;
   let default_direction_id = 0;
 
-  if (today_day_of_week === 6) {
-    default_timetable_day = 'Sat';
-  } else if (today_day_of_week === 0) {
+  // For testing purposes, you can uncomment the line below to simulate a holiday
+  // window.holidayDates.push(todayStr);
+
+  const isHoliday =
+    typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(todayStr);
+
+  if (isHoliday || today_day_of_week === 0) {
     default_timetable_day = 'Sun';
+  } else if (today_day_of_week === 6) {
+    default_timetable_day = 'Sat';
   } else {
     default_timetable_day = 'Mon-Fri';
+  }
+
+  console.log('Todays date is:', todayStr, 'Holiday:', isHoliday);
+  console.log(
+    'Today is day of week:',
+    today_day_of_week,
+    'which corresponds to:',
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][today_day_of_week],
+  );
+  console.log('holidays configured on this site:', window.holidayDates);
+  console.log('Default timetable day determined to be:', default_timetable_day);
+
+  if (isHoliday) {
+    const holidayNoteEl = document.getElementById('holiday_note');
+    console.log('Today is a holiday. Displaying holiday note:', holidayNoteEl);
+    if (holidayNoteEl) {
+      holidayNoteEl.className =
+        'p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 rounded text-art-black';
+      holidayNoteEl.innerHTML =
+        '<div class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-yellow-600" aria-hidden="true"></i><strong>Holiday Schedule in Effect Today</strong></div>' +
+        '<p class="mt-1 mb-0 text-sm">Today is an ART system holiday. Buses are operating on a Sunday/Holiday schedule.</p>';
+    }
   }
 
   const this_route_direction_ids = [
