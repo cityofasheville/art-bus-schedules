@@ -369,6 +369,12 @@ const directions = db.prepare('SELECT * FROM directions').all();
 const stopTimes = db
   .prepare('SELECT trip_id, stop_id, stop_sequence FROM stop_times ORDER BY trip_id, stop_sequence')
   .all();
+const holidayDates = db
+  .prepare('SELECT DISTINCT date FROM calendar_dates ORDER BY date')
+  .all()
+  .map((row) => row.date);
+
+config.holidayDates = holidayDates;
 
 console.log('Routes fetched:', routes.length);
 

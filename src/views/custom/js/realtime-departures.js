@@ -212,6 +212,10 @@ function toggleFavoriteStop(stop_id) {
     defaultStops = defaultStops.filter((id) => id !== stop_id);
     // Use Tom Select API to remove the option
     if (typeof favoriteStopSelectInstance !== 'undefined' && favoriteStopSelectInstance) {
+      // Clear selection first if the removed stop is currently selected
+      if (favoriteStopSelectInstance.getValue() === stop_id) {
+        favoriteStopSelectInstance.clear(true);
+      }
       favoriteStopSelectInstance.removeOption(stop_id);
       favoriteStopSelectInstance.refreshOptions(false);
     }
@@ -377,8 +381,8 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
             }
               ${arrivalsProcessed === 3 ? 'hidden md:inline-block' : ''}
               ${arrivalsProcessed > 3 ? 'hidden lg:inline-block' : ''}">
-            <span class="text-lg sm:text-2xl text-gray-700">${arrival.time_from_now}</span> <span class="text-xs sm:text-base">min</span><br />
-            <span class="text-[10px] sm:text-xs text-gray-500">
+            <span class="text-lg sm:text-2xl text-gray-800">${arrival.time_from_now}</span> <span class="text-xs sm:text-base">min</span><br />
+            <span class="text-[10px] sm:text-xs text-gray-700">
                         (${formattedTime})
             </span>
             </span>
@@ -426,8 +430,12 @@ function getUpcomingArrivalsForStop(stop_id) {
 }
 
 jQuery(() => {
+  // If user has favorite stops, default to the favorites interface
+  const defaultToFavorites = false;
+  const initialInterface =
+    defaultToFavorites && getFavoriteStops().length > 0 ? 'favorites' : 'search_stop';
   jQuery(
-    `#departure_interface_selector input[name="departure_interface"][value="search_stop"]`,
+    `#departure_interface_selector input[name="departure_interface"][value="${initialInterface}"]`,
   ).prop('checked', true);
 
   showSelectedInterface();

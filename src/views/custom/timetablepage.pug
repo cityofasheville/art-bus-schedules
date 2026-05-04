@@ -80,7 +80,7 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
           div(class="coa-timetable-map-container relative border border-slate-300 rounded-lg shadow-lg overflow-hidden" id=`coa_map_container_${formatHtmlId(timetable.timetable_id)}` data-direction-id=timetable.direction_id)
             if config.showRouteTitle
               .timetable-label
-                h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Route Map: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
+                h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Route Map: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong} Schedule`
             include timetable_map.pug
 
     div(id="coa_main_timetable_container" class="mb-12")
@@ -91,7 +91,7 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
 
           if config.showRouteTitle
             .timetable-label
-              h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Timetable: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong}`
+              h2(class="p-2 bg-aux-gray border-b-2 border-art-blue text-lg xs:text-xl")= `Timetable: ${timetable.timetable_label} | ${timetable.dayListLong === 'Sunday' ? 'Sunday / Holiday' : timetable.dayListLong} Schedule`
                 each note in getNotesForTimetableLabel(timetable.notes)
                   include timetable_note_symbol.pug
               if timetable.service_notes !== null
@@ -132,6 +132,9 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
               .excluded-dates= `${config.serviceNotProvidedOnText}: ${timetable.calendarDates.excludedDates.join(', ')}`
 
       
+  script.
+    window.holidayDates = !{JSON.stringify(config.holidayDates || [])};
+
   if config.showMap
     script.
       console.log('Data:', window.config);

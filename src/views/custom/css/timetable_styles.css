@@ -477,7 +477,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
 .timetable-page .map .maplibregl-popup-content .popup-title {
   margin: 0 20px 5px 0;
   font-size: 1rem;
-  font-weight: 700;
+  /* font-weight: 700; */
   line-height: 1;
 }
 
