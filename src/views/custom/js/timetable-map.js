@@ -8,6 +8,7 @@ let vehiclePositions;
 let tripUpdates;
 let vehiclePopup;
 let stopPopup; // Popup for stop info
+let currentStopPopupFeature = null; // Track feature for refreshing popup content
 let gtfsRealtimeInterval;
 let rtPositionsPaused = false;
 let previousVehicleCount = null;
@@ -16,8 +17,6 @@ let dataFetchTimestamp = null; // Timestamp (in seconds) when GTFS-RT data was f
 // Configuration flag: when true, only show vehicle markers that match the
 // direction_id of the currently visible map. When false, show all vehicles.
 const filterVehiclesByDirection = true;
-
-console.log('timetable-map script loaded');
 
 function formatRouteColor(route) {
   return route.route_color || '#000000';
@@ -372,7 +371,6 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
 
   // Skip all updates if paused (status shows "updates paused" instead)
   if (rtPositionsPaused) {
-    console.log('RT positions container updates paused');
     return;
   }
 
@@ -406,13 +404,6 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     }
     previousVehicleCount = currentVehicleCount;
   }
-
-  console.log(
-    'Updating real-time positions container with VP: ',
-    vehiclePositions,
-    '  and TU: ',
-    tripUpdates,
-  );
 
   const container = jQuery('#rt_positions_list');
   if (!container.length) {
@@ -941,6 +932,9 @@ async function updateArrivals({ withMap = true } = {}) {
     } else {
       updateRtPositionsContainer(vehiclePositions, tripUpdates);
     }
+
+    // Notify other modules that tripUpdates data is available
+    document.dispatchEvent(new CustomEvent('tripUpdatesReady'));
   } catch (error) {
     console.error(error);
   }
@@ -949,7 +943,6 @@ async function updateArrivals({ withMap = true } = {}) {
 function toggleMap(id) {
   if (maps[id]) {
     // Resize the map to fit the visible area
-    // console.log('Resizing map for timetable id', id);
     maps[id].resize();
 
     const geojson = geojsons[id];
@@ -1007,7 +1000,6 @@ function toggleMap(id) {
       }
 
       const vehicleTripUpdate = tripUpdates?.find((tripUpdate) => {
-        // console.log('tripUpdate', tripUpdate);
         return tripUpdate?.trip_update?.vehicle?.id === vehicleId;
       });
 
@@ -1084,9 +1076,6 @@ async function createMap(id) {
 
   const bounds = getBounds(geojson);
 
-  console.log('Creating map for timetable id', id);
-  console.log('Map bounds:', bounds.toArray());
-
   const mapStyle = await loadMapStyleWithWorkingFonts(mapStyleUrl);
   const map = new maplibregl.Map({
     container: `map_timetable_id_${id}`,
@@ -1142,7 +1131,6 @@ async function createMap(id) {
 }
 
 function fitMapToBounds(map, bounds) {
-  console.log('Fitting map to bounds:', bounds.toArray());
   map.fitBounds(bounds, {
     padding: { top: 40, bottom: 40, left: 20, right: 40 },
     duration: 0,
@@ -1339,11 +1327,16 @@ function handleClick(event, map, id) {
     currentFilter && currentFilter[0] === 'any' && JSON.stringify(currentFilter).includes(stopId);
 
   if (isAlreadyHighlighted) {
-    // Clear highlights using unified function
-    if (typeof clearStopSelection === 'function') {
-      clearStopSelection(id);
+    if (stopPopup) {
+      // Popup is open — toggle off (deselect)
+      if (typeof clearStopSelection === 'function') {
+        clearStopSelection(id);
+      } else {
+        unHighlightStop(map, id);
+      }
     } else {
-      unHighlightStop(map, id);
+      // Highlighted but no popup — open the popup
+      showStopPopup(map, feature);
     }
   } else {
     // Use unified selectStop function to highlight everything
@@ -1355,10 +1348,6 @@ function handleClick(event, map, id) {
 }
 
 function showStopPopup(map, feature) {
-  console.log('popup feature', feature);
-  console.log('popup map', map._container.id.split('_id_').pop());
-  console.log('feature stop data', stopData[feature.properties.stop_id]);
-
   // Close any existing stop popup first
   closeStopPopup();
 
@@ -1367,6 +1356,8 @@ function showStopPopup(map, feature) {
     vehiclePopup.remove();
   }
 
+  currentStopPopupFeature = feature;
+
   stopPopup = new maplibregl.Popup()
     .setLngLat(feature.geometry.coordinates)
     .setHTML(getStopPopupHtml(feature, stopData[feature.properties.stop_id]))
@@ -1374,11 +1365,11 @@ function showStopPopup(map, feature) {
 }
 
 function closeStopPopup() {
-  console.log('closing stop popup', stopPopup);
   if (stopPopup) {
     stopPopup.remove();
     stopPopup = null;
   }
+  currentStopPopupFeature = null;
 }
 
 /**
@@ -1442,7 +1433,6 @@ function highlightStop(map, id, stopIds) {
 function unHighlightStop(map, id) {
   map.setFilter('stops-highlighted', ['==', 'stop_id', '']);
   unHighlightTimetableStops(id);
-  console.log('unhighlighting stop on map and timetable for id', id);
   closeStopPopup();
 }
 
@@ -1658,6 +1648,16 @@ async function createMaps() {
 
   // Initialize pause button for RT positions container
   initRtPositionsPauseButton();
+
+  // Refresh stop popup content when real-time data updates
+  document.addEventListener('tripUpdatesReady', () => {
+    if (stopPopup && currentStopPopupFeature) {
+      const stop = stopData[currentStopPopupFeature.properties.stop_id];
+      if (stop) {
+        stopPopup.setHTML(getStopPopupHtml(currentStopPopupFeature, stop));
+      }
+    }
+  });
 
   // Add document-level escape key handler to close popups
   jQuery(document).on('keydown.timetableMap', function (event) {

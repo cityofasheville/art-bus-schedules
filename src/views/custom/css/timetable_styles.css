@@ -658,26 +658,26 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   margin-bottom: 1.5rem;
 } */
 
-.timetable-page .timetable-alerts .timetable-alerts-list {
+/* .timetable-page .timetable-alerts .timetable-alerts-list {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 0.25rem;
-}
+} */
 
-@media screen and (min-width: 1024px) {
+/* @media screen and (min-width: 1024px) {
   .timetable-page .timetable-alerts .timetable-alerts-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
+} */
 
-.timetable-page .timetable-alert {
+/* .timetable-page .timetable-alert {
   background-color: rgb(224, 230, 245);
   padding: 0.75rem 1.25rem;
   border-radius: 0.5rem;
-}
+} */
 
-.timetable-page .timetable-alerts .alert-header {
+/* .timetable-page .timetable-alerts .alert-header {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -689,7 +689,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   flex-direction: row;
   align-items: center;
   gap: 4px;
-}
+} */
 
 .timetable-page .timetable-alerts .route-color-swatch {
   min-width: 29px;
@@ -706,27 +706,27 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   color: white;
 }
 
-.timetable-page .timetable-alerts .alert-header .alert-title {
+/* .timetable-page .timetable-alerts .alert-header .alert-title {
   font-size: 1.25rem;
   font-weight: bold;
 }
 
 .timetable-page .timetable-alerts .alert-body {
   margin-top: 0.5rem;
-}
+} */
 
 /* .timetable-page .timetable-alerts .alert-more-info {
   margin-top: 0.75rem;
 } */
 
-.timetable-page .timetable-alert-empty {
+/* .timetable-page .timetable-alert-empty {
   display: none;
   background-color: rgb(224, 230, 245);
   padding: 0.75rem 1.25rem;
   border-radius: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 16px;
-}
+} */
 
 .alert-body {
   white-space: pre-wrap;

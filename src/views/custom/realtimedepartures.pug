@@ -56,8 +56,6 @@ script.
       return accumulator;
     }, {});
     const timetableData = window.config.timetablePage.consolidatedTimetables;
-    console.log('Data:', window.config);
-    console.log('routeDirectionStops mapping:', routeDirectionStops);
 
     // Populate route dropdown on page load
     function initRouteDropdown() {
@@ -165,9 +163,7 @@ script.
       });
 
       const initialStopId = getUrlParam('stop_id');
-      console.log('Initial stop ID from URL:', initialStopId);
       if (initialStopId) {
-        console.log('Setting initial stop selection to:', initialStopId);
         stopSelectInstance.setValue(initialStopId, true); // true = silent (no change event)
         if (favoriteStopSelectInstance) {
           favoriteStopSelectInstance.clear(true);
