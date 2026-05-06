@@ -28,48 +28,27 @@ function formatAlertAsHtml(
   affectedStopsIdsInTimetable,
   isCurrentlyActive,
 ) {
-  console.log('Formatting alert:', alert);
+  const $alert = jQuery('<li>').addClass(
+    'timetable-alert bg-white border border-slate-300 rounded border-l-4 border-l-aux-red p-4',
+  );
 
-  const $alert = jQuery('<article>').addClass('timetable-alert').attr('role', 'alert');
-
-  const $routeList = jQuery('<ul>').addClass('route-list flex gap-1 list-none p-0 m-0');
-
-  for (const routeId of affectedRouteIdsInTimetable) {
-    const route = routeData[routeId];
-
-    if (!route) {
-      continue;
+  // Route swatches
+  let routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0 mb-2">';
+  if (affectedRouteIdsInTimetable.length > 0) {
+    for (const routeId of affectedRouteIdsInTimetable) {
+      const route = routeData[routeId];
+      if (!route) continue;
+      routeSwatchesHtml += `<li class="route-color-swatch" style="background-color: ${route.route_color || '#000000'}; color: ${route.route_text_color || '#FFFFFF'};" title="${route.route_long_name || 'Route ' + route.route_short_name}" aria-label="${route.route_long_name || 'Route ' + route.route_short_name}">${route.route_short_name}</li>`;
     }
-
-    jQuery('<li>')
-      .addClass('route-color-swatch-large')
-      .css('background-color', route.route_color || '#000000')
-      .css('color', route.route_text_color || '#FFFFFF')
-      .attr('title', route.route_long_name || `Route ${route.route_short_name}`)
-      .text(route.route_short_name)
-      .appendTo($routeList);
   }
+  routeSwatchesHtml += '</ul>';
 
-  // Status badge for active vs upcoming
-  const $statusBadge = isCurrentlyActive
-    ? jQuery('<span>')
-        .addClass(
-          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800',
-        )
-        .attr('aria-label', 'Currently active')
-        .text('Active')
-    : jQuery('<span>')
-        .addClass(
-          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800',
-        )
-        .attr('aria-label', 'Upcoming alert')
-        .text('Upcoming');
+  // Status badge
+  const statusBadge = isCurrentlyActive
+    ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" aria-label="Currently active">Active</span>'
+    : '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800" aria-label="Upcoming alert">Upcoming</span>';
 
-  const $alertTitle = jQuery('<h3>')
-    .addClass('alert-title text-lg font-semibold m-0')
-    .text(alert.alert.header_text.translation[0].text);
-
-  // Build timespan text from active_period
+  // Build timespan text
   const timespans = alert.alert.active_period || [];
   const timespanText =
     timespans.length > 0
@@ -94,76 +73,45 @@ function formatAlertAsHtml(
           .join(', ')
       : 'Ongoing';
 
-  // Build datetime attribute for <time> element
-  const firstTimespan = timespans[0];
-  const datetimeAttr = firstTimespan?.start
-    ? new Date(firstTimespan.start * 1000).toISOString()
-    : '';
+  // Title
+  const title = jQuery('<span>').text(alert.alert.header_text.translation[0].text).html();
 
-  const $timeElement = jQuery('<time>')
-    .addClass('text-sm text-gray-600')
-    .attr('datetime', datetimeAttr)
-    .text(timespanText);
-
-  // Row 1: Route swatch + title
-  const $alertRow1 = jQuery('<div>')
-    .addClass('flex items-center gap-3')
-    .append($routeList)
-    .append($alertTitle);
-
-  // Row 2: Status badge + timespan
-  const $alertRow2 = jQuery('<div>')
-    .addClass('flex items-center gap-2 mt-1')
-    .append($timeElement)
-    .append($statusBadge);
-
-  const $alertHeader = jQuery('<header>')
-    .addClass('flex flex-col gap-2 border-b border-gray-300 pb-2')
-    .append($alertRow1)
-    .append($alertRow2);
-
-  // Use anchorme to convert URLs to clickable links while using jQuery .text to prevent XSS
+  // Description (XSS-safe via .text then anchorme for links)
   const descriptionHtml = anchorme(
-    jQuery('<span>').text(`${alert.alert.description_text.translation[0].text} `).html(),
+    jQuery('<span>').text(alert.alert.description_text.translation[0].text).html(),
   );
 
-  const $alertBody = jQuery('<div>').addClass('alert-body');
-
-  const $description = jQuery('<p>').addClass('my-2').html(descriptionHtml);
-
-  $description.appendTo($alertBody);
-
-  if (alert.alert.url?.translation?.[0].text) {
-    jQuery('<a>')
-      .attr('href', alert.alert.url.translation[0].text)
-      .addClass('alert-more-info text-link')
-      .text('More Info')
-      .appendTo($alertBody);
-  }
-
+  // Affected stops
+  let affectedStopsHtml = '';
   if (affectedStopsIdsInTimetable.length > 0) {
-    const $stopsSection = jQuery('<aside>').addClass('mt-4 pt-2 border-t border-gray-300');
-
-    jQuery('<h4>').addClass('font-semibold mb-2').text('Stops Affected:').appendTo($stopsSection);
-
-    const $stopList = jQuery('<ul>').addClass('list-disc pl-4');
-
+    affectedStopsHtml =
+      '<div class="mt-3 border-t border-gray-300 pt-2"><span class="font-semibold">Stops Affected:</span><ul class="list-disc pl-4 mt-1">';
     for (const stopId of affectedStopsIdsInTimetable) {
       const stop = stopData[stopId];
-
-      if (!stop) {
-        continue;
-      }
-
-      jQuery('<li>').addClass('my-1').text(stop.stop_name).appendTo($stopList);
+      if (!stop) continue;
+      affectedStopsHtml += `<li class="my-1">${jQuery('<span>').text(stop.stop_name).html()}</li>`;
     }
-
-    $stopList.appendTo($stopsSection);
-    $stopsSection.appendTo($alertBody);
+    affectedStopsHtml += '</ul></div>';
   }
 
-  $alertHeader.appendTo($alert);
-  $alertBody.appendTo($alert);
+  // More info link
+  const moreInfoHtml = alert.alert.url?.translation?.[0]?.text
+    ? `<a href="${alert.alert.url.translation[0].text}" class="text-link underline hover:no-underline">More Info</a>`
+    : '';
+
+  $alert.html(`
+    <div class="flex flex-col gap-1">
+      ${routeSwatchesHtml}
+      <div class="text-lg font-medium">${title}</div>
+      <div class="text-sm text-gray-600">${timespanText}</div>
+      <div>${statusBadge}</div>
+    </div>
+    <div class="mt-3 text-sm">
+      <p class="my-1">${descriptionHtml}</p>
+      ${moreInfoHtml}
+      ${affectedStopsHtml}
+    </div>
+  `);
 
   return $alert;
 }
@@ -278,7 +226,8 @@ async function updateAlerts() {
     }
 
     // Remove previously posted GTFS-RT alerts
-    jQuery('.timetable-alerts-list .timetable-alert').remove();
+    jQuery('.timetable-alerts-list').empty().addClass('hidden');
+    jQuery('.timetable-alert-empty').removeClass('hidden');
 
     $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
 
@@ -298,16 +247,16 @@ async function updateAlerts() {
       const statusText = statusParts.join(', ');
 
       $('#timetable_alert_count').addClass('border-red-600').text(statusText).show();
-      // Remove the empty message if present
-      jQuery('.timetable-alert-empty').hide();
 
+      const $list = jQuery('<ul>').addClass('list-none p-0 m-0 flex flex-col gap-4');
       for (const alert of formattedAlerts) {
-        jQuery('.timetable-alerts-list').append(alert.element);
+        $list.append(alert.element);
       }
+      jQuery('.timetable-alert-empty').addClass('hidden');
+      jQuery('.timetable-alerts-list').append($list).removeClass('hidden');
     } else {
       // Show "No alerts" status and empty message
       $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
-      jQuery('.timetable-alert-empty').show();
     }
   } catch (error) {
     console.error(error);
@@ -315,10 +264,8 @@ async function updateAlerts() {
 }
 
 jQuery(() => {
-  console.log('Timetable Alerts JS loaded', gtfsRealtimeUrls);
-  // $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
-    const alertUpdateInterval = 60 * 1000; // Every Minute
+    const alertUpdateInterval = 60 * 1000;
     updateAlerts();
     gtfsRealtimeAlertsInterval = setInterval(() => {
       updateAlerts();

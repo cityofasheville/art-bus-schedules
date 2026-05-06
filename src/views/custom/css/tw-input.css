@@ -105,12 +105,12 @@
   }
 
   .entry-content td {
-    @apply border-r border-black border;
+    @apply px-4 py-2 border-r border-black border;
     /* Add right border for internal columns */
   }
 
   .entry-content th {
-    @apply border-b border-black border;
+    @apply px-4 py-2 border-b border-black border;
     /* Optional: if you want borders for header cells as well */
   }
 

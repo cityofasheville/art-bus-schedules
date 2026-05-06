@@ -352,7 +352,6 @@ function displayAlertsForRoute(routeId) {
 }
 
 async function updateAlerts() {
-  console.log('Updating GTFS-Realtime alerts', gtfsRealtimeUrls);
   if (!gtfsRealtimeUrls?.realtimeAlerts) {
     jQuery('#alerts-loading-message').text('No alerts feed configured.').show();
     return;
@@ -396,8 +395,6 @@ async function updateAlerts() {
       }
       return isActive;
     });
-
-    console.log('Active alerts:', active_alerts);
 
     // Process each active alert
     for (const alert of active_alerts) {
@@ -484,8 +481,6 @@ async function updateAlerts() {
       }
     }
 
-    console.log('Processed alerts:', processedAlerts);
-
     // Render the route selector UI
     renderRouteSelector();
 
@@ -513,8 +508,6 @@ async function updateAlerts() {
 }
 
 jQuery(() => {
-  console.log('Home Alerts JS loaded', gtfsRealtimeUrls);
-
   if (gtfsRealtimeUrls?.realtimeAlerts?.url) {
     updateAlerts();
   } else {

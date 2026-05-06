@@ -263,7 +263,6 @@ function getUrlParam(paramName) {
 }
 
 async function fetchRealtimeDeparturesForStop(stop_id) {
-  // console.log('Fetching realtime departures for stop ID:', stop_id);
   const favorite_stops = getFavoriteStops();
   const thisStop = stopData[stop_id];
   $('#results-container').html('Loading upcoming arrivals...');
@@ -319,8 +318,6 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
   const formattedTimeUpdated = timeUpdated.toLocaleTimeString([], {
     timeStyle: 'short',
   });
-
-  // console.log('augmentedArrivals', augmentedArrivals);
 
   let html = '';
   if (augmentedArrivals.length === 0) {
@@ -450,7 +447,6 @@ jQuery(() => {
     };
     announceDepartureStatus('Showing ' + (labels[selectedValue] || selectedValue));
   });
-  console.log('Route data and stop data loaded:', routeData, directions, routeDirectionStops);
 
   // Populate favorites dropdown - defer to allow Tom Select to initialize first
   setTimeout(function () {

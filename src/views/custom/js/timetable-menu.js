@@ -43,8 +43,6 @@ function showSelectedTimetable() {
   jQuery('.timetable').hide();
   jQuery('.coa-timetable-map-container').hide();
 
-  console.log(`Showing timetable for day list: ${dayList}, direction ID: ${directionId}`);
-
   const id = jQuery(
     `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`,
   ).data('timetable-id');
@@ -156,8 +154,6 @@ function showAllTimepoints() {
 }
 
 jQuery(() => {
-  console.log('Timetable menu JS loaded, initializing...');
-
   const initialDirection = getUrlParam('direction_id');
   const initialDayList = getUrlParam('day_list');
   const initialTimepoints = getUrlParam('timepoints');
@@ -187,19 +183,8 @@ jQuery(() => {
     default_timetable_day = 'Mon-Fri';
   }
 
-  console.log('Todays date is:', todayStr, 'Holiday:', isHoliday);
-  console.log(
-    'Today is day of week:',
-    today_day_of_week,
-    'which corresponds to:',
-    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][today_day_of_week],
-  );
-  console.log('holidays configured on this site:', window.holidayDates);
-  console.log('Default timetable day determined to be:', default_timetable_day);
-
   if (isHoliday) {
     const holidayNoteEl = document.getElementById('holiday_note');
-    console.log('Today is a holiday. Displaying holiday note:', holidayNoteEl);
     if (holidayNoteEl) {
       holidayNoteEl.className =
         'p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 rounded text-art-black';
@@ -222,18 +207,14 @@ jQuery(() => {
   }
 
   if (initialDirection) {
-    console.log('Setting initial direction to: ', initialDirection);
     jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
   } else {
-    console.log('Setting initial direction to default: ', 0);
     jQuery('input[name="directionId"][value="' + default_direction_id + '"]').prop('checked', true);
   }
 
   if (initialDayList) {
-    console.log('Setting initial day list to', initialDayList);
     jQuery('input[name="dayList"][value="' + initialDayList + '"]').prop('checked', true);
   } else {
-    console.log(`Setting initial day list to ${default_timetable_day}`);
     jQuery(`input[name="dayList"][value="${default_timetable_day}"]`).prop('checked', true);
   }
 
@@ -241,10 +222,8 @@ jQuery(() => {
     initialTimepoints &&
     (initialTimepoints === 'timepoints_only' || initialTimepoints === 'all_stops')
   ) {
-    console.log('Setting initial timepoints to', initialTimepoints);
     jQuery(`input[name="timepoints"][value="${initialTimepoints}"]`).prop('checked', true);
   } else {
-    console.log('Setting initial stops to timepoints only view');
     jQuery(`input[name="timepoints"][value="timepoints_only"]`).prop('checked', true);
   }
 
@@ -263,7 +242,6 @@ jQuery(() => {
     const visibleTimetable = jQuery('.timetable:visible').first();
     if (visibleTimetable.length) {
       const timetableId = visibleTimetable.data('timetable-id');
-      console.log('Selecting initial stop:', initialStopId, 'in timetable:', timetableId);
       selectStop(initialStopId, timetableId, {
         fromDropdown: false,
         showPopup: false, // Don't show popup on page load to avoid capturing keyboard focus
@@ -275,6 +253,10 @@ jQuery(() => {
   jQuery('#day_list_selector input[name="dayList"]').change(function () {
     const dayLabel = jQuery(this).val() === 'Sun' ? 'Sunday / Holiday' : jQuery(this).val();
     setUrlParam('day_list', jQuery(this).val());
+    const visibleTimetable = jQuery('.timetable:visible').first();
+    if (visibleTimetable.length) {
+      clearStopSelection(visibleTimetable.data('timetable-id'));
+    }
     showSelectedTimetable();
     announceStatus(`Showing ${dayLabel} schedule`);
   });
@@ -665,6 +647,17 @@ function selectStop(stopId, timetableId, options = {}) {
   // Update the stop info container with stop details
   updateStopInfoContainer(stopId, timetableId);
 }
+
+// Refresh stop info container when real-time data becomes available
+document.addEventListener('tripUpdatesReady', () => {
+  const selectedStopId = getUrlParam('stop_id');
+  if (!selectedStopId) return;
+
+  const visibleTimetable = jQuery('.timetable:visible').first();
+  if (visibleTimetable.length) {
+    updateStopInfoContainer(selectedStopId, visibleTimetable.data('timetable-id'));
+  }
+});
 
 // Legacy function for compatibility - now calls selectStop
 function highlightAndScrollToStop(stopId, timetableId) {

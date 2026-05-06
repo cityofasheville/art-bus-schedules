@@ -26,7 +26,7 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
 
     div(id="route_alerts_container" class="mb-12")
       if config.hasGtfsRealtimeAlerts
-        details(class="border my-6 rounded text-aux-black" aria-labelledby="service_alerts_heading")
+        details(class="border my-6 rounded text-aux-black overflow-hidden" aria-labelledby="service_alerts_heading")
           summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
             
             div(class="flex items-start gap-2 text-base xs:text-lg md:text-xl ")
@@ -41,10 +41,10 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
             div(class="flex items-center justify-center")
               span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
                 
-          div(class="timetable-alerts border-t border-slate-300")
-            div(class="timetable-alerts-list p-4")
-              div(class="timetable-alert-empty")
-                | There are no service alerts at this time.
+          div(class="timetable-alerts")
+            div(class="timetable-alerts-list hidden p-4 sm:p-6 md:p-8 border-t-[8px] border-b-[8px] border-aux-red bg-aux-gray")
+            div(class="timetable-alert-empty p-4 sm:p-6 md:p-8 border-t-[8px] border-b-[8px] border-aux-gray bg-aux-gray")
+              | There are no service alerts at this time.
 
       details(class="border my-6 rounded text-aux-black" aria-labelledby="rt_positions_heading")
         summary(class="list-none flex gap-4 align-middle justify-between py-2 px-5 cursor-pointer")
@@ -137,11 +137,8 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
 
   if config.showMap
     script.
-      console.log('Data:', window.config);
-
       const timetablePageFromServer = !{JSON.stringify(timetablePage)};
       timetablePageFromServer.dayLists.sort();
-      console.log('GTFS data from server', timetablePageFromServer);
       const { gtfsRealtimeUrls, mapStyleUrl, routeData, stopData, pageData: { routeIds, tripIds,  stopIds, geojsons } } = !{JSON.stringify(prepareMapData(timetablePage, config))};
      
       createMaps();

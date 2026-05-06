@@ -5,14 +5,14 @@ if timetablePage.consolidatedTimetables.length > 1
     div(id="timetable_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
     -const uniqueDirectionTimetablesC = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
     -timetablePage.dayLists.sort();
-    fieldset(id="direction_name_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
+    fieldset(id="direction_name_selector" class="p-4 border rounded-lg shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
       legend="Service Direction"
       div(class=`w-full grid grid-cols-${uniqueDirectionTimetablesC.length} btn-group`)
         each timetable, idx in uniqueDirectionTimetablesC
           label.relative.btn-gray.text-center.cursor-pointer(for=`radio_dir_${timetable.direction_id}`)
             input(class="opacity-0 absolute top-0 left-0" type="radio" name="directionId" value=timetable.direction_id id=`radio_dir_${timetable.direction_id}`)
             span=timetable.direction_name
-    fieldset(id="day_list_selector" class="p-4 border shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
+    fieldset(id="day_list_selector" class="p-4 border rounded-lg shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")
       legend="Route Schedule"
       div(class=`w-full grid grid-cols-${timetablePage.dayLists.length} btn-group`)
         each dayList, idx in timetablePage.dayLists

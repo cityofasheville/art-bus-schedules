@@ -804,6 +804,10 @@ fieldset.radio-group:has(input:focus) {
   border-right-width: 1px;
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   /* Add right border for internal columns */
 }
 
@@ -812,6 +816,10 @@ fieldset.radio-group:has(input:focus) {
   border-bottom-width: 1px;
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   /* Optional: if you want borders for header cells as well */
 }
 
@@ -1300,6 +1308,10 @@ fieldset.radio-group:has(input:focus) {
   margin-top: 0.5rem;
 }
 
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
 .mt-4 {
   margin-top: 1rem;
 }
@@ -1708,6 +1720,10 @@ fieldset.radio-group:has(input:focus) {
   border-bottom-width: 16px;
 }
 
+.border-b-\[8px\] {
+  border-bottom-width: 8px;
+}
+
 .border-l-4 {
   border-left-width: 4px;
 }
@@ -1734,6 +1750,10 @@ fieldset.radio-group:has(input:focus) {
 
 .border-t-\[16px\] {
   border-top-width: 16px;
+}
+
+.border-t-\[8px\] {
+  border-top-width: 8px;
 }
 
 .border-art-blue {
@@ -1798,6 +1818,16 @@ fieldset.radio-group:has(input:focus) {
 .border-yellow-500 {
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
+}
+
+.border-aux-gray {
+  --tw-border-opacity: 1;
+  border-color: rgb(226 236 246 / var(--tw-border-opacity, 1));
+}
+
+.border-l-aux-red {
+  --tw-border-opacity: 1;
+  border-left-color: rgb(219 60 2 / var(--tw-border-opacity, 1));
 }
 
 .bg-amber-100 {
@@ -2218,11 +2248,6 @@ fieldset.radio-group:has(input:focus) {
   color: rgb(202 138 4 / var(--tw-text-opacity, 1));
 }
 
-.text-yellow-900 {
-  --tw-text-opacity: 1;
-  color: rgb(113 63 18 / var(--tw-text-opacity, 1));
-}
-
 .underline {
   text-decoration-line: underline;
 }
@@ -2581,6 +2606,10 @@ fieldset.radio-group:has(input:focus) {
     padding: 1rem;
   }
 
+  .sm\:p-6 {
+    padding: 1.5rem;
+  }
+
   .sm\:px-2 {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -2690,6 +2719,10 @@ fieldset.radio-group:has(input:focus) {
 
   .md\:p-12 {
     padding: 3rem;
+  }
+
+  .md\:p-8 {
+    padding: 2rem;
   }
 
   .md\:px-12 {

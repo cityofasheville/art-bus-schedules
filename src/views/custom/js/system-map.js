@@ -640,7 +640,6 @@ function highlightRoutes(map, routeIds, zoom) {
     }
 
     if (highlightedFeatures.length > 0) {
-      console.log('highlightRoutes fit to highlighted features');
       const zoomBounds = getBounds({
         type: 'FeatureCollection',
         features: highlightedFeatures,
@@ -669,12 +668,10 @@ function unHighlightRoutes(map, zoom) {
     const data = map.querySourceFeatures('routes');
     if (data) {
       if (zoom && map._systemBounds) {
-        console.log('highlightRoutes fit to system bounds');
         map.fitBounds(map._systemBounds, {
           padding: 20,
         });
       } else {
-        console.log('highlightRoutes fit to highlighted features');
         const zoomBounds = getBounds({
           type: 'FeatureCollection',
           features: highlightedFeatures,
