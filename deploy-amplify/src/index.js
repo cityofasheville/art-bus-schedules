@@ -1,15 +1,17 @@
-import { AmplifyClient, StartJobCommand, GetJobCommand } from "@aws-sdk/client-amplify";
+import { AmplifyClient, StartJobCommand, GetJobCommand, ListJobsCommand } from "@aws-sdk/client-amplify";
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 
 const amplifyClient = new AmplifyClient({ region: "us-east-1" });
 const secretsClient = new SecretsManagerClient({ region: "us-east-1" });
+const cloudfrontClient = new CloudFrontClient({ region: "us-east-1" });
 
 // Cached at cold start to avoid a Secrets Manager call on every request.
 let cachedApiKey = null;
 
-async function getApiKey() {
+async function getApiKey(secretName) {
   if (cachedApiKey) return cachedApiKey;
-  const command = new GetSecretValueCommand({ SecretId: process.env.API_KEY_SECRET_NAME });
+  const command = new GetSecretValueCommand({ SecretId: secretName });
   const response = await secretsClient.send(command);
   cachedApiKey = JSON.parse(response.SecretString).API_KEY;
   return cachedApiKey;
@@ -26,10 +28,10 @@ function authenticate(event, apiKey) {
   return token === apiKey;
 }
 
-async function startBuild() {
+async function startBuild(appId, branchName) {
   const command = new StartJobCommand({
-    appId: process.env.appId,
-    branchName: process.env.branch,
+    appId,
+    branchName,
     jobType: "RELEASE",
   });
   const response = await amplifyClient.send(command);
@@ -38,10 +40,24 @@ async function startBuild() {
   return jobId;
 }
 
-async function getJobStatus(jobId) {
+async function getRunningJob(appId, branchName) {
+  const command = new ListJobsCommand({
+    appId,
+    branchName,
+    maxResults: 1,
+    jobStatus: "RUNNING",
+  });
+  const response = await amplifyClient.send(command);
+  if (response.jobSummaries.length > 0) {
+    return response.jobSummaries[0].jobId;
+  }
+  return null;
+}
+
+async function getJobStatus(appId, branchName, jobId) {
   const command = new GetJobCommand({
-    appId: process.env.appId,
-    branchName: process.env.branch,
+    appId,
+    branchName,
     jobId,
   });
   const response = await amplifyClient.send(command);
@@ -50,37 +66,82 @@ async function getJobStatus(jobId) {
   return status;
 }
 
+async function invalidateCache(distributionId) {
+  const paths = ["/*"]; // Invalidate all paths. Adjust as needed.
+  const input = {
+    DistributionId: distributionId,
+    InvalidationBatch: {
+      // CallerReference must be unique for every request to avoid retrying the same invalidation
+      CallerReference: `invalidate-${Date.now()}`, 
+      Paths: {
+        Quantity: paths.length,
+        Items: paths,
+      },
+    },
+  };
+
+  try {
+    const command = new CreateInvalidationCommand(input);
+    const response = await cloudfrontClient.send(command);
+    console.log("Invalidation created successfully:", response.Invalidation.Id);
+    return response;
+  } catch (error) {
+    console.error("Error creating invalidation:", error);
+  }
+}
+
 export const handler = async (event) => {
   try {
 
     //Authenticate request
-    const apiKey = await getApiKey();
+    const secretName = process.env.API_KEY_SECRET_NAME;
+    const apiKey = await getApiKey(secretName);
     if (!authenticate(event, apiKey)) {
       return respond(401, { message: "Unauthorized" });
     }
 
+    const amplifyId = process.env.amplifyId;
+    const branchName = process.env.branch;
+    const cloudfrontId = process.env.cloudfrontId;
+
     const segments = event.rawPath.split("/");
     const route = segments[1];
+    let jobId;
 
-    // Start route
+    // Start route - trigger a new build or return existing running job Id
     if (route === "start") {
       try {
-        const jobId = await startBuild();
+        jobId = await startBuild(amplifyId, branchName);
         return respond(200, { jobId });
       } catch (error) {
         if (error.name === "LimitExceededException") {
-          return respond(409, { message: "A build is already pending or running." });
+          jobId = await getRunningJob(amplifyId, branchName);
+          if (!jobId) {
+            return respond(409, { message: "A build is already running but could not retrieve its ID." });
+          }
+          return respond(200, { message: "A build is already pending or running.", jobExists: true, jobId });
         }
         throw error;
       }
     }
 
-    // Status route
+    // Status route - check status of running job
     if (route === "status") {
-      const jobId = segments[2];
+      jobId = segments[2];
       if (!jobId) return respond(400, { message: "jobId is required" });
-      const status = await getJobStatus(jobId);
+      const status = await getJobStatus(amplifyId, branchName, jobId);
       return respond(200, { jobId, status });
+    }
+
+    // Invalidate route - trigger a CloudFront cache invalidation
+    if (route === "invalidate") {
+      try {
+        const result = await invalidateCache(cloudfrontId);
+        return respond(200, { message: "Cache invalidation started", invalidationId: result.Invalidation.Id });
+      } catch (error) {
+        console.error("Cache invalidation failed:", error);
+        return respond(500, { message: "Cache invalidation failed" });
+      }
     }
 
     return respond(404, { message: "Not found" });
