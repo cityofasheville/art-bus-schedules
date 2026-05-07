@@ -28,11 +28,12 @@ html(lang="en")
       //- Popup
       div#feedback-popup(class="hidden absolute bottom-14 right-0 w-48 xs:w-64 bg-white rounded-lg shadow-xl border border-gray-200 px-4 py-6 text-sm")
         p(class="text-aux-black mb-3") How is your experience using the new ART website? Have a good idea? See an opportunity for improvement? We'd love to hear from you!
-        a(
+        a#feedback-form-link(
           href="https://forms.ashevillenc.gov/form/art-website-feedback"
           class="inline-flex items-center gap-1 bg-art-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-art-green hover:text-aux-black transition-colors"
+          target="_blank" rel="noopener noreferrer"
         )
-          i.bi.bi-chat-left-text(aria-hidden="true")
+          i(class="bi bi-chat-left-text" aria-hidden="true")
           span Share Your Feedback
         button#feedback-popup-close(
           class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
@@ -41,17 +42,23 @@ html(lang="en")
         )
           i.bi.bi-x-lg(aria-hidden="true")
       //- Trigger button
-      button#feedback-trigger(
-        class="btn-art-green w-12 h-12 rounded-full shadow-lg  transition-colors flex items-center justify-center text-xl"
+      button(id="feedback-trigger"
+        class="btn-art-green w-12 h-12 rounded-full shadow-lg  transition-colors flex items-center justify-center text-xl border-2 border-art-blue"
         aria-label="Website feedback"
         aria-expanded="false"
         aria-controls="feedback-popup"
         type="button"
       )
-        i.bi.bi-chat-left-text(aria-hidden="true")
+        i(class="bi bi-chat-left-text" aria-hidden="true")
 
     script.
       (function() {
+        const feedbackLink = document.getElementById('feedback-form-link');
+        if (feedbackLink) {
+          feedbackLink.addEventListener('click', function() {
+            this.href = 'https://forms.ashevillenc.gov/form/art-website-feedback?referringpath=' + encodeURIComponent(window.location.pathname + window.location.search);
+          });
+        }
         const trigger = document.getElementById('feedback-trigger');
         const popup = document.getElementById('feedback-popup');
         const close = document.getElementById('feedback-popup-close');
@@ -138,16 +145,16 @@ html(lang="en")
                 li
                   a(href="/contact/" class="text-gray-300 hover:text-white hover:underline transition-colors") Contact
                 li
-                  a(href="https://www.ashevillenc.gov/projects/#avl_department=transit" class="text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
-                    | Projects
+                  a(href="https://www.ashevillenc.gov/projects/#avl_department=transit" class="flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
+                    span Projects
                     i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
                 li
-                  a(href="https://www.buncombenc.gov/605/Transportation" class="text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
-                    | Paratransit
+                  a(href="https://www.buncombenc.gov/605/Transportation" class="flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
+                    span Paratransit
                     i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
                 li
-                  a(href="https://forms.ashevillenc.gov/form/art-website-feedback" class="text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer")
-                    | Website Feedback
+                  a(href="https://forms.ashevillenc.gov/form/art-website-feedback" class="flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer")
+                    span Website Feedback
                     i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
 
           //- Footer bottom row

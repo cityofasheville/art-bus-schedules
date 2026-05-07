@@ -1,4 +1,4 @@
-.main-header {
+/* .main-header {
   height: 150px;
   display: flex;
   align-items: baseline;
@@ -16,7 +16,7 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-}
+} */
 
 /* .nav-items {
   display: flex;
@@ -199,3 +199,40 @@
 /* .maplibregl-ctrl-top-left .maplibregl-ctrl {
   display: none;
 } */
+
+/* Container for a custom arrow */
+.styled-select-wrapper {
+  position: relative;
+  display: block;
+}
+
+select {
+  appearance: none;
+  /* Removes default arrow and OS styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+select:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+  color: #999;
+}
+
+/* Adding a custom arrow using a pseudo-element */
+.styled-select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  /* Ensures the arrow doesn't block clicks */
+}
