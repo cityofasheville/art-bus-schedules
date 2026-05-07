@@ -116,9 +116,9 @@ script.
         (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {numeric: true})
       );
       sortedRoutes.forEach(route => {
-        const displayName = route.route_short_name 
-          ? `${route.route_short_name} - ${route.route_long_name}` 
-          : route.route_long_name;
+        const displayName = route.route_short_name && route.route_long_name ? 
+          `${route.route_short_name} - ${route.route_long_name}` 
+          : route.route_long_name ? route.route_long_name : `Route ${route.route_short_name}`;
         routeDropdown.append(`<option value="${route.route_id}">${displayName}</option>`);
       });
     }
