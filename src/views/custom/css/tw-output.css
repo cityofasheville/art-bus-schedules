@@ -1699,6 +1699,10 @@ fieldset.radio-group:has(input:focus) {
   border-width: 2px;
 }
 
+.border-4 {
+  border-width: 4px;
+}
+
 .border-x {
   border-left-width: 1px;
   border-right-width: 1px;
@@ -1756,6 +1760,10 @@ fieldset.radio-group:has(input:focus) {
   border-top-width: 8px;
 }
 
+.border-b-8 {
+  border-bottom-width: 8px;
+}
+
 .border-art-blue {
   --tw-border-opacity: 1;
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
@@ -1764,6 +1772,11 @@ fieldset.radio-group:has(input:focus) {
 .border-art-green {
   --tw-border-opacity: 1;
   border-color: rgb(74 169 30 / var(--tw-border-opacity, 1));
+}
+
+.border-aux-gray {
+  --tw-border-opacity: 1;
+  border-color: rgb(226 236 246 / var(--tw-border-opacity, 1));
 }
 
 .border-aux-green {
@@ -1818,11 +1831,6 @@ fieldset.radio-group:has(input:focus) {
 .border-yellow-500 {
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
-}
-
-.border-aux-gray {
-  --tw-border-opacity: 1;
-  border-color: rgb(226 236 246 / var(--tw-border-opacity, 1));
 }
 
 .border-l-aux-red {
@@ -2491,10 +2499,6 @@ fieldset.radio-group:has(input:focus) {
 }
 
 @media (min-width: 480px) {
-  .xs\:block {
-    display: block;
-  }
-
   .xs\:inline-block {
     display: inline-block;
   }

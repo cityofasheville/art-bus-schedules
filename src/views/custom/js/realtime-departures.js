@@ -329,7 +329,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
         <h3 class="text-base font-semibold arrivals-header my-0">Upcoming arrivals for ${
           thisStop.stop_name
         } (${thisStop.stop_code})</h3>
-        <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span class="sr-only">Reload arrivals</span></button></div>
+        <div class="flex gap-2 items-center text-sm text-gray-600">As of ${formattedTimeUpdated} <button class="p-2" data-stopid="${stop_id}" onClick="handleReloadArrivals(event)"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span class="sr-only">Reload departures</span></button></div>
     </div>
     <div>
       <button class="p-2" data-stopid="${stop_id}" onClick="toggleFavoriteStop(${stop_id})"><i id="favorite_stop_icon_${stop_id}" class="bi ${
@@ -341,7 +341,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     </div>
     </div>`;
     html += `<table class="w-full arrivals-table my-4">`;
-    html += `<thead><tr><th class="w-[80px] sm:w-[115px] text-center pr-1 sm:pr-3 text-sm sm:text-base">Route</th><th class="text-left px-2 sm:px-4 text-sm sm:text-base">Arrivals</th></tr></thead>`;
+    html += `<thead><tr><th class="w-[80px] sm:w-[115px] text-center pr-1 sm:pr-3 text-sm sm:text-base">Route</th><th class="text-left px-2 sm:px-4 text-sm sm:text-base">Departures</th></tr></thead>`;
     html += `<tbody>`;
     for (const groupKey in groupedArrivals) {
       html += `<tr class="odd:bg-white even:bg-slate-100">`;
@@ -351,7 +351,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
             groupedArrivals[groupKey][0].direction_id
           }&day_list=${groupedArrivals[groupKey][0].timetable_day}&timetable_id=${
             groupedArrivals[groupKey][0].timetable_id
-          }" class="mx-auto text-center">
+          }&stop_id=${stop_id}" class="mx-auto text-center">
           <span class="route-color-swatch-responsive" style="background-color: #${
             groupedArrivals[groupKey][0].route_color
           };color: #${groupedArrivals[groupKey][0].route_text_color};">${

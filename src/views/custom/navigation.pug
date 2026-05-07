@@ -2,10 +2,10 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
   //- img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/10/TransitBus-Feature-72res.jpg" class="absolute" style="width:100%;height:100%;object-fit:cover;")
   div(class="relative flex flex-col lg:flex-row items-end justify-between w-full")
     div(class="flex flex-col xs:flex-row justify-between w-full items-center xs:items-end px-4")
-      #header-logo(class="w-full xs:w-auto py-4 lg:w-auto text-center xs:text-left")
+      div(id="header-logo" class="w-full xs:w-auto py-4 lg:w-auto text-center xs:text-left")
         a(href="/")
-          img(class="block xs:hidden inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url_mobile}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
-          img(class="hidden xs:block inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
+          img(class="inline-block xs:hidden w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url_mobile}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
+          img(class="hidden xs:inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
           //- h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
           <span class="sr-only">Asheville Rides Transit Home</span>
 

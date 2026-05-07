@@ -12,6 +12,7 @@ const sanitizeOptions = {
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
     iframe: ['src', 'width', 'height', 'frameborder', 'allow', 'allowfullscreen', 'title'],
+    th: ['scope', 'colspan', 'rowspan'],
   },
   allowedIframeHostnames: ['www.youtube.com', 'www.youtube-nocookie.com'],
 };

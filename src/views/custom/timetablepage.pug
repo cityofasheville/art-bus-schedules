@@ -18,9 +18,6 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
                     a(href=`${route.route_url}` class="text-link text-sm")=`Printable Map & Schedule (PDF)`
             if timetablePage.timetables[0].routes[0].route_desc
               p(class="my-0 py-0 text-sm")= timetablePage.timetables[0].routes[0].route_desc
-        //- each route in timetableRouteList
-        //-   if route.route_url
-        //-     a(href=`${route.route_url}` class="btn-gray btn-sm")=`View ${route.route_short_name} Map & Schedule (PDF)`
       if config.effectiveDate
         .effective-date= `Effective ${config.effectiveDate}`
 
@@ -42,8 +39,8 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
               span(class="bi bi-chevron-down justify-self-end text-xl" aria-hidden="true")
                 
           div(class="timetable-alerts")
-            div(class="timetable-alerts-list hidden p-4 sm:p-6 md:p-8 border-t-[8px] border-b-[8px] border-aux-red bg-aux-gray")
-            div(class="timetable-alert-empty p-4 sm:p-6 md:p-8 border-t-[8px] border-b-[8px] border-aux-gray bg-aux-gray")
+            div(class="timetable-alerts-list hidden p-4 sm:p-6 md:p-8 border-t-8 border-b-8 border-aux-red bg-aux-gray")
+            div(class="timetable-alert-empty p-4 sm:p-6 md:p-8 border-t-2 border-b-2 border-aux-gray ")
               | There are no service alerts at this time.
 
       details(class="border my-6 rounded text-aux-black" aria-labelledby="rt_positions_heading")
@@ -104,7 +101,7 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
           else if timetable.orientation === 'vertical'
             include timetable_vertical.pug
 
-          div(class="timetable-footer p-4")
+          div(class="timetable-footer p-4 flex flex-col gap-2")
             if hasNotesOrNotices(timetable)
               .notes
                 if timetable.requestPickupSymbolUsed

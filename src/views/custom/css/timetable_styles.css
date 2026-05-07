@@ -151,7 +151,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   margin-bottom: 0.5rem;
 }
 
-.timetable-page .timetable .timetable-footer {
+/* .timetable-page .timetable .timetable-footer {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 0.25rem;
@@ -162,7 +162,7 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
   }
-}
+} */
 
 /* Menu Styles */
 
@@ -472,6 +472,10 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   .timetable-page .map {
     min-height: 450px;
   }
+}
+
+.maplibregl-popup {
+  z-index: 10;
 }
 
 .timetable-page .map .maplibregl-popup-content .popup-title {
