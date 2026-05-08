@@ -94,7 +94,13 @@ function formatRoute(route) {
 
 function getStopPopupHtml(feature, stop) {
   const routeIds = JSON.parse(feature.properties.route_ids);
-  const html = jQuery('<div>');
+  const html = jQuery('<div>').attr('data-stop-id', stop.stop_id);
+
+  const timetableRouteId = jQuery('.timetable:visible').first().data('route-id');
+  const firstRouteId = timetableRouteId ? String(timetableRouteId).split('_')[0] : null;
+  const currentRoute =
+    firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
+  const routeLabel = currentRoute?.route_short_name ? `${currentRoute.route_short_name} ` : '';
 
   jQuery('<div>')
     .addClass('popup-title')
@@ -145,7 +151,10 @@ function getStopPopupHtml(feature, stop) {
     });
 
     if (stopTimeUpdates['0'].length > 0 || stopTimeUpdates['1'].length > 0) {
-      jQuery('<div>').addClass('popup-label').text('Upcoming Departures:').appendTo(html);
+      jQuery('<div>')
+        .addClass('popup-label')
+        .text(`Upcoming ${routeLabel}Departures:`)
+        .appendTo(html);
 
       for (const direction of ['0', '1']) {
         if (stopTimeUpdates[direction].length > 0) {
@@ -1649,12 +1658,24 @@ async function createMaps() {
   // Initialize pause button for RT positions container
   initRtPositionsPauseButton();
 
-  // Refresh stop popup content when real-time data updates
+  // Refresh stop popup content when real-time data updates.
+  // Update the DOM content directly instead of calling setHTML() to avoid
+  // MapLibre's _update() repositioning, which can cause the page to scroll.
   document.addEventListener('tripUpdatesReady', () => {
     if (stopPopup && currentStopPopupFeature) {
       const stop = stopData[currentStopPopupFeature.properties.stop_id];
       if (stop) {
-        stopPopup.setHTML(getStopPopupHtml(currentStopPopupFeature, stop));
+        const contentEl = stopPopup.getElement()?.querySelector('.maplibregl-popup-content');
+        if (contentEl) {
+          // Preserve the close button, update only the user content
+          const closeButton = contentEl.querySelector('.maplibregl-popup-close-button');
+          const newHtml = getStopPopupHtml(currentStopPopupFeature, stop);
+          // Clear non-close-button children and insert new content
+          Array.from(contentEl.childNodes).forEach((child) => {
+            if (child !== closeButton) child.remove();
+          });
+          contentEl.insertAdjacentHTML('beforeend', newHtml);
+        }
       }
     }
   });

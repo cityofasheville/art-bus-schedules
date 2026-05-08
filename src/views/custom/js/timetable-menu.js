@@ -310,6 +310,50 @@ jQuery(() => {
 });
 
 /**
+ * Resolves a stop_id to the one used in the timetable colgroup.
+ * Handles parent_station relationships: if the given stopId is a platform
+ * whose parent_station has a col, returns the parent_station stop_id.
+ * @param {string} stopId - The stop_id to resolve
+ * @param {NodeList} cols - The col elements from the timetable colgroup
+ * @returns {string|null} The stop_id that matches a col, or null if not found
+ */
+function resolveColStopId(stopId, cols) {
+  // Direct match
+  for (const col of cols) {
+    if (col.dataset.stopId === stopId) return stopId;
+  }
+
+  // stopId might be a platform whose parent_station has a col
+  if (typeof stopData !== 'undefined' && stopData[stopId] && stopData[stopId].parent_station) {
+    const parentId = stopData[stopId].parent_station;
+    for (const col of cols) {
+      if (col.dataset.stopId === parentId) return parentId;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Resolves a stop_id to one that exists in stopData.
+ * If the given stopId is a parent_station not in stopData, finds the
+ * child platform stop that references it.
+ * @param {string} stopId - The stop_id to resolve
+ * @returns {string|null} A stop_id that exists in stopData, or null
+ */
+function resolveDataStopId(stopId) {
+  if (typeof stopData === 'undefined') return null;
+  if (stopData[stopId]) return stopId;
+
+  // stopId might be a parent_station — find a child platform
+  for (const [childId, data] of Object.entries(stopData)) {
+    if (data.parent_station === stopId) return childId;
+  }
+
+  return null;
+}
+
+/**
  * Clears the current stop selection for a timetable
  * @param {string} timetableId - The timetable ID
  */
@@ -372,13 +416,14 @@ function updateStopInfoContainer(stopId, timetableId) {
   const container = document.getElementById(`stop-info-${timetableId}`);
   if (!container) return;
 
-  // Get stop data (globally available from timetablepage.pug)
-  if (typeof stopData === 'undefined' || !stopData[stopId]) {
+  // Resolve parent_station if needed (stopId may be a parent not in stopData)
+  const resolvedId = resolveDataStopId(stopId);
+  if (!resolvedId) {
     console.warn(`Stop data not found for stop ${stopId}`);
     return;
   }
 
-  const stop = stopData[stopId];
+  const stop = stopData[resolvedId];
   const placeholder = container.querySelector('.stop-info-placeholder');
   const content = container.querySelector('.stop-info-content');
 
@@ -419,7 +464,7 @@ function updateStopInfoContainer(stopId, timetableId) {
     for (const tripUpdate of tripUpdates) {
       const stopTimeUpdatesForStop = tripUpdate.trip_update.stop_time_update.filter(
         (stopTimeUpdate) =>
-          stopTimeUpdate.stop_id === stopId &&
+          stopTimeUpdate.stop_id === resolvedId &&
           (stopTimeUpdate.departure !== null || stopTimeUpdate.arrival !== null) &&
           stopTimeUpdate.schedule_relationship !== 3,
       );
@@ -543,9 +588,26 @@ function selectStop(stopId, timetableId, options = {}) {
     return;
   }
 
+  // Resolve parent_station relationships: the col may use a parent stop_id
+  // while stopData uses the platform stop_id (or vice versa).
+  const colgroup = table.querySelector('colgroup');
+  if (!colgroup) return;
+
+  const cols = colgroup.querySelectorAll('col');
+  const colStopId = resolveColStopId(stopId, cols);
+  const dataStopId = resolveDataStopId(stopId);
+
+  if (!colStopId) {
+    console.warn(`Stop ${stopId} not found in timetable ${timetableId}`);
+    return;
+  }
+
+  // Use the data stop_id for URL and map (it's the platform-level ID)
+  const urlStopId = dataStopId || stopId;
+
   // Update URL with stop_id (unless explicitly disabled, e.g., on initial page load)
   if (updateUrl) {
-    setUrlParam('stop_id', stopId);
+    setUrlParam('stop_id', urlStopId);
   }
 
   // Close any existing map popup, then optionally show new one
@@ -554,28 +616,19 @@ function selectStop(stopId, timetableId, options = {}) {
   }
 
   if (options.showPopup && typeof showStopPopupById === 'function') {
-    showStopPopupById(stopId, timetableId);
+    showStopPopupById(urlStopId, timetableId);
   }
 
-  // Find the column for this stop using the colgroup
-  const colgroup = table.querySelector('colgroup');
-  if (!colgroup) return;
-
-  const cols = colgroup.querySelectorAll('col');
+  // Find the column for this stop using the resolved col stop_id
   let targetCol = null;
   let colIndex = -1;
 
   cols.forEach((col, index) => {
-    if (col.dataset.stopId === stopId) {
+    if (col.dataset.stopId === colStopId) {
       colIndex = index;
       targetCol = col;
     }
   });
-
-  if (colIndex === -1 || !targetCol) {
-    console.warn(`Stop ${stopId} not found in timetable ${timetableId}`);
-    return;
-  }
 
   // Check if the stop is a non-timepoint and we're in timepoints-only mode
   const isTimepoint = targetCol.dataset.isTimepoint === 'true';
@@ -625,27 +678,31 @@ function selectStop(stopId, timetableId, options = {}) {
   });
 
   // Update the dropdown selection (unless called from dropdown to avoid loops)
+  // Use colStopId since dropdown options match col data-stop-id values
   if (!options.fromDropdown) {
     if (stopSearchSelects[timetableId]) {
       const currentVal = stopSearchSelects[timetableId].getValue();
-      if (currentVal !== stopId) {
-        stopSearchSelects[timetableId].setValue(stopId, true); // true = silent, no change event
+      if (currentVal !== colStopId) {
+        stopSearchSelects[timetableId].setValue(colStopId, true); // true = silent, no change event
       }
     }
   }
 
   // Update the map highlight (unless already handled by caller)
+  // Use both the col and data stop IDs to ensure the marker is highlighted
   if (typeof maps !== 'undefined' && maps[timetableId]) {
     const map = maps[timetableId];
+    const filterIds = [colStopId];
+    if (dataStopId && dataStopId !== colStopId) filterIds.push(dataStopId);
     map.setFilter('stops-highlighted', [
       'any',
-      ['in', 'stop_id', stopId],
-      ['in', 'parent_station', stopId],
+      ['in', 'stop_id', ...filterIds],
+      ['in', 'parent_station', ...filterIds],
     ]);
   }
 
-  // Update the stop info container with stop details
-  updateStopInfoContainer(stopId, timetableId);
+  // Update the stop info container with stop details (use data stop ID for stopData lookup)
+  updateStopInfoContainer(dataStopId || stopId, timetableId);
 }
 
 // Refresh stop info container when real-time data becomes available
