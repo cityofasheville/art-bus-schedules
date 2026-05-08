@@ -31,7 +31,6 @@ html(lang="en")
         a#feedback-form-link(
           href="https://forms.ashevillenc.gov/form/art-website-feedback"
           class="inline-flex items-center gap-1 bg-art-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-art-green hover:text-aux-black transition-colors"
-          target="_blank" rel="noopener noreferrer"
         )
           i(class="bi bi-chat-left-text" aria-hidden="true")
           span Share Your Feedback
@@ -55,8 +54,10 @@ html(lang="en")
       (function() {
         const feedbackLink = document.getElementById('feedback-form-link');
         if (feedbackLink) {
-          feedbackLink.addEventListener('click', function() {
-            this.href = 'https://forms.ashevillenc.gov/form/art-website-feedback?referringpath=' + encodeURIComponent(window.location.pathname + window.location.search);
+          feedbackLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            var url = 'https://forms.ashevillenc.gov/form/art-website-feedback?referringpath=' + encodeURIComponent(window.location.pathname + window.location.search);
+            window.open(url, this.target || '_self');
           });
         }
         const trigger = document.getElementById('feedback-trigger');
