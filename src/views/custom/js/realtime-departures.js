@@ -2,6 +2,10 @@
 
 let tripUpdates;
 
+// Tom Select instances
+var stopSelectInstance;
+var favoriteStopSelectInstance;
+
 /**
  * Announces a status message to screen readers via the live region
  * @param {string} message - The message to announce
@@ -452,6 +456,119 @@ jQuery(() => {
   setTimeout(function () {
     populateFavoriteStops();
   }, 0);
+});
+
+// Populate route dropdown on page load
+function initRouteDropdown() {
+  const routeDropdown = $('#route-select-dropdown');
+  const sortedRoutes = Object.values(routeData).sort((a, b) =>
+    (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {
+      numeric: true,
+    }),
+  );
+  sortedRoutes.forEach((route) => {
+    const displayName =
+      route.route_short_name && route.route_long_name
+        ? `${route.route_short_name} - ${route.route_long_name}`
+        : route.route_long_name
+          ? route.route_long_name
+          : `Route ${route.route_short_name}`;
+    routeDropdown.append(`<option value="${route.route_id}">${displayName}</option>`);
+  });
+}
+
+// Handle route selection - populate directions
+function onRouteChange() {
+  const routeId = $('#route-select-dropdown').val();
+  const directionDropdown = $('#direction-select-dropdown');
+  const stopDropdown = $('#stop-by-route-select-dropdown');
+
+  directionDropdown.html('<option value="">Select a direction</option>');
+  stopDropdown.html('<option value="">Select a stop</option>').prop('disabled', true);
+
+  if (!routeId) {
+    directionDropdown.prop('disabled', true);
+    return;
+  }
+
+  const directionsForRoute = directions.filter((dir) => dir.route_id === routeId);
+  directionsForRoute.forEach((dir) => {
+    directionDropdown.append(`<option value="${dir.direction_id}">${dir.direction}</option>`);
+  });
+  directionDropdown.prop('disabled', false);
+}
+
+// Handle direction selection - populate stops
+function onDirectionChange() {
+  const routeId = $('#route-select-dropdown').val();
+  const directionId = $('#direction-select-dropdown').val();
+  const stopDropdown = $('#stop-by-route-select-dropdown');
+
+  stopDropdown.html('<option value="">Select a stop</option>');
+
+  if (!routeId || !directionId) {
+    stopDropdown.prop('disabled', true);
+    return;
+  }
+
+  // Use pre-built mapping from server-side
+  const key = `${routeId}_${directionId}`;
+  const stops = routeDirectionStops[key] || [];
+
+  stops.forEach((stop) => {
+    const displayName = stop.stop_code ? `${stop.stop_name} (${stop.stop_code})` : stop.stop_name;
+    stopDropdown.append(`<option value="${stop.stop_id}">${displayName}</option>`);
+  });
+
+  stopDropdown.prop('disabled', false);
+}
+
+// Handle stop selection from By Route interface
+function onStopByRouteChange() {
+  const stopId = $('#stop-by-route-select-dropdown').val();
+  if (stopId) {
+    setUrlParam('stop_id', stopId);
+    fetchRealtimeDeparturesForStop(stopId);
+  }
+}
+
+$(document).ready(function () {
+  // Initialize By Route dropdowns
+  initRouteDropdown();
+  $('#route-select-dropdown').on('change', onRouteChange);
+  $('#direction-select-dropdown').on('change', onDirectionChange);
+  $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
+
+  // Initialize Tom Select for stop dropdown with accessibility features
+  stopSelectInstance = createAccessibleTomSelect('#stop-select-dropdown', {
+    dropdownParent: '#container_search_stop',
+    labelId: 'stop-select-label',
+    onChange: function (value) {
+      if (value) {
+        handleStopSelection({ target: { value: value } });
+      }
+    },
+  });
+
+  // Initialize Tom Select for favorite stops dropdown
+  favoriteStopSelectInstance = createAccessibleTomSelect('#favorite-stop-select-dropdown', {
+    dropdownParent: '#container_favorites',
+    labelId: 'favorite-stop-select-label',
+    onChange: function (value) {
+      if (value) {
+        handleStopSelection({ target: { value: value } });
+      }
+    },
+  });
+
+  const initialStopId = getUrlParam('stop_id');
+  if (initialStopId) {
+    stopSelectInstance.setValue(initialStopId, true); // true = silent (no change event)
+    if (favoriteStopSelectInstance) {
+      favoriteStopSelectInstance.clear(true);
+    }
+    fetchRealtimeDeparturesForStop(initialStopId);
+  }
 });
 
 /**

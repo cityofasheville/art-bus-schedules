@@ -7,12 +7,9 @@ include page_heading
 
 div(class="w-full max-w-screen-lg mx-auto px-4 pt-8")
   
-  //- p(class="text-lg mb-8")!= contactUs.what_we_do
-
   div(class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12")
     
-    //- Contact Information
-    div(class="bg-white rounded-lg shadow-md p-6")
+    div(class="bg-white rounded-lg shadow-md border p-6")
       h2(class="text-2xl mb-4 flex items-center gap-2")
         i(class="bi bi-telephone-fill text-aux-black" aria-hidden="true")
         span Contact Information
@@ -48,8 +45,7 @@ div(class="w-full max-w-screen-lg mx-auto px-4 pt-8")
             span(class="font-semibold block") Emergency Line
             a(href=`tel:${contactUs.emergency.replace(/-/g, '')}` class="text-art-blue hover:underline")= contactUs.emergency
 
-    //- Business Hours
-    div(class="bg-white rounded-lg shadow-md p-6")
+    div(class="bg-white rounded-lg shadow-md border p-6")
       h2(class="text-2xl mb-4 flex items-center gap-2")
         i(class="bi bi-clock-fill text-aux-black" aria-hidden="true")
         span Business Hours
@@ -62,11 +58,24 @@ div(class="w-full max-w-screen-lg mx-auto px-4 pt-8")
               span(class="font-semibold block")= info.title
               span= info.details
 
-  div(id="stay-in-the-loop" class="w-full max-w-80 mb-12")
-    div(class="flex items-center gap-3 mb-6")
-      img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
-      h2(class="text-2xl") Stay in the Loop!
-    iframe(width="100%" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
+    div(id="stay-in-the-loop" class="bg-white rounded-lg shadow-md border p-6")
+      div(class="flex items-center gap-3 mb-6")
+        img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
+        h2(class="text-2xl") Stay in the Loop!
+      iframe(width="100%" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
+
+    div(id="website-feedback" class="bg-white rounded-lg shadow-md border p-6")
+      h2(class="text-2xl mb-4 flex items-center gap-2")
+        i(class="bi bi-lightbulb-fill text-aux-black" aria-hidden="true")
+        span Have feedback about the website?
+      p(class="mb-4") How is your experience using the new ART website? Have a good idea? See an opportunity for improvement? We'd love to hear from you!
+      a(
+        id="feedback-form-link-contact"
+        href="https://forms.ashevillenc.gov/form/art-website-feedback"
+        class="feedback-form-link inline-flex items-center gap-1 bg-art-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-art-green hover:text-aux-black transition-colors"
+      )
+        i(class="bi bi-chat-left-text" aria-hidden="true")
+        span Share Your Feedback
 
 div(class="entry-content w-full max-w-screen-lg mx-auto px-4 mb-12")
   div!=config.wordpress.reportIssues.content.rendered

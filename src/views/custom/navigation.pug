@@ -6,27 +6,27 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
         a(href="/")
           img(class="inline-block xs:hidden w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url_mobile}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
           img(class="hidden xs:inline-block w-64 md:w-80 xl:w-96 h-auto", src=`${config.logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} header logo`)
-          //- h1(class="m-0 p-0 sr-only")=`${config.webpageTitle || 'Asheville Transit System '}`
           <span class="sr-only">Asheville Rides Transit Home</span>
 
       div(class="w-full xs:w-auto flex justify-center items-end gap-3 py-4")
-        button#hamburger(
+        button(
+          id="hamburger"
           class="lg:hidden text-2xl min-w-max text-art-blue font-semibold align-middle"
           aria-expanded="false"
           aria-controls="top-menu-container"
           aria-label="Toggle navigation menu"
         )
-          i.bi.bi-list(aria-hidden="true")
-          i.bi.bi-x-lg(aria-hidden="true")
+          i(class="bi bi-list" aria-hidden="true")
+          i(class="bi bi-x-lg" aria-hidden="true")
           span(class="inline-block pl-2")="Menu"
 
-    div#top-menu-container(class="nav-items hidden lg:block w-full lg:w-auto border-t-4 border-art-blue lg:border-transparent bg-aux-gray lg:bg-transparent p-0")
-      ul#menu-main-site-navigation(class="flex flex-col lg:flex-row justify-center lg:justify-start")
+    div(id="top-menu-container" class="nav-items hidden lg:block w-full lg:w-auto border-t-4 border-art-blue lg:border-transparent bg-aux-gray lg:bg-transparent p-0")
+      ul(id="menu-main-site-navigation" class="flex flex-col lg:flex-row justify-center lg:justify-start")
 
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
-            button#submenu-routes-schedules-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
+            button(id="submenu-routes-schedules-trigger"
+              class="dropdown-toggle w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -36,10 +36,11 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
               <span class="mr-2">Routes and Schedules</span>
               i(class="bi bi-chevron-down", aria-hidden="true")
               i(class="bi bi-chevron-up", aria-hidden="true")
-              span.sr-only show submenu for Routes and Schedules
+              span(class="sr-only") show submenu for Routes and Schedules
 
           //- Mega menu dropdown - full width, below nav bar on desktop
-          div#parent_routes_schedules(
+          div(
+            id="parent_routes_schedules"
             class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden"
             aria-labelledby="submenu-routes-schedules-trigger"
           )
@@ -72,7 +73,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
                         i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
                       span(class="sr-only") opens external site
 
-                //- Routes grid section - dynamically generated from route data
+                //- Routes grid section 
                 div(class="flex-1 min-w-0")
                   span(id="individual_routes_heading" class="inline-block text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3") Individual Routes
                   ul(class="list-none flex flex-wrap gap-2" aria-describedby="individual_routes_heading")
@@ -90,8 +91,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
 
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
-            button#submenu-fares-passes-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
+            button(id="submenu-fares-passes-trigger" class="dropdown-toggle w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -101,13 +101,10 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
               <span class="mr-2">Fares and Passes</span>
               i(class="bi bi-chevron-down", aria-hidden="true")
               i(class="bi bi-chevron-up", aria-hidden="true")
-              span.sr-only show submenu for Fares and Passes
+              span(class="sr-only") show submenu for Fares and Passes
 
           //- Mega menu dropdown - full width, below nav bar on desktop
-          div#parent_fares_passes(
-            class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden"
-            aria-labelledby="submenu-fares-passes-trigger"
-          )
+          div(id="parent_fares_passes" class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden" aria-labelledby="submenu-fares-passes-trigger")
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
               ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")
@@ -131,8 +128,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
 
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
-            button#submenu-rider-tools-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
+            button(id="submenu-rider-tools-trigger" class="dropdown-toggle w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -142,13 +138,10 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
               <span class="mr-2">Rider Tools</span>
               i(class="bi bi-chevron-down", aria-hidden="true")
               i(class="bi bi-chevron-up", aria-hidden="true")
-              span.sr-only show submenu for Rider Tools
+              span(class="sr-only") show submenu for Rider Tools
 
           //- Mega menu dropdown - full width, below nav bar on desktop
-          div#parent_rider_tools(
-            class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden"
-            aria-labelledby="submenu-rider-tools-trigger"
-          )
+          div(id="parent_rider_tools" class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden" aria-labelledby="submenu-rider-tools-trigger")
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
               ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")
@@ -203,8 +196,7 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
 
         li(class="w-full lg:w-auto lg:min-w-max relative flex flex-col lg:static")
           div(class="border-l-8 border-transparent has-[button:focus]:border-art-blue lg:has-[button:focus]:border-transparent has-[button:hover]:border-art-blue lg:has-[button:hover]:border-transparent w-full flex flex-row group")
-            button#submenu-about-trigger.dropdown-toggle(
-              class="w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
+            button(id="submenu-about-trigger" class="dropdown-toggle w-full border-t-4 border-transparent lg:hocus:border-art-blue px-4 py-3 flex items-center justify-between"
               type="button"
               aria-expanded="false"
               aria-haspopup="true"
@@ -214,13 +206,10 @@ nav#main-nav(class="relative border-b-4 border-art-blue" aria-label="Main Naviga
               <span class="mr-2">About</span>
               i(class="bi bi-chevron-down", aria-hidden="true")
               i(class="bi bi-chevron-up", aria-hidden="true")
-              span.sr-only show submenu for About
+              span(class="sr-only") show submenu for About
 
           //- Mega menu dropdown - full width, below nav bar on desktop
-          div#parent_about(
-            class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden"
-            aria-labelledby="submenu-about-trigger"
-          )
+          div(id="parent_about" class="dropdown-menu submenu z-50 w-full relative lg:absolute lg:left-0 lg:right-0 lg:top-full bg-aux-gray text-aux-black border-t-2 border-b-2 border-art-blue hidden overflow-hidden" aria-labelledby="submenu-about-trigger")
             div(class="w-full max-w-screen-xl mx-auto px-4 py-6 overflow-hidden")
               ul(class="flex flex-row flex-wrap gap-4 lg:gap-6 items-stretch justify-center")
                 li(class="min-w-0")

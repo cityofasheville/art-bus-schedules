@@ -24,9 +24,9 @@ html(lang="en")
       block content 
 
     //- Fixed feedback button (bottom-right)
-    div#feedback-widget(class="fixed bottom-4 right-4 z-40")
+    div(id="feedback-widget" class="fixed bottom-4 right-4 z-40")
       //- Popup
-      div#feedback-popup(class="hidden absolute bottom-14 right-0 w-48 xs:w-64 bg-white rounded-lg shadow-xl border border-gray-200 px-4 py-6 text-sm")
+      div(id="feedback-popup" class="hidden absolute bottom-14 right-0 w-48 xs:w-64 bg-white rounded-lg shadow-xl border border-gray-200 px-4 py-6 text-sm")
         p(class="text-aux-black mb-3") How is your experience using the new ART website? Have a good idea? See an opportunity for improvement? We'd love to hear from you!
         a(
           id="feedback-form-link-widget"
@@ -35,12 +35,13 @@ html(lang="en")
         )
           i(class="bi bi-chat-left-text" aria-hidden="true")
           span Share Your Feedback
-        button#feedback-popup-close(
+        button(
+          id="feedback-popup-close"
           class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
           aria-label="Close feedback popup"
           type="button"
         )
-          i.bi.bi-x-lg(aria-hidden="true")
+          i(class="bi bi-x-lg" aria-hidden="true")
       //- Trigger button
       button(id="feedback-trigger"
         class="btn-art-green w-12 h-12 rounded-full shadow-lg  transition-colors flex items-center justify-center text-xl border-2 border-art-blue"
@@ -61,7 +62,6 @@ html(lang="en")
             div(class="flex items-center gap-3 mb-6")
               img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
               h2(class="text-3xl") Stay in the Loop!
-            //- iframe(width="100%" height="200" title="Sign up to receive alerts for ART" src="https://publicinput.com/Embed/SignupDynamic?custId=1241&insightId=857362&leadListId=-1&projId=98618&fields=&requiredFields=4&manageSettingsLink=False&requiredFields=4&customStyleId=-1&textCategoryId=0&format=1&prompt=Sign+up+to+receive+alerts+for+ART&submitText=Sign+Up")
             div(class="flex flex-col gap-6")
               p() Sign up to receive alerts for ART
               a(href="/contact/#stay-in-the-loop" class="btn-blue") Sign Up for Alerts
@@ -141,8 +141,9 @@ html(lang="en")
                 span(class="sr-only")="love"
                 span()="and "
                 a(href="https://gtfstohtml.com/" class="text-gray-300 hover:text-white hover:underline transition-colors")="gtfs-to-html"
+    
     script.
-      (function() {
+      document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.feedback-form-link').forEach(function(feedbackLink) {
           feedbackLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -172,7 +173,7 @@ html(lang="en")
             trigger.focus();
           }
         });
-      })();
+      });
 
     //- Google tag (gtag.js)
     script(async src="https://www.googletagmanager.com/gtag/js?id=G-K7V7XKDSR5")

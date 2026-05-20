@@ -1,40 +1,19 @@
 include formatting_functions.pug
 
-//- div(class="relative w-full bg-art-blue border-b-4 border-art-green bg-cover bg-center" style="background-image: url(https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg)")
-//-   div(class="w-full max-w-screen-xl mx-auto p-4 z-10")
-//-     h1(class="py-4 text-aux-white text-2xl sm:text-4xl lg:text-5xl m-0")
-//-       span(id="all_bus_routes_and_schedules") All Bus Routes and Schedules
-
 include page_heading
 +page_heading('All Bus Routes and Schedules', 'max-w-screen-xl', 'all_bus_routes_and_schedules')
-
-//- div(class="w-full max-w-screen-xl mx-auto px-4 my-6")
-//-   p Click on a route number below for detailed route maps and schedules
-
-//- nav(id="all_routes_list" class="relative w-full max-w-screen-xl mx-auto px-4 mb-6" aria-label="All ART Routes")
-//-   a(href="#route_listing" class="absolute mx-auto top-0 sr-only focus:not-sr-only") Skip to list of routes and service areas
-//-   div(class="flex flex-wrap gap-2 justify-start")
-//-     - var allTimetablePages = _.flatMap(getAgencyTimetableGroups(timetablePages, agencies), function(g) { return g.timetablePages; });
-//-     each timetablePage in sortTimetablePages(allTimetablePages)
-//-       if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
-//-         - const swatchRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
-//-         each route in swatchRouteList
-//-           a(href=`/${timetablePage.timetable_page_id}` class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};`)= route.route_short_name || ''
-
-//- div(id="route_listing" class="w-full max-w-screen-xl mx-auto px-4 mb-6")
-//-   h2="All Routes and Service Areas"
     
 div(class="w-full max-w-screen-xl mx-auto px-4 py-8")
-  .overview-radio-menu(role="group" aria-label="Route listing display options")
+  div(class="overview-radio-menu" role="group" aria-label="Route listing display options")
     //- Live region to announce changes to screen readers
     div(id="overview_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
-    fieldset#view_selector.p-4.border.shadow-md(aria-controls="all_routes_table all_routes_map")
+    fieldset(id="view_selector" class="p-4 border rounded-lg shadow-md radio-group" aria-controls="all_routes_table all_routes_map")
       legend="View"
       div(class="w-full grid grid-cols-2 btn-group")
-        label.relative.btn-gray.text-center.cursor-pointer(for="radio_view_table")
+        label(class="relative btn-gray text-center cursor-pointer" for="radio_view_table")
           input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="table" id="radio_view_table" checked=true)
           span Table View
-        label.relative.btn-gray.text-center.cursor-pointer(for="radio_view_map")
+        label(class="relative btn-gray text-center cursor-pointer" for="radio_view_map")
           input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="map" id="radio_view_map")
           span Map View
 
@@ -56,7 +35,7 @@ div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
                 a(class="flex flex-col sm:flex-row items-center gap-2" href=`/${timetablePage.timetable_page_id}` aria-describedby=`desc_${timetablePage.timetable_page_id}`)
                   - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                   each route in tableRouteList
-                    .route-color-swatch-large(style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
+                    div(class="route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
                   span()= timetablePage.timetable_page_label
               td(class="p-2 border-b border-gray-200")
                 div(id=`desc_${timetablePage.timetable_page_id}` class="flex flex-wrap gap-1 items-center")
@@ -69,18 +48,19 @@ div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
                           i(class="bi bi-arrow-right mx-1 text-gray-500" aria-hidden="true")
 
 div(class="px-6 mb-12")
-  div(id="all_routes_map" class="timetable-overview flex flex-col-reverse md:flex-row hidden border border-gray-300")
+  div(id="all_routes_map" class="timetable-overview flex flex-col-reverse md:flex-row border border-gray-300")
     if !timetablePages || !timetablePages.length
       p No timetables found
     else
-      div(class="overview-list border-x md:border-x-0 border-x md:border-x-0 md:max-h-none w-full md:max-w-sm shadow-xl md:shadow-none overflow-y-scroll")
+      div(class="overview-list border-x md:border-x-0 md:max-h-none w-full md:max-w-sm shadow-xl md:shadow-none overflow-y-scroll")
         each timetablePageGroup in getAgencyTimetableGroups(timetablePages, agencies)
           //- h1.text-decoration-line-through= `${formatListForDisplay(agencies.map((agency) => agency.agency_name))} Routes`
-          ul(aria-describedby="all_bus_routes_and_schedules" class="mb-8")
+          ul(class="list-none" aria-describedby="all_bus_routes_and_schedules" class="mb-8")
             each timetablePage in sortTimetablePages(timetablePageGroup.timetablePages)
               if config.allowEmptyTimetables || timetablePage.consolidatedTimetables.length > 0
-                li.coa-timetable-page-link-item
-                  a(class="flex gap-2 no-underline hover:no-underline hover-bg-aux-gray p-2" href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
+                //- li.coa-timetable-page-link-item
+                li(class="flex items-center justify-between divide-x divide-slate-200 px-0 py-2 border-b border-gray-200")
+                  a(class="flex grow gap-2 no-underline hover:no-underline hocus:bg-aux-gray p-2" href=`/${timetablePage.timetable_page_id}` data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
                     - const timetableRouteList = _.uniqBy(_.flatMap(timetablePage.consolidatedTimetables, timetable => timetable.routes), 'route_id')
                     each route in timetableRouteList
                       span(class="route-color-swatch xs:route-color-swatch-large" style=`background-color: ${formatRouteColor(route)}; color: ${formatRouteTextColor(route)};` aria-hidden="true")= route.route_short_name || ''
@@ -93,14 +73,14 @@ div(class="px-6 mb-12")
                           if index < routeDescParts.length - 1
                             i(class="bi bi-arrow-right ml-1 text-gray-500" aria-hidden="true")
                             
-                  button.zoom-to(data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
-                    i(class="bi bi-zoom-in" aria-hidden="true")
+                  button(class="zoom-to flex items-center justify-center self-stretch p-4  hocus:bg-aux-gray" data-route-ids=`${timetablePage.route_ids ? timetablePage.route_ids.join(',') : ''}`)
+                    i(class="bi bi-zoom-in text-2xl" aria-hidden="true")
                     span(class="sr-only") Zoom to #{timetablePage.timetable_page_label} route map
                     
       if config.showMap
         div(class="relative")
           a(href="#main_footer" class="absolute top-0 left-0 sr-only focus:not-sr-only" tabindex="0") Skip map
-        div#system_map(class="overview-map border w-100 md:flex-1 h-96 md:h-auto")
+        div(id="system_map" class="overview-map border w-100 md:flex-1 h-96 md:h-auto")
 
         //- Use !{variable} format to inject values from pug to client side js
         script.

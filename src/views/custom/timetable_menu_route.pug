@@ -1,8 +1,6 @@
 if timetablePage.consolidatedTimetables.length > 1
   div(id="holiday_note" class="")
   div(class="timetable-radio-menu grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" role="group" aria-label="Route direction and schedule selection")
-    //- Live region to announce changes to screen readers
-    div(id="timetable_status" class="sr-only" role="status" aria-live="polite" aria-atomic="true")
     -const uniqueDirectionTimetablesC = _.uniqBy(timetablePage.consolidatedTimetables, 'direction_id');
     -timetablePage.dayLists.sort();
     fieldset(id="direction_name_selector" class="p-4 border rounded-lg shadow-md radio-group" aria-controls="coa_main_timetable_container coa_main_map_container")

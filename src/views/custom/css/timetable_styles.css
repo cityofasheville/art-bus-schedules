@@ -147,9 +147,9 @@ div.timetable[data-stops='all-stops'] th[data-is-timepoint='true'] i.bi-clock-fi
   display: none;
 }
 
-.timetable-page .timetable .timetable-label {
+/* .timetable-page .timetable .timetable-label {
   margin-bottom: 0.5rem;
-}
+} */
 
 /* .timetable-page .timetable .timetable-footer {
   display: grid;

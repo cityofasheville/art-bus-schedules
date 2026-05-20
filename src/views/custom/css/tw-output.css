@@ -1288,10 +1288,6 @@ fieldset.radio-group:has(input:focus) {
   margin-left: 0.5rem;
 }
 
-.ml-3 {
-  margin-left: 0.75rem;
-}
-
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -1358,13 +1354,6 @@ fieldset.radio-group:has(input:focus) {
 
 .aspect-video {
   aspect-ratio: 16 / 9;
-}
-
-.size-max {
-  width: -moz-max-content;
-  width: max-content;
-  height: -moz-max-content;
-  height: max-content;
 }
 
 .h-12 {
@@ -1468,10 +1457,6 @@ fieldset.radio-group:has(input:focus) {
   max-width: 80rem;
 }
 
-.max-w-80 {
-  max-width: 20rem;
-}
-
 .max-w-\[24rem\] {
   max-width: 24rem;
 }
@@ -1501,6 +1486,10 @@ fieldset.radio-group:has(input:focus) {
 }
 
 .flex-grow {
+  flex-grow: 1;
+}
+
+.grow {
   flex-grow: 1;
 }
 
@@ -1643,6 +1632,20 @@ fieldset.radio-group:has(input:focus) {
   border-color: rgb(226 232 240 / var(--tw-divide-opacity, 1));
 }
 
+.divide-purple-800 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(107 33 168 / var(--tw-divide-opacity, 1));
+}
+
+.divide-slate-400 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(148 163 184 / var(--tw-divide-opacity, 1));
+}
+
+.self-stretch {
+  align-self: stretch;
+}
+
 .justify-self-end {
   justify-self: end;
 }
@@ -1659,6 +1662,10 @@ fieldset.radio-group:has(input:focus) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.text-nowrap {
+  text-wrap: nowrap;
 }
 
 .rounded {
@@ -1699,10 +1706,6 @@ fieldset.radio-group:has(input:focus) {
   border-width: 2px;
 }
 
-.border-4 {
-  border-width: 4px;
-}
-
 .border-x {
   border-left-width: 1px;
   border-right-width: 1px;
@@ -1720,12 +1723,12 @@ fieldset.radio-group:has(input:focus) {
   border-bottom-width: 4px;
 }
 
-.border-b-\[16px\] {
-  border-bottom-width: 16px;
+.border-b-8 {
+  border-bottom-width: 8px;
 }
 
-.border-b-\[8px\] {
-  border-bottom-width: 8px;
+.border-b-\[16px\] {
+  border-bottom-width: 16px;
 }
 
 .border-l-4 {
@@ -1754,14 +1757,6 @@ fieldset.radio-group:has(input:focus) {
 
 .border-t-\[16px\] {
   border-top-width: 16px;
-}
-
-.border-t-\[8px\] {
-  border-top-width: 8px;
-}
-
-.border-b-8 {
-  border-bottom-width: 8px;
 }
 
 .border-art-blue {
@@ -1817,11 +1812,6 @@ fieldset.radio-group:has(input:focus) {
 .border-slate-300 {
   --tw-border-opacity: 1;
   border-color: rgb(203 213 225 / var(--tw-border-opacity, 1));
-}
-
-.border-slate-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(148 163 184 / var(--tw-border-opacity, 1));
 }
 
 .border-transparent {
@@ -2044,10 +2034,6 @@ fieldset.radio-group:has(input:focus) {
 
 .pl-4 {
   padding-left: 1rem;
-}
-
-.pl-8 {
-  padding-left: 2rem;
 }
 
 .pr-1 {
@@ -2398,6 +2384,11 @@ fieldset.radio-group:has(input:focus) {
   background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-aux-gray:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:text-aux-black:hover {
   --tw-text-opacity: 1;
   color: rgb(28 38 52 / var(--tw-text-opacity, 1));
@@ -2498,6 +2489,26 @@ fieldset.radio-group:has(input:focus) {
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
 }
 
+.hocus\:bg-art-green:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
+}
+
+.hocus\:bg-aux-gray:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
+}
+
+.hocus\:bg-art-green:focus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
+}
+
+.hocus\:bg-aux-gray:focus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
+}
+
 @media (min-width: 480px) {
   .xs\:inline-block {
     display: inline-block;
@@ -2585,10 +2596,6 @@ fieldset.radio-group:has(input:focus) {
     align-items: center;
   }
 
-  .sm\:justify-end {
-    justify-content: flex-end;
-  }
-
   .sm\:justify-between {
     justify-content: space-between;
   }
@@ -2635,10 +2642,6 @@ fieldset.radio-group:has(input:focus) {
 
   .sm\:pr-3 {
     padding-right: 0.75rem;
-  }
-
-  .sm\:text-left {
-    text-align: left;
   }
 
   .sm\:text-2xl {
@@ -2716,6 +2719,18 @@ fieldset.radio-group:has(input:focus) {
     flex-direction: row;
   }
 
+  .md\:items-center {
+    align-items: center;
+  }
+
+  .md\:justify-between {
+    justify-content: space-between;
+  }
+
+  .md\:gap-2 {
+    gap: 0.5rem;
+  }
+
   .md\:border-x-0 {
     border-left-width: 0px;
     border-right-width: 0px;
@@ -2770,10 +2785,6 @@ fieldset.radio-group:has(input:focus) {
 
   .lg\:right-0 {
     right: 0px;
-  }
-
-  .lg\:top-16 {
-    top: 4rem;
   }
 
   .lg\:top-full {
@@ -2841,19 +2852,6 @@ fieldset.radio-group:has(input:focus) {
     gap: 1.5rem;
   }
 
-  .lg\:rounded-b-sm {
-    border-bottom-right-radius: 0.125rem;
-    border-bottom-left-radius: 0.125rem;
-  }
-
-  .lg\:border-b {
-    border-bottom-width: 1px;
-  }
-
-  .lg\:border-l {
-    border-left-width: 1px;
-  }
-
   .lg\:border-r {
     border-right-width: 1px;
   }
@@ -2883,10 +2881,6 @@ fieldset.radio-group:has(input:focus) {
   .lg\:py-16 {
     padding-top: 4rem;
     padding-bottom: 4rem;
-  }
-
-  .lg\:pl-4 {
-    padding-left: 1rem;
   }
 
   .lg\:pr-6 {

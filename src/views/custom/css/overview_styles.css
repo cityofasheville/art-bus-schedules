@@ -105,7 +105,7 @@ a:hover {
   padding: 0.5rem;
 }
 
-button.zoom-to {
+/* button.zoom-to {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,7 +113,7 @@ button.zoom-to {
   border: none;
   cursor: pointer;
   padding: 1rem;
-}
+} */
 
 /* .timetable-overview a.timetable-page-link:hover {
   background-color: rgb(241 245 249);

@@ -70,12 +70,4 @@ document.addEventListener('DOMContentLoaded', () => {
       hideAllDropdowns();
     }
   });
-
-  // $('button#hamburger').on('click', function () {
-  //   if ($(this).attr('aria-expanded') === 'false') {
-  //     $('#top-menu-container').slideDown('slow');
-  //   } else {
-  //     $('#top-menu-container').slideUp('slow');
-  //   }
-  // });
 });
