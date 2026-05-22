@@ -1,4 +1,4 @@
-/* global document, jQuery, maplibregl, Pbf, mapStyleUrl, stopData, routeData, routeIds, tripIds, geojsons, gtfsRealtimeUrls */
+/* global document, maplibregl, Pbf, mapStyleUrl, stopData, routeData, routeIds, tripIds, geojsons, gtfsRealtimeUrls */
 
 let tripUpdates;
 
@@ -11,29 +11,27 @@ var favoriteStopSelectInstance;
  * @param {string} message - The message to announce
  */
 function announceDepartureStatus(message) {
-  const statusEl = jQuery('#departure_status');
-  if (statusEl.length) {
-    statusEl.text(message);
+  const statusEl = document.querySelector('#departure_status');
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
 
 function showSelectedInterface() {
-  jQuery('#departure_interface_selector input[name="departure_interface"]').each(
-    (index, element) => {
-      jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
-      jQuery(element)
-        .parents('label')
-        .toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-    },
-  );
+  document
+    .querySelectorAll('#departure_interface_selector input[name="departure_interface"]')
+    .forEach((element) => {
+      element.closest('label').classList.toggle('btn-blue', element.checked);
+      element.closest('label').classList.toggle('btn-gray', !element.checked);
+    });
 
-  const selected_interface = jQuery(
+  const selected_interface = document.querySelector(
     '#departure_interface_selector input[name="departure_interface"]:checked',
-  ).val();
+  ).value;
 
-  jQuery('.departure-interface').hide();
+  document.querySelectorAll('.departure-interface').forEach((el) => (el.style.display = 'none'));
 
-  jQuery(`#container_${selected_interface}`).show();
+  document.querySelector(`#container_${selected_interface}`).style.display = '';
 }
 
 function secondsInFuture(dateString) {
@@ -224,8 +222,8 @@ function toggleFavoriteStop(stop_id) {
       favoriteStopSelectInstance.refreshOptions(false);
     }
     if (defaultStops.length === 0) {
-      jQuery('#favorite_stops_select_container').hide();
-      jQuery('#favorite_instructions_container').show();
+      document.querySelector('#favorite_stops_select_container').style.display = 'none';
+      document.querySelector('#favorite_instructions_container').style.display = '';
     }
   } else {
     defaultStops.push(stop_id);
@@ -236,12 +234,16 @@ function toggleFavoriteStop(stop_id) {
       favoriteStopSelectInstance.addOption({ value: stop_id, text: displayText });
       favoriteStopSelectInstance.refreshOptions(false);
     }
-    jQuery('#favorite_instructions_container').hide();
-    jQuery('#favorite_stops_select_container').show();
+    document.querySelector('#favorite_instructions_container').style.display = 'none';
+    document.querySelector('#favorite_stops_select_container').style.display = '';
   }
 
   localStorage.setItem('art_favorite_stops', JSON.stringify(defaultStops));
-  $(`#favorite_stop_icon_${stop_id}`).toggleClass('bi-star-fill bi-star');
+  const icon = document.querySelector(`#favorite_stop_icon_${stop_id}`);
+  if (icon) {
+    icon.classList.toggle('bi-star-fill');
+    icon.classList.toggle('bi-star');
+  }
 }
 
 function getFavoriteStops() {
@@ -269,10 +271,11 @@ function getUrlParam(paramName) {
 async function fetchRealtimeDeparturesForStop(stop_id) {
   const favorite_stops = getFavoriteStops();
   const thisStop = stopData[stop_id];
-  $('#results-container').html('Loading upcoming arrivals...');
+  document.querySelector('#results-container').innerHTML = 'Loading upcoming arrivals...';
 
   if (!thisStop) {
-    $('#results-container').html('<div class="no-arrivals">Invalid stop selected.</div>');
+    document.querySelector('#results-container').innerHTML =
+      '<div class="no-arrivals">Invalid stop selected.</div>';
     return;
   }
 
@@ -399,7 +402,7 @@ async function fetchRealtimeDeparturesForStop(stop_id) {
     html += `</div>`;
   }
 
-  $('#results-container').html(html);
+  document.querySelector('#results-container').innerHTML = html;
 }
 
 function getUpcomingArrivalsForStop(stop_id) {
@@ -430,27 +433,31 @@ function getUpcomingArrivalsForStop(stop_id) {
   return arrivals;
 }
 
-jQuery(() => {
+document.addEventListener('DOMContentLoaded', () => {
   // If user has favorite stops, default to the favorites interface
   const defaultToFavorites = false;
   const initialInterface =
     defaultToFavorites && getFavoriteStops().length > 0 ? 'favorites' : 'search_stop';
-  jQuery(
+  document.querySelector(
     `#departure_interface_selector input[name="departure_interface"][value="${initialInterface}"]`,
-  ).prop('checked', true);
+  ).checked = true;
 
   showSelectedInterface();
 
-  jQuery('#departure_interface_selector input[name="departure_interface"]').change(function () {
-    showSelectedInterface();
-    const selectedValue = jQuery(this).val();
-    const labels = {
-      search_stop: 'Search by stop',
-      favorites: 'Favorite stops',
-      choose_route: 'Search by route',
-    };
-    announceDepartureStatus('Showing ' + (labels[selectedValue] || selectedValue));
-  });
+  document
+    .querySelectorAll('#departure_interface_selector input[name="departure_interface"]')
+    .forEach(function (input) {
+      input.addEventListener('change', function () {
+        showSelectedInterface();
+        const selectedValue = this.value;
+        const labels = {
+          search_stop: 'Search by stop',
+          favorites: 'Favorite stops',
+          choose_route: 'Search by route',
+        };
+        announceDepartureStatus('Showing ' + (labels[selectedValue] || selectedValue));
+      });
+    });
 
   // Populate favorites dropdown - defer to allow Tom Select to initialize first
   setTimeout(function () {
@@ -460,7 +467,7 @@ jQuery(() => {
 
 // Populate route dropdown on page load
 function initRouteDropdown() {
-  const routeDropdown = $('#route-select-dropdown');
+  const routeDropdown = document.querySelector('#route-select-dropdown');
   const sortedRoutes = Object.values(routeData).sort((a, b) =>
     (a.route_short_name || '').localeCompare(b.route_short_name || '', undefined, {
       numeric: true,
@@ -473,41 +480,42 @@ function initRouteDropdown() {
         : route.route_long_name
           ? route.route_long_name
           : `Route ${route.route_short_name}`;
-    routeDropdown.append(`<option value="${route.route_id}">${displayName}</option>`);
+    routeDropdown.appendChild(new Option(displayName, route.route_id));
   });
 }
 
 // Handle route selection - populate directions
 function onRouteChange() {
-  const routeId = $('#route-select-dropdown').val();
-  const directionDropdown = $('#direction-select-dropdown');
-  const stopDropdown = $('#stop-by-route-select-dropdown');
+  const routeId = document.querySelector('#route-select-dropdown').value;
+  const directionDropdown = document.querySelector('#direction-select-dropdown');
+  const stopDropdown = document.querySelector('#stop-by-route-select-dropdown');
 
-  directionDropdown.html('<option value="">Select a direction</option>');
-  stopDropdown.html('<option value="">Select a stop</option>').prop('disabled', true);
+  directionDropdown.innerHTML = '<option value="">Select a direction</option>';
+  stopDropdown.innerHTML = '<option value="">Select a stop</option>';
+  stopDropdown.disabled = true;
 
   if (!routeId) {
-    directionDropdown.prop('disabled', true);
+    directionDropdown.disabled = true;
     return;
   }
 
   const directionsForRoute = directions.filter((dir) => dir.route_id === routeId);
   directionsForRoute.forEach((dir) => {
-    directionDropdown.append(`<option value="${dir.direction_id}">${dir.direction}</option>`);
+    directionDropdown.appendChild(new Option(dir.direction, dir.direction_id));
   });
-  directionDropdown.prop('disabled', false);
+  directionDropdown.disabled = false;
 }
 
 // Handle direction selection - populate stops
 function onDirectionChange() {
-  const routeId = $('#route-select-dropdown').val();
-  const directionId = $('#direction-select-dropdown').val();
-  const stopDropdown = $('#stop-by-route-select-dropdown');
+  const routeId = document.querySelector('#route-select-dropdown').value;
+  const directionId = document.querySelector('#direction-select-dropdown').value;
+  const stopDropdown = document.querySelector('#stop-by-route-select-dropdown');
 
-  stopDropdown.html('<option value="">Select a stop</option>');
+  stopDropdown.innerHTML = '<option value="">Select a stop</option>';
 
   if (!routeId || !directionId) {
-    stopDropdown.prop('disabled', true);
+    stopDropdown.disabled = true;
     return;
   }
 
@@ -517,27 +525,31 @@ function onDirectionChange() {
 
   stops.forEach((stop) => {
     const displayName = stop.stop_code ? `${stop.stop_name} (${stop.stop_code})` : stop.stop_name;
-    stopDropdown.append(`<option value="${stop.stop_id}">${displayName}</option>`);
+    stopDropdown.appendChild(new Option(displayName, stop.stop_id));
   });
 
-  stopDropdown.prop('disabled', false);
+  stopDropdown.disabled = false;
 }
 
 // Handle stop selection from By Route interface
 function onStopByRouteChange() {
-  const stopId = $('#stop-by-route-select-dropdown').val();
+  const stopId = document.querySelector('#stop-by-route-select-dropdown').value;
   if (stopId) {
     setUrlParam('stop_id', stopId);
     fetchRealtimeDeparturesForStop(stopId);
   }
 }
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
   // Initialize By Route dropdowns
   initRouteDropdown();
-  $('#route-select-dropdown').on('change', onRouteChange);
-  $('#direction-select-dropdown').on('change', onDirectionChange);
-  $('#stop-by-route-select-dropdown').on('change', onStopByRouteChange);
+  document.querySelector('#route-select-dropdown').addEventListener('change', onRouteChange);
+  document
+    .querySelector('#direction-select-dropdown')
+    .addEventListener('change', onDirectionChange);
+  document
+    .querySelector('#stop-by-route-select-dropdown')
+    .addEventListener('change', onStopByRouteChange);
 
   // Initialize Tom Select for stop dropdown with accessibility features
   stopSelectInstance = createAccessibleTomSelect('#stop-select-dropdown', {
@@ -591,7 +603,7 @@ function populateFavoriteStops() {
       } else {
         // Fallback to DOM manipulation
         let new_option_element = new Option(displayText, stop_id, false, false);
-        $('#favorite-stop-select-dropdown').append(new_option_element);
+        document.querySelector('#favorite-stop-select-dropdown').appendChild(new_option_element);
       }
     });
 
@@ -600,10 +612,10 @@ function populateFavoriteStops() {
       favoriteStopSelectInstance.refreshOptions(false);
     }
 
-    jQuery('#favorite_instructions_container').hide();
-    jQuery('#favorite_stops_select_container').show();
+    document.querySelector('#favorite_instructions_container').style.display = 'none';
+    document.querySelector('#favorite_stops_select_container').style.display = '';
   } else {
-    jQuery('#favorite_stops_select_container').hide();
-    jQuery('#favorite_instructions_container').show();
+    document.querySelector('#favorite_stops_select_container').style.display = 'none';
+    document.querySelector('#favorite_instructions_container').style.display = '';
   }
 }

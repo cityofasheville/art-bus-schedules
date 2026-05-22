@@ -1,7 +1,13 @@
-/* global jQuery, anchorme, Pbf, stopData, routeData, routeIds, tripIds, stopIds, gtfsRealtimeUrls */
+/* global anchorme, Pbf, stopData, routeData, routeIds, tripIds, stopIds, gtfsRealtimeUrls */
 /* eslint no-var: "off", prefer-arrow-callback: "off", no-unused-vars: "off" */
 
 let gtfsRealtimeAlertsInterval;
+
+function escapeHtml(text) {
+  const el = document.createElement('span');
+  el.textContent = text;
+  return el.innerHTML;
+}
 
 async function fetchGtfsRealtime(url, headers) {
   if (!url) {
@@ -28,9 +34,9 @@ function formatAlertAsHtml(
   affectedStopsIdsInTimetable,
   isCurrentlyActive,
 ) {
-  const $alert = jQuery('<li>').addClass(
-    'timetable-alert bg-white border border-slate-300 rounded border-l-4 border-l-aux-red p-4',
-  );
+  const li = document.createElement('li');
+  li.className =
+    'timetable-alert bg-white border border-slate-300 rounded border-l-4 border-l-aux-red p-4';
 
   // Route swatches
   let routeSwatchesHtml = '<ul class="flex flex-wrap gap-1 list-none p-0 m-0 mb-2">';
@@ -74,12 +80,10 @@ function formatAlertAsHtml(
       : 'Ongoing';
 
   // Title
-  const title = jQuery('<span>').text(alert.alert.header_text.translation[0].text).html();
+  const title = escapeHtml(alert.alert.header_text.translation[0].text);
 
-  // Description (XSS-safe via .text then anchorme for links)
-  const descriptionHtml = anchorme(
-    jQuery('<span>').text(alert.alert.description_text.translation[0].text).html(),
-  );
+  // Description (XSS-safe via escapeHtml then anchorme for links)
+  const descriptionHtml = anchorme(escapeHtml(alert.alert.description_text.translation[0].text));
 
   // Affected stops
   let affectedStopsHtml = '';
@@ -89,7 +93,7 @@ function formatAlertAsHtml(
     for (const stopId of affectedStopsIdsInTimetable) {
       const stop = stopData[stopId];
       if (!stop) continue;
-      affectedStopsHtml += `<li class="my-1">${jQuery('<span>').text(stop.stop_name).html()}</li>`;
+      affectedStopsHtml += `<li class="my-1">${escapeHtml(stop.stop_name)}</li>`;
     }
     affectedStopsHtml += '</ul></div>';
   }
@@ -99,7 +103,7 @@ function formatAlertAsHtml(
     ? `<a href="${alert.alert.url.translation[0].text}" class="text-link underline hover:no-underline">More Info</a>`
     : '';
 
-  $alert.html(`
+  li.innerHTML = `
     <div class="flex flex-col gap-1">
       ${routeSwatchesHtml}
       <div class="text-lg font-medium">${title}</div>
@@ -111,9 +115,9 @@ function formatAlertAsHtml(
       ${moreInfoHtml}
       ${affectedStopsHtml}
     </div>
-  `);
+  `;
 
-  return $alert;
+  return li;
 }
 
 async function updateAlerts() {
@@ -132,7 +136,10 @@ async function updateAlerts() {
     );
 
     if (!alerts) {
-      $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+      const el = document.querySelector('#timetable_alert_count');
+      el.classList.remove('border-red-600');
+      el.textContent = '';
+      el.style.display = 'none';
       return;
     }
 
@@ -226,10 +233,18 @@ async function updateAlerts() {
     }
 
     // Remove previously posted GTFS-RT alerts
-    jQuery('.timetable-alerts-list').empty().addClass('hidden');
-    jQuery('.timetable-alert-empty').removeClass('hidden');
+    document.querySelectorAll('.timetable-alerts-list').forEach(function (el) {
+      el.innerHTML = '';
+      el.classList.add('hidden');
+    });
+    document.querySelectorAll('.timetable-alert-empty').forEach(function (el) {
+      el.classList.remove('hidden');
+    });
 
-    $('#timetable_alert_count').removeClass('border-red-600').text('').hide();
+    const alertCountEl = document.querySelector('#timetable_alert_count');
+    alertCountEl.classList.remove('border-red-600');
+    alertCountEl.textContent = '';
+    alertCountEl.style.display = 'none';
 
     if (formattedAlerts.length > 0) {
       // Count active vs upcoming
@@ -246,24 +261,34 @@ async function updateAlerts() {
       }
       const statusText = statusParts.join(', ');
 
-      $('#timetable_alert_count').addClass('border-red-600').text(statusText).show();
+      alertCountEl.classList.add('border-red-600');
+      alertCountEl.textContent = statusText;
+      alertCountEl.style.display = '';
 
-      const $list = jQuery('<ul>').addClass('list-none p-0 m-0 flex flex-col gap-4');
+      const ul = document.createElement('ul');
+      ul.className = 'list-none p-0 m-0 flex flex-col gap-4';
       for (const alert of formattedAlerts) {
-        $list.append(alert.element);
+        ul.appendChild(alert.element);
       }
-      jQuery('.timetable-alert-empty').addClass('hidden');
-      jQuery('.timetable-alerts-list').append($list).removeClass('hidden');
+      document.querySelectorAll('.timetable-alert-empty').forEach(function (el) {
+        el.classList.add('hidden');
+      });
+      document.querySelectorAll('.timetable-alerts-list').forEach(function (el) {
+        el.appendChild(ul);
+        el.classList.remove('hidden');
+      });
     } else {
       // Show "No alerts" status and empty message
-      $('#timetable_alert_count').removeClass('border-red-600').text('No alerts').show();
+      alertCountEl.classList.remove('border-red-600');
+      alertCountEl.textContent = 'No alerts';
+      alertCountEl.style.display = '';
     }
   } catch (error) {
     console.error(error);
   }
 }
 
-jQuery(() => {
+document.addEventListener('DOMContentLoaded', () => {
   if (!gtfsRealtimeAlertsInterval && gtfsRealtimeUrls?.realtimeAlerts?.url) {
     const alertUpdateInterval = 60 * 1000;
     updateAlerts();

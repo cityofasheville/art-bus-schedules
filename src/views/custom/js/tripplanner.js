@@ -13,14 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   function initAutocomplete(inputSelector, suggestionsSelector) {
-    const input_target = $(inputSelector);
-    const suggestions_for_input = $(suggestionsSelector);
+    const input_target = document.querySelector(inputSelector);
+    const suggestions_for_input = document.querySelector(suggestionsSelector);
     let debounceTimer = null;
     let highlightedIndex = -1;
     let currentSuggestions = [];
 
-    input_target.on('input', function () {
-      const query = $(this).val().trim();
+    input_target.addEventListener('input', function () {
+      const query = this.value.trim();
 
       clearTimeout(debounceTimer);
 
@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }, DEBOUNCE_DELAY);
     });
 
-    input_target.on('keydown', function (e) {
-      if (!suggestions_for_input.hasClass('show')) return;
+    input_target.addEventListener('keydown', function (e) {
+      if (!suggestions_for_input.classList.contains('show')) return;
 
       switch (e.key) {
         case 'ArrowDown':
@@ -67,16 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    input_target.on('focus', function () {
+    input_target.addEventListener('focus', function () {
       if (currentSuggestions.length > 0) {
-        suggestions_for_input.addClass('show');
+        suggestions_for_input.classList.add('show');
       }
     });
 
     async function fetchSuggestions(query) {
-      suggestions_for_input
-        .html('<li class="autocomplete-loading">Searching...</li>')
-        .addClass('show');
+      suggestions_for_input.innerHTML = '<li class="autocomplete-loading">Searching...</li>';
+      suggestions_for_input.classList.add('show');
 
       try {
         const url = `${GEOCODER_URL}?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=10&viewbox=${VIEWBOX}&bounded=1`;
@@ -87,15 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
         highlightedIndex = -1;
 
         if (currentSuggestions.length === 0) {
-          suggestions_for_input.html('<li class="autocomplete-no-results">No locations found</li>');
+          suggestions_for_input.innerHTML =
+            '<li class="autocomplete-no-results">No locations found</li>';
         } else {
           renderSuggestions();
         }
       } catch (error) {
         console.error('Geocoder error:', error);
-        suggestions_for_input.html(
-          '<li class="autocomplete-no-results">Error fetching suggestions</li>',
-        );
+        suggestions_for_input.innerHTML =
+          '<li class="autocomplete-no-results">Error fetching suggestions</li>';
       }
     }
 
@@ -111,35 +110,44 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .join('');
 
-      suggestions_for_input.html(html).addClass('show');
+      suggestions_for_input.innerHTML = html;
+      suggestions_for_input.classList.add('show');
 
-      suggestions_for_input.find('li').on('click', function () {
-        const index = $(this).data('index');
-        if (currentSuggestions[index]) {
-          selectSuggestion(currentSuggestions[index]);
-        }
+      suggestions_for_input.querySelectorAll('li').forEach(function (li) {
+        li.addEventListener('click', function () {
+          const index = parseInt(this.dataset.index, 10);
+          if (currentSuggestions[index]) {
+            selectSuggestion(currentSuggestions[index]);
+          }
+        });
       });
     }
 
     function updateHighlight() {
-      suggestions_for_input.find('li').removeClass('highlighted').attr('aria-selected', 'false');
+      suggestions_for_input.querySelectorAll('li').forEach(function (li) {
+        li.classList.remove('highlighted');
+        li.setAttribute('aria-selected', 'false');
+      });
       if (highlightedIndex >= 0) {
-        suggestions_for_input
-          .find(`li[data-index="${highlightedIndex}"]`)
-          .addClass('highlighted')
-          .attr('aria-selected', 'true');
+        const highlighted = suggestions_for_input.querySelector(
+          `li[data-index="${highlightedIndex}"]`,
+        );
+        if (highlighted) {
+          highlighted.classList.add('highlighted');
+          highlighted.setAttribute('aria-selected', 'true');
+        }
       }
     }
 
     function selectSuggestion(suggestion) {
       // Use display_name from Nominatim
-      input_target.val(suggestion.display_name);
+      input_target.value = suggestion.display_name;
       hideSuggestions();
-      input_target.trigger('change');
+      input_target.dispatchEvent(new Event('change'));
     }
 
     function hideSuggestions() {
-      suggestions_for_input.removeClass('show');
+      suggestions_for_input.classList.remove('show');
       highlightedIndex = -1;
     }
 
@@ -149,23 +157,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return div.innerHTML;
     }
 
-    $(document).on('click', function (e) {
-      if (
-        !$(e.target).closest(inputSelector).length &&
-        !$(e.target).closest(suggestionsSelector).length
-      ) {
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest(inputSelector) && !e.target.closest(suggestionsSelector)) {
         hideSuggestions();
       }
     });
   }
 
-  $('#trip_planner_form').on('submit', function (e) {
+  document.querySelector('#trip_planner_form').addEventListener('submit', function (e) {
     e.preventDefault();
-    const source = $('#trip_planner_input_source').val();
-    const destination = $('#trip_planner_input_destination').val();
-    const departure_date = $('#trip_planner_input_date').val();
-    const departure_time = $('#trip_planner_input_time').val();
-    const tripPreference = $('#trip_planner_input_trip_preference').val();
+    const source = document.querySelector('#trip_planner_input_source').value;
+    const destination = document.querySelector('#trip_planner_input_destination').value;
+    const departure_date = document.querySelector('#trip_planner_input_date').value;
+    const departure_time = document.querySelector('#trip_planner_input_time').value;
+    const tripPreference = document.querySelector('#trip_planner_input_trip_preference').value;
 
     // Use legacy Google Maps URL format which supports departure time and transit preferences
     // dirflg: r=transit, w=walking, d=driving, b=bicycling
