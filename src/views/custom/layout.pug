@@ -8,8 +8,7 @@ html(lang="en")
 
     block extraHeader
       script(src=`/vendor/js/jquery.min.3.7.1.js`)
-      //- script(src=`/vendor/js/lodash.min.4.17.21.js`)
-      script(src=`/js/dropdown-menus.js`)
+      script(src=`/js/menu-behavior.js`)
       link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css")
       link(rel="stylesheet" href=`/css/global.css`)
       link(rel="stylesheet" href=`/css/tw-output.css`)
@@ -142,38 +141,6 @@ html(lang="en")
                 span()="and "
                 a(href="https://gtfstohtml.com/" class="text-gray-300 hover:text-white hover:underline transition-colors")="gtfs-to-html"
     
-    script.
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.feedback-form-link').forEach(function(feedbackLink) {
-          feedbackLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            var url = 'https://forms.ashevillenc.gov/form/art-website-feedback?referringpath=' + encodeURIComponent(window.location.pathname + window.location.search);
-            window.open(url, this.target || '_self');
-          });
-        });
-        const trigger = document.getElementById('feedback-trigger');
-        const popup = document.getElementById('feedback-popup');
-        const close = document.getElementById('feedback-popup-close');
-        function toggle() {
-          const open = popup.classList.toggle('hidden');
-          trigger.setAttribute('aria-expanded', !open);
-        }
-        trigger.addEventListener('click', toggle);
-        close.addEventListener('click', toggle);
-        document.addEventListener('click', function(e) {
-          if (!document.getElementById('feedback-widget').contains(e.target)) {
-            popup.classList.add('hidden');
-            trigger.setAttribute('aria-expanded', 'false');
-          }
-        });
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
-            popup.classList.add('hidden');
-            trigger.setAttribute('aria-expanded', 'false');
-            trigger.focus();
-          }
-        });
-      });
 
     //- Google tag (gtag.js)
     script(async src="https://www.googletagmanager.com/gtag/js?id=G-K7V7XKDSR5")

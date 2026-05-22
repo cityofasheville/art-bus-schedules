@@ -4,11 +4,9 @@ div(id="service_alerts_content" class=" w-full max-w-screen-sm lg:max-w-full mx-
     span(class="inline-block")="Service Alert Listing"
 
   div(class="timetable-alerts")
-    //- Route selector - clickable swatches for affected routes
     nav#alerts-route-selector(aria-label="Filter alerts by route" class="mb-6")
       p#alerts-loading-message(class="text-gray-600") Checking for service alerts...
       div#alerts-route-list(class="flex flex-wrap gap-3" role="tablist" aria-label="Routes with active alerts")
       
-    //- Target container for displaying alerts for selected route
     div#alerts-display-container(role="tabpanel" aria-live="polite" class="min-h-24")
       p#alerts-select-prompt(class="text-gray-600 hidden") Select a route above to view its alerts.

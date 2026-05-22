@@ -1,0 +1,34 @@
+//- Shared data preparation for realtime departures, custom home, and service alerts pages.
+//- This file builds server-side data structures and serializes them to the client.
+-
+-// Build a route/direction -> stops mapping using trips and stopTimes
+-var routeDirectionStops = {};
+-var tripLookup = {};
+-config.timetablePage.trips.forEach(function(trip) { tripLookup[trip.trip_id] = { route_id: trip.route_id, direction_id: trip.direction_id }; });
+-var stopLookup = {};
+-config.timetablePage.stops.forEach(function(stop) { stopLookup[stop.stop_id] = { stop_id: stop.stop_id, stop_name: stop.stop_name, stop_code: stop.stop_code }; });
+-config.timetablePage.stopTimes.forEach(function(st) { var trip = tripLookup[st.trip_id]; if (!trip) return; var key = trip.route_id + '_' + trip.direction_id; if (!routeDirectionStops[key]) { routeDirectionStops[key] = []; } var stopInfo = stopLookup[st.stop_id]; if (stopInfo && !routeDirectionStops[key].some(function(s) { return s.stop_id === st.stop_id; })) { routeDirectionStops[key].push(stopInfo); } });
+-
+-// Pre-compute data structures server-side
+-var gtfsRealtimeUrls = { realtimeTripUpdates: config.agencies[0].realtimeTripUpdates, realtimeVehiclePositions: config.agencies[0].realtimeVehiclePositions, realtimeAlerts: config.agencies[0].realtimeAlerts };
+-var directions = config.timetablePage.directions;
+-var routeIds = config.timetablePage.routes.map(function(route) { return route.route_id; });
+-var routeData = config.timetablePage.routes.reduce(function(acc, route) { acc[route.route_id] = { route_id: route.route_id, route_short_name: route.route_short_name, route_long_name: route.route_long_name, route_desc: route.route_desc, route_color: route.route_color, route_text_color: route.route_text_color }; return acc; }, {});
+-var tripIds = config.timetablePage.trips.map(function(trip) { return trip.trip_id; });
+-var tripData = config.timetablePage.trips.reduce(function(acc, trip) { acc[trip.trip_id] = { trip_id: trip.trip_id, route_id: trip.route_id, trip_headsign: trip.trip_headsign, direction_id: trip.direction_id }; return acc; }, {});
+-var stopIds = config.timetablePage.stops.map(function(stop) { return stop.stop_id; });
+-var stopData = config.timetablePage.stops.reduce(function(acc, stop) { acc[stop.stop_id] = { stop_id: stop.stop_id, stop_code: stop.stop_code, stop_name: stop.stop_name, stop_lat: stop.stop_lat, stop_lon: stop.stop_lon }; return acc; }, {});
+-var timetableData = config.timetablePage.consolidatedTimetables;
+-var alphabetical_stops = [...config.timetablePage.stops].sort((a, b) => a.stop_name.localeCompare(b.stop_name));
+
+script.
+    const routeDirectionStops = !{JSON.stringify(routeDirectionStops)};
+    const gtfsRealtimeUrls = !{JSON.stringify(gtfsRealtimeUrls)};
+    const directions = !{JSON.stringify(directions)};
+    const routeIds = !{JSON.stringify(routeIds)};
+    const routeData = !{JSON.stringify(routeData)};
+    const tripIds = !{JSON.stringify(tripIds)};
+    const tripData = !{JSON.stringify(tripData)};
+    const stopIds = !{JSON.stringify(stopIds)};
+    const stopData = !{JSON.stringify(stopData)};
+    const timetableData = !{JSON.stringify(timetableData)};
