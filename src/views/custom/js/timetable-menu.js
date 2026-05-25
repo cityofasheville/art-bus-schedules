@@ -173,7 +173,7 @@ jQuery(() => {
   // window.holidayDates.push(todayStr);
 
   const isHoliday =
-    typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(todayStr);
+    typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(+todayStr);
 
   if (isHoliday || today_day_of_week === 0) {
     default_timetable_day = 'Sun';
