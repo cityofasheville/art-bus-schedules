@@ -121,6 +121,9 @@ async function getWordPressData() {
     if (!howToRideResponse.ok) {
       throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
     }
+    if (!reportIssuesResponse.ok) {
+      throw new Error(`HTTP error fetching Report Issues! status: ${reportIssuesResponse.status}`);
+    }
     if (!faresAndPassesResponse.ok) {
       throw new Error(
         `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`,
@@ -128,11 +131,8 @@ async function getWordPressData() {
     }
     if (!transitHomepageResponse.ok) {
       throw new Error(
-        `HTTP error fetching Fares and Passes! status: ${transitHomepageResponse.status}`,
+        `HTTP error fetching Transit Homepage! status: ${transitHomepageResponse.status}`,
       );
-    }
-    if (!transitNewsResponse.ok) {
-      throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
     }
     if (!holidaysResponse.ok) {
       throw new Error(`HTTP error fetching Holidays! status: ${holidaysResponse.status}`);
@@ -142,6 +142,12 @@ async function getWordPressData() {
     }
     if (!bikesResponse.ok) {
       throw new Error(`HTTP error fetching Bikes on Buses! status: ${bikesResponse.status}`);
+    }
+    if (!wifiTermsResponse.ok) {
+      throw new Error(`HTTP error fetching Wi-Fi Terms! status: ${wifiTermsResponse.status}`);
+    }
+    if (!wifiFaqsResponse.ok) {
+      throw new Error(`HTTP error fetching Wi-Fi FAQs! status: ${wifiFaqsResponse.status}`);
     }
     if (!passportResponse.ok) {
       throw new Error(`HTTP error fetching Passport! status: ${passportResponse.status}`);
@@ -154,12 +160,6 @@ async function getWordPressData() {
     if (!transitNewsResponse.ok) {
       throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
     }
-    if (!wifiTermsResponse.ok) {
-      throw new Error(`HTTP error fetching Wi-Fi Terms! status: ${wifiTermsResponse.status}`);
-    }
-    if (!wifiFaqsResponse.ok) {
-      throw new Error(`HTTP error fetching Wi-Fi FAQs! status: ${wifiFaqsResponse.status}`);
-    }
 
     const [
       howToRideData,
@@ -167,26 +167,26 @@ async function getWordPressData() {
       faresAndPassesData,
       transitHomepageData,
       holidaysData,
-      transitNewsData,
       adaData,
       bikesData,
       wifiTermsData,
       wifiFaqsData,
       passportData,
       policiesAndTipsData,
+      transitNewsData,
     ] = await Promise.all([
       howToRideResponse.json(),
       reportIssuesResponse.json(),
       faresAndPassesResponse.json(),
       transitHomepageResponse.json(),
       holidaysResponse.json(),
-      transitNewsResponse.json(),
       adaResponse.json(),
       bikesResponse.json(),
       wifiTermsResponse.json(),
       wifiFaqsResponse.json(),
       passportResponse.json(),
       policiesAndTipsResponse.json(),
+      transitNewsResponse.json(),
     ]);
 
     returnedData.howToRide = {
@@ -346,7 +346,8 @@ const query3 = `SELECT DISTINCT CONCAT(c.start_date,'-',c.end_date) AS relativeP
                 FROM calendar c
                 WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date`;
 
-await fs.mkdir('./src/tmp');
+await fs.rm('./src/tmp', { recursive: true, force: true });
+await fs.mkdir('./src/tmp', { recursive: true });
 const db = new Database(dbPath);
 
 await importGtfs({
