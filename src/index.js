@@ -84,8 +84,7 @@ async function processFiles({
  * Fetches content from the WordPress API
  */
 async function getWordPressData() {
-  let defaultData = null;
-  let returnedData = {};
+  const returnedData = {};
 
   try {
     const [
@@ -297,24 +296,12 @@ async function getWordPressData() {
     };
   } catch (error) {
     console.error('Failed to fetch data from WordPress API:', error.message);
-    return defaultData;
+    throw error;
   }
   return returnedData;
 }
 
-const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url)));
-const url = config.agencies[0].url;
-const dbPath = config.sqlitePath;
-const templatePath = config.templatePath;
-const buildPath = config.outputPath;
-config.wordpress = await getWordPressData();
-config.logo_url = '/art-logo-blue-small.png';
-config.logo_url_mobile = '/art-logo-blue-small-text-under.png';
-config.footer_logo_url = '/art-logo-white-no-text.png';
-config.connect_icon_url = '/art-connect-icon.svg';
-config.webpageTitle = 'ART Transit System';
-
-const query1 = `INSERT INTO timetables 
+const query1 = `INSERT INTO timetables
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
                       ,ttbls.friday,ttbls.saturday,ttbls.sunday,ttbls.start_time,ttbls.start_timestamp,ttbls.end_time,ttbls.end_timestamp
@@ -346,115 +333,129 @@ const query3 = `SELECT DISTINCT CONCAT(c.start_date,'-',c.end_date) AS relativeP
                 FROM calendar c
                 WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date`;
 
-await fs.rm('./src/tmp', { recursive: true, force: true });
-await fs.mkdir('./src/tmp', { recursive: true });
-const db = new Database(dbPath);
+async function main() {
+  const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url)));
+  const url = config.agencies[0].url;
+  const dbPath = config.sqlitePath;
+  const templatePath = config.templatePath;
+  const buildPath = config.outputPath;
+  config.wordpress = await getWordPressData();
+  config.logo_url = '/art-logo-blue-small.png';
+  config.logo_url_mobile = '/art-logo-blue-small-text-under.png';
+  config.footer_logo_url = '/art-logo-white-no-text.png';
+  config.connect_icon_url = '/art-connect-icon.svg';
+  config.webpageTitle = 'ART Transit System';
 
-await importGtfs({
-  agencies: [
-    {
-      url: url,
-    },
-  ],
-  sqlitePath: dbPath,
-});
-
-const ttableResult = runQuery(db, query1);
-const ttablePagesResult = runQuery(db, query2);
-const folderPath = db.prepare(query3).get();
-
-const stops = db.prepare('SELECT * FROM stops').all();
-const routes = db.prepare('SELECT * FROM routes').all();
-const timetables = db.prepare('SELECT * FROM timetables').all();
-const trips = db.prepare('SELECT * FROM trips').all();
-const directions = db.prepare('SELECT * FROM directions').all();
-const stopTimes = db
-  .prepare('SELECT trip_id, stop_id, stop_sequence FROM stop_times ORDER BY trip_id, stop_sequence')
-  .all();
-const holidayDates = db
-  .prepare('SELECT DISTINCT date FROM calendar_dates ORDER BY date')
-  .all()
-  .map((row) => row.date);
-
-config.holidayDates = holidayDates;
-
-console.log('Routes fetched:', routes.length);
-
-// Build a timetablePage-like object
-const timetablePage = {
-  consolidatedTimetables: timetables, // You may want to group/filter these
-  stops,
-  routes,
-  trips,
-  directions,
-  stopTimes,
-  // Add other properties as needed
-};
-
-config.timetablePage = timetablePage;
-
-console.log('Timtables inserted', ttableResult.changes);
-console.log('Timtable Pages inserted', ttablePagesResult.changes);
-
-try {
-  await gtfsToHtml(config);
-  // console.log('Timetables generated successfully');
-} catch (err) {
-  console.error('Generation failed:', err);
   await fs.rm('./src/tmp', { recursive: true, force: true });
+  await fs.mkdir('./src/tmp', { recursive: true });
+  const db = new Database(dbPath);
+
+  try {
+    await importGtfs({
+      agencies: [
+        {
+          url: url,
+        },
+      ],
+      sqlitePath: dbPath,
+    });
+
+    const ttableResult = runQuery(db, query1);
+    const ttablePagesResult = runQuery(db, query2);
+    const folderPath = db.prepare(query3).get();
+
+    const stops = db.prepare('SELECT * FROM stops').all();
+    const routes = db.prepare('SELECT * FROM routes').all();
+    const timetables = db.prepare('SELECT * FROM timetables').all();
+    const trips = db.prepare('SELECT * FROM trips').all();
+    const directions = db.prepare('SELECT * FROM directions').all();
+    const stopTimes = db
+      .prepare(
+        'SELECT trip_id, stop_id, stop_sequence FROM stop_times ORDER BY trip_id, stop_sequence',
+      )
+      .all();
+    const holidayDates = db
+      .prepare('SELECT DISTINCT date FROM calendar_dates ORDER BY date')
+      .all()
+      .map((row) => row.date);
+
+    config.holidayDates = holidayDates;
+
+    console.log('Routes fetched:', routes.length);
+
+    // Build a timetablePage-like object
+    const timetablePage = {
+      consolidatedTimetables: timetables, // You may want to group/filter these
+      stops,
+      routes,
+      trips,
+      directions,
+      stopTimes,
+      // Add other properties as needed
+    };
+
+    config.timetablePage = timetablePage;
+
+    console.log('Timetables inserted', ttableResult.changes);
+    console.log('Timetable Pages inserted', ttablePagesResult.changes);
+
+    await gtfsToHtml(config);
+
+    for (const page of config.customPages) {
+      const pageTemplatePath = path.join(config.templatePath, page.template);
+      const outputPath = path.join(config.outputPath, page.output);
+      const pageTitle = page.title;
+
+      const html = pug.renderFile(pageTemplatePath, {
+        config,
+        timetablePage,
+        pageTitle,
+      });
+
+      await fs.mkdir(path.dirname(outputPath), { recursive: true });
+
+      await fs.writeFile(outputPath, html);
+    }
+
+    await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
+    await fs.copyFile(
+      templatePath + 'art-logo-blue-small.png',
+      buildPath + 'art-logo-blue-small.png',
+    );
+    await fs.copyFile(
+      templatePath + 'art-logo-blue-small-text-under.png',
+      buildPath + 'art-logo-blue-small-text-under.png',
+    );
+    await fs.copyFile(
+      templatePath + 'art-logo-white-small.png',
+      buildPath + 'art-logo-white-small.png',
+    );
+    await fs.copyFile(
+      templatePath + 'art-logo-green-small.png',
+      buildPath + 'art-logo-green-small.png',
+    );
+    await fs.copyFile(templatePath + 'art-connect-icon.svg', buildPath + 'art-connect-icon.svg');
+    await fs.copyFile(
+      templatePath + 'art-logo-white-no-text.png',
+      buildPath + 'art-logo-white-no-text.png',
+    );
+
+    // Copy vendor assets (CSS and JS libraries)
+    await fs.cp(templatePath + 'vendor', buildPath + 'vendor', { recursive: true });
+
+    await processFiles({
+      sourceFolder: buildPath + folderPath.relativePath,
+      defaultMapPagePath: buildPath,
+      systemMapPagePath: buildPath + config.systemMapPagePath,
+      customHomePagePath: buildPath + config.customHomePagePath,
+    });
+  } finally {
+    db.close();
+    await fs.rm('./src/tmp', { recursive: true, force: true });
+  }
 }
 
-db.close();
-
-for (const page of config.customPages) {
-  const templatePath = path.join(config.templatePath, page.template);
-  const outputPath = path.join(config.outputPath, page.output);
-  const pageTitle = page.title;
-
-  const html = pug.renderFile(templatePath, {
-    config,
-    timetablePage,
-    pageTitle,
-  });
-
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-
-  await fs.writeFile(outputPath, html);
-}
-
-await fs.rm('./src/tmp', { recursive: true, force: true });
-await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
-await fs.copyFile(templatePath + 'art-logo-blue-small.png', buildPath + 'art-logo-blue-small.png');
-await fs.copyFile(
-  templatePath + 'art-logo-blue-small-text-under.png',
-  buildPath + 'art-logo-blue-small-text-under.png',
-);
-await fs.copyFile(
-  templatePath + 'art-logo-white-small.png',
-  buildPath + 'art-logo-white-small.png',
-);
-await fs.copyFile(
-  templatePath + 'art-logo-green-small.png',
-  buildPath + 'art-logo-green-small.png',
-);
-await fs.copyFile(templatePath + 'art-connect-icon.svg', buildPath + 'art-connect-icon.svg');
-await fs.copyFile(
-  templatePath + 'art-logo-white-no-text.png',
-  buildPath + 'art-logo-white-no-text.png',
-);
-
-// Copy vendor assets (CSS and JS libraries)
-await fs.cp(templatePath + 'vendor', buildPath + 'vendor', { recursive: true });
-
-// art-logo-white-no-text.png
-// const htmlSourceFolder = buildPath + folderPath.relativePath;
-// const defaultHomePagePath = buildPath;
-// const customHomePagePath = buildPath + config.customHomePagePath;
-// const systemMapPagePath = buildPath + config.systemMapPagePath;
-
-await processFiles({
-  sourceFolder: buildPath + folderPath.relativePath,
-  defaultMapPagePath: buildPath,
-  systemMapPagePath: buildPath + config.systemMapPagePath,
-  customHomePagePath: buildPath + config.customHomePagePath,
+main().catch((err) => {
+  console.error('Build failed:', err);
+  process.exitCode = 1;
 });
