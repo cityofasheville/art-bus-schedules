@@ -1,8 +1,7 @@
-// Using better-sqlite3 to open database
 import { importGtfs } from 'gtfs';
 import gtfsToHtml from 'gtfs-to-html';
 import pug from 'pug';
-import fs, { readFile } from 'fs/promises';
+import fs from 'fs/promises';
 import path from 'path';
 import Database from 'better-sqlite3';
 import sanitizeHtml from 'sanitize-html';
@@ -80,228 +79,100 @@ async function processFiles({
   }
 }
 
+const WP_BASE = 'https://www.ashevillenc.gov/wp-json/wp/v2';
+
+/**
+ * Maps a standard WordPress page payload to a sanitized { content, title } shape.
+ * Body content allows the extended tag set (images, YouTube iframes); titles use the defaults.
+ */
+function sanitizePage(data) {
+  return {
+    content: { rendered: sanitizeHtml(data.content.rendered, sanitizeOptions) },
+    title: { rendered: sanitizeHtml(data.title.rendered) },
+  };
+}
+
+/**
+ * WordPress endpoints to pull content from, in fetch order. Each entry maps one
+ * API response into the returned data object:
+ *   - `key`   assigns the sanitized page to returnedData[key] (the default behavior).
+ *   - `apply` is a custom handler for responses that don't fit the standard shape.
+ * `label` is used only for error messages.
+ */
+const WP_ENDPOINTS = [
+  { key: 'howToRide', label: 'How to Ride', path: '/services/468?_fields=title,content' },
+  { key: 'reportIssues', label: 'Report Issues', path: '/services/492?_fields=title,content' },
+  { key: 'faresAndPasses', label: 'Fares and Passes', path: '/services/424?_fields=title,content' },
+  {
+    label: 'Transit Homepage',
+    path: '/departments/861?_fields=title,content,acf',
+    apply: (data, out) => {
+      out.transitConnect = data.acf;
+      out.transitAbout = sanitizePage(data);
+    },
+  },
+  { key: 'holidays', label: 'Holidays', path: '/departments/141640?_fields=title,content' },
+  { key: 'ada', label: 'ADA', path: '/services/494?_fields=title,content' },
+  { key: 'bikesOnBuses', label: 'Bikes on Buses', path: '/services/481?_fields=title,content' },
+  { key: 'wifiTerms', label: 'Wi-Fi Terms', path: '/departments/92483?_fields=title,content' },
+  { key: 'wifiFaqs', label: 'Wi-Fi FAQs', path: '/departments/93145?_fields=title,content' },
+  { key: 'passport', label: 'Passport', path: '/departments/99420?_fields=title,content' },
+  {
+    key: 'policiesAndTips',
+    label: 'Policies and Tips',
+    path: '/services/488?_fields=title,content',
+  },
+  {
+    label: 'Transit News',
+    path: '/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
+    apply: (data, out) => {
+      out.transitNews = data.map((post) => ({
+        ...post,
+        title: { ...post.title, rendered: sanitizeHtml(post.title.rendered) },
+        excerpt: {
+          ...post.excerpt,
+          rendered: sanitizeHtml(post.excerpt.rendered, sanitizeOptions),
+        },
+      }));
+    },
+  },
+];
+
 /**
  * Fetches content from the WordPress API
  */
 async function getWordPressData() {
-  const returnedData = {};
-
   try {
-    const [
-      howToRideResponse,
-      reportIssuesResponse,
-      faresAndPassesResponse,
-      transitHomepageResponse,
-      holidaysResponse,
-      adaResponse,
-      bikesResponse,
-      wifiTermsResponse,
-      wifiFaqsResponse,
-      passportResponse,
-      policiesAndTipsResponse,
-      transitNewsResponse,
-    ] = await Promise.all([
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/468?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/492?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/424?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/861?_fields=title,content,acf'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/141640?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/494?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/481?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/92483?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/93145?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/departments/99420?_fields=title,content'),
-      fetch('https://www.ashevillenc.gov/wp-json/wp/v2/services/488?_fields=title,content'),
-      fetch(
-        'https://www.ashevillenc.gov/wp-json/wp/v2/posts?avl_department=64&per_page=3&orderby=date&order=desc&_fields=id,title,excerpt,date,link,featured_media,_links&_embed=wp:featuredmedia',
-      ),
-    ]);
+    const responses = await Promise.all(
+      WP_ENDPOINTS.map((endpoint) => fetch(`${WP_BASE}${endpoint.path}`)),
+    );
 
-    if (!howToRideResponse.ok) {
-      throw new Error(`HTTP error fetching How to Ride! status: ${howToRideResponse.status}`);
-    }
-    if (!reportIssuesResponse.ok) {
-      throw new Error(`HTTP error fetching Report Issues! status: ${reportIssuesResponse.status}`);
-    }
-    if (!faresAndPassesResponse.ok) {
-      throw new Error(
-        `HTTP error fetching Fares and Passes! status: ${faresAndPassesResponse.status}`,
-      );
-    }
-    if (!transitHomepageResponse.ok) {
-      throw new Error(
-        `HTTP error fetching Transit Homepage! status: ${transitHomepageResponse.status}`,
-      );
-    }
-    if (!holidaysResponse.ok) {
-      throw new Error(`HTTP error fetching Holidays! status: ${holidaysResponse.status}`);
-    }
-    if (!adaResponse.ok) {
-      throw new Error(`HTTP error fetching ADA! status: ${adaResponse.status}`);
-    }
-    if (!bikesResponse.ok) {
-      throw new Error(`HTTP error fetching Bikes on Buses! status: ${bikesResponse.status}`);
-    }
-    if (!wifiTermsResponse.ok) {
-      throw new Error(`HTTP error fetching Wi-Fi Terms! status: ${wifiTermsResponse.status}`);
-    }
-    if (!wifiFaqsResponse.ok) {
-      throw new Error(`HTTP error fetching Wi-Fi FAQs! status: ${wifiFaqsResponse.status}`);
-    }
-    if (!passportResponse.ok) {
-      throw new Error(`HTTP error fetching Passport! status: ${passportResponse.status}`);
-    }
-    if (!policiesAndTipsResponse.ok) {
-      throw new Error(
-        `HTTP error fetching Policies and Tips! status: ${policiesAndTipsResponse.status}`,
-      );
-    }
-    if (!transitNewsResponse.ok) {
-      throw new Error(`HTTP error fetching Transit News! status: ${transitNewsResponse.status}`);
-    }
+    responses.forEach((response, i) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error fetching ${WP_ENDPOINTS[i].label}! status: ${response.status}`);
+      }
+    });
 
-    const [
-      howToRideData,
-      reportIssuesData,
-      faresAndPassesData,
-      transitHomepageData,
-      holidaysData,
-      adaData,
-      bikesData,
-      wifiTermsData,
-      wifiFaqsData,
-      passportData,
-      policiesAndTipsData,
-      transitNewsData,
-    ] = await Promise.all([
-      howToRideResponse.json(),
-      reportIssuesResponse.json(),
-      faresAndPassesResponse.json(),
-      transitHomepageResponse.json(),
-      holidaysResponse.json(),
-      adaResponse.json(),
-      bikesResponse.json(),
-      wifiTermsResponse.json(),
-      wifiFaqsResponse.json(),
-      passportResponse.json(),
-      policiesAndTipsResponse.json(),
-      transitNewsResponse.json(),
-    ]);
+    const payloads = await Promise.all(responses.map((response) => response.json()));
 
-    returnedData.howToRide = {
-      content: {
-        rendered: sanitizeHtml(howToRideData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(howToRideData.title.rendered),
-      },
-    };
+    const returnedData = {};
+    payloads.forEach((payload, i) => {
+      const endpoint = WP_ENDPOINTS[i];
+      if (endpoint.apply) {
+        endpoint.apply(payload, returnedData);
+      } else {
+        returnedData[endpoint.key] = sanitizePage(payload);
+      }
+    });
 
-    returnedData.reportIssues = {
-      content: {
-        rendered: sanitizeHtml(reportIssuesData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(reportIssuesData.title.rendered),
-      },
-    };
-
-    returnedData.faresAndPasses = {
-      content: {
-        rendered: sanitizeHtml(faresAndPassesData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(faresAndPassesData.title.rendered),
-      },
-    };
-
-    returnedData.transitConnect = transitHomepageData.acf;
-
-    returnedData.transitAbout = {
-      content: {
-        rendered: sanitizeHtml(transitHomepageData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(transitHomepageData.title.rendered),
-      },
-    };
-
-    returnedData.holidays = {
-      content: {
-        rendered: sanitizeHtml(holidaysData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(holidaysData.title.rendered),
-      },
-    };
-
-    returnedData.transitNews = transitNewsData.map((post) => ({
-      ...post,
-      title: { ...post.title, rendered: sanitizeHtml(post.title.rendered) },
-      excerpt: { ...post.excerpt, rendered: sanitizeHtml(post.excerpt.rendered, sanitizeOptions) },
-    }));
-
-    returnedData.ada = {
-      content: {
-        rendered: sanitizeHtml(adaData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(adaData.title.rendered),
-      },
-    };
-
-    returnedData.bikesOnBuses = {
-      content: {
-        rendered: sanitizeHtml(bikesData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(bikesData.title.rendered),
-      },
-    };
-
-    returnedData.wifiTerms = {
-      content: {
-        rendered: sanitizeHtml(wifiTermsData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(wifiTermsData.title.rendered),
-      },
-    };
-
-    returnedData.wifiFaqs = {
-      content: {
-        rendered: sanitizeHtml(wifiFaqsData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(wifiFaqsData.title.rendered),
-      },
-    };
-
-    returnedData.passport = {
-      content: {
-        rendered: sanitizeHtml(passportData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(passportData.title.rendered),
-      },
-    };
-
-    returnedData.policiesAndTips = {
-      content: {
-        rendered: sanitizeHtml(policiesAndTipsData.content.rendered, sanitizeOptions),
-      },
-      title: {
-        rendered: sanitizeHtml(policiesAndTipsData.title.rendered),
-      },
-    };
+    return returnedData;
   } catch (error) {
     console.error('Failed to fetch data from WordPress API:', error.message);
     throw error;
   }
-  return returnedData;
 }
 
-const query1 = `INSERT INTO timetables
+const insertTimetablesQuery = `INSERT INTO timetables
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
                       ,ttbls.friday,ttbls.saturday,ttbls.sunday,ttbls.start_time,ttbls.start_timestamp,ttbls.end_time,ttbls.end_timestamp
@@ -326,15 +197,29 @@ const query1 = `INSERT INTO timetables
                       INNER JOIN  calendar_attributes ca ON ca.service_id =c.service_id
                       WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date  
                     ) ttbls`;
-const query2 = `INSERT INTO timetable_pages (timetable_page_id)
+const insertTimetablePagesQuery = `INSERT INTO timetable_pages (timetable_page_id)
                 SELECT DISTINCT route_short_name
                 FROM routes`;
-const query3 = `SELECT DISTINCT CONCAT(c.start_date,'-',c.end_date) AS relativePath
+const activePeriodQuery = `SELECT DISTINCT CONCAT(c.start_date,'-',c.end_date) AS relativePath
                 FROM calendar c
                 WHERE (SELECT MAX(start_date) FROM calendar WHERE strftime('%Y%m%d', 'now') BETWEEN start_date AND end_date) = c.start_date`;
 
+// Working directory for the imported GTFS SQLite database; wiped before and after each build.
+const TMP_DIR = './src/tmp';
+
+// Static files copied verbatim from the template dir into the build output.
+const STATIC_ASSETS = [
+  'favicon.ico',
+  'art-logo-blue-small.png',
+  'art-logo-blue-small-text-under.png',
+  'art-logo-white-small.png',
+  'art-logo-green-small.png',
+  'art-connect-icon.svg',
+  'art-logo-white-no-text.png',
+];
+
 async function main() {
-  const config = JSON.parse(await readFile(new URL('../config.json', import.meta.url)));
+  const config = JSON.parse(await fs.readFile(new URL('../config.json', import.meta.url)));
   const url = config.agencies[0].url;
   const dbPath = config.sqlitePath;
   const templatePath = config.templatePath;
@@ -346,8 +231,8 @@ async function main() {
   config.connect_icon_url = '/art-connect-icon.svg';
   config.webpageTitle = 'ART Transit System';
 
-  await fs.rm('./src/tmp', { recursive: true, force: true });
-  await fs.mkdir('./src/tmp', { recursive: true });
+  await fs.rm(TMP_DIR, { recursive: true, force: true });
+  await fs.mkdir(TMP_DIR, { recursive: true });
   const db = new Database(dbPath);
 
   try {
@@ -360,9 +245,9 @@ async function main() {
       sqlitePath: dbPath,
     });
 
-    const ttableResult = runQuery(db, query1);
-    const ttablePagesResult = runQuery(db, query2);
-    const folderPath = db.prepare(query3).get();
+    const ttableResult = runQuery(db, insertTimetablesQuery);
+    const ttablePagesResult = runQuery(db, insertTimetablePagesQuery);
+    const folderPath = db.prepare(activePeriodQuery).get();
 
     const stops = db.prepare('SELECT * FROM stops').all();
     const routes = db.prepare('SELECT * FROM routes').all();
@@ -383,15 +268,13 @@ async function main() {
 
     console.log('Routes fetched:', routes.length);
 
-    // Build a timetablePage-like object
     const timetablePage = {
-      consolidatedTimetables: timetables, // You may want to group/filter these
+      consolidatedTimetables: timetables,
       stops,
       routes,
       trips,
       directions,
       stopTimes,
-      // Add other properties as needed
     };
 
     config.timetablePage = timetablePage;
@@ -417,28 +300,9 @@ async function main() {
       await fs.writeFile(outputPath, html);
     }
 
-    await fs.copyFile(templatePath + 'favicon.ico', buildPath + 'favicon.ico');
-    await fs.copyFile(
-      templatePath + 'art-logo-blue-small.png',
-      buildPath + 'art-logo-blue-small.png',
-    );
-    await fs.copyFile(
-      templatePath + 'art-logo-blue-small-text-under.png',
-      buildPath + 'art-logo-blue-small-text-under.png',
-    );
-    await fs.copyFile(
-      templatePath + 'art-logo-white-small.png',
-      buildPath + 'art-logo-white-small.png',
-    );
-    await fs.copyFile(
-      templatePath + 'art-logo-green-small.png',
-      buildPath + 'art-logo-green-small.png',
-    );
-    await fs.copyFile(templatePath + 'art-connect-icon.svg', buildPath + 'art-connect-icon.svg');
-    await fs.copyFile(
-      templatePath + 'art-logo-white-no-text.png',
-      buildPath + 'art-logo-white-no-text.png',
-    );
+    for (const asset of STATIC_ASSETS) {
+      await fs.copyFile(templatePath + asset, buildPath + asset);
+    }
 
     // Copy vendor assets (CSS and JS libraries)
     await fs.cp(templatePath + 'vendor', buildPath + 'vendor', { recursive: true });
@@ -451,7 +315,7 @@ async function main() {
     });
   } finally {
     db.close();
-    await fs.rm('./src/tmp', { recursive: true, force: true });
+    await fs.rm(TMP_DIR, { recursive: true, force: true });
   }
 }
 
