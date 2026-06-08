@@ -19,7 +19,7 @@ div(id="container_real_time_departures" class="w-full max-w-[24rem] sm:max-w-[32
 
       div(id="container_search_stop" class="relative departure-interface mb-4")
         label(id="stop-select-label" for="stop-select-dropdown" class="block mb-2") Select a stop to see real time departure information
-        select#stop-select-dropdown.border(class="max-w-full" aria-label="Select a stop to see real time departure information")
+        select(id="stop-select-dropdown" class="border max-w-full" aria-label="Select a stop to see real time departure information")
           option(value="") Select a stop
           each stop in alphabetical_stops
             option(value=stop.stop_id)=`${stop.stop_name} (${stop.stop_code})`
@@ -27,31 +27,31 @@ div(id="container_real_time_departures" class="w-full max-w-[24rem] sm:max-w-[32
       div(id="container_favorites" class="relative departure-interface mb-4")
         div(id="favorite_stops_select_container" class="mb-4")
           label(id="favorite-stop-select-label" for="favorite-stop-select-dropdown" class="block mb-2") Select one of your favorite stops to see real time departure information
-          select#favorite-stop-select-dropdown.border(class="max-w-full" aria-label="Select one of your favorite stops to see real time departure information")
+          select(id="favorite-stop-select-dropdown" class="border max-w-full" aria-label="Select one of your favorite stops to see real time departure information")
             option(value="") Select a favorite stop
         div(id="favorite_instructions_container" class="flex items-start gap-2")
           i(class="bi bi-info-circle-fill text-art-blue text-xl mr-2" aria-hidden="true")
           span="To use this favorite stops feature, mark one or more favorites by clicking the star icon next to any stop name in the realtime departure results."
             
       div(id="container_choose_route" class="departure-interface mb-4")
-        p.mb-4="Choose a route, direction, and stop to see real time departure information"
+        p(class="mb-4")="Choose a route, direction, and stop to see real time departure information"
         
-        div.mb-4
+        div(class="mb-4")
           label(for="route-select-dropdown") Route
           div(class="styled-select-wrapper")
-            select#route-select-dropdown.border.p-2.w-full
+            select(id="route-select-dropdown" class="border p-2 w-full")
               option(value="") Select a route
 
-        div.mb-4
+        div(class="mb-4")
           label(for="direction-select-dropdown") Direction
           div(class="styled-select-wrapper")
-            select#direction-select-dropdown.border.p-2.w-full(disabled)
+            select(id="direction-select-dropdown" class="border p-2 w-full" disabled)
               option(value="") Select a direction
 
-        div.mb-4
+        div(class="mb-4")
           label(for="stop-by-route-select-dropdown") Stop
           div(class="styled-select-wrapper")
-            select#stop-by-route-select-dropdown.border.p-2.w-full(disabled)
+            select(id="stop-by-route-select-dropdown" class="border p-2 w-full" disabled)
               option(value="") Select a stop
 
       output(id="results-container" class="max-w-screen-lg mx-auto block")

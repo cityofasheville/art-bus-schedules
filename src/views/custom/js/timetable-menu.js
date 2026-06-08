@@ -1,58 +1,84 @@
-/* global jQuery, TomSelect, createAccessibleTomSelect */
+/* global TomSelect, createAccessibleTomSelect */
 /* eslint no-unused-vars: "off" */
 
 // Global object to store Tom Select instances by timetable ID
 const stopSearchSelects = {};
 
 /**
+ * Escapes HTML special characters for safe insertion
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Returns the first visible .timetable element, or null
+ */
+function getVisibleTimetable() {
+  return document.querySelector('.timetable:not([style*="display: none"])');
+}
+
+/**
  * Announces a status message to screen readers via the live region
  * @param {string} message - The message to announce
  */
 function announceStatus(message) {
-  const statusEl = jQuery('#timetable_status');
-  if (statusEl.length) {
-    statusEl.text(message);
+  const statusEl = document.querySelector('#timetable_status');
+  if (statusEl) {
+    statusEl.textContent = message;
   }
 }
 
 function showSelectedTimetable() {
-  if (jQuery('.timetable').length === 1) {
-    showTimetable(jQuery('.timetable').data('timetable-id'));
+  const timetables = document.querySelectorAll('.timetable');
+  if (timetables.length === 1) {
+    showTimetable(timetables[0].dataset.timetableId);
     return false;
   }
 
-  jQuery('#day_list_selector input[name="dayList"]').each((index, element) => {
-    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
-    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+  document.querySelectorAll('#day_list_selector input[name="dayList"]').forEach((element) => {
+    element.closest('label').classList.toggle('btn-blue', element.checked);
+    element.closest('label').classList.toggle('btn-gray', !element.checked);
   });
 
-  jQuery('#direction_name_selector input[name="directionId"]').each((index, element) => {
-    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
-    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
+  document
+    .querySelectorAll('#direction_name_selector input[name="directionId"]')
+    .forEach((element) => {
+      element.closest('label').classList.toggle('btn-blue', element.checked);
+      element.closest('label').classList.toggle('btn-gray', !element.checked);
+    });
+
+  document.querySelectorAll('#timepoint_selector input[name="timepoints"]').forEach((element) => {
+    element.closest('label').classList.toggle('btn-blue', element.checked);
+    element.closest('label').classList.toggle('btn-gray', !element.checked);
   });
 
-  jQuery('#timepoint_selector input[name="timepoints"]').each((index, element) => {
-    jQuery(element).parents('label').toggleClass('btn-blue', jQuery(element).is(':checked'));
-    jQuery(element).parents('label').toggleClass('btn-gray', jQuery(element).is(':not(:checked)'));
-  });
+  const dayList = document.querySelector('#day_list_selector input[name="dayList"]:checked').value;
 
-  const dayList = jQuery('#day_list_selector input[name="dayList"]:checked').val();
+  const directionId = document.querySelector(
+    '#direction_name_selector input[name="directionId"]:checked',
+  ).value;
 
-  const directionId = jQuery('#direction_name_selector input[name="directionId"]:checked').val();
+  document.querySelectorAll('.timetable').forEach((el) => (el.style.display = 'none'));
+  document
+    .querySelectorAll('.coa-timetable-map-container')
+    .forEach((el) => (el.style.display = 'none'));
 
-  jQuery('.timetable').hide();
-  jQuery('.coa-timetable-map-container').hide();
-
-  const id = jQuery(
+  const matchingTimetable = document.querySelector(
     `.timetable[data-day-list="${dayList}"][data-direction-id="${directionId}"]`,
-  ).data('timetable-id');
+  );
+  const id = matchingTimetable ? matchingTimetable.dataset.timetableId : undefined;
 
   showTimetable(id);
 }
 
 function showTimetable(id) {
-  jQuery(`#timetable_id_${id}`).show();
-  jQuery(`#coa_map_container_${id}`).show();
+  const timetableEl = document.querySelector(`#timetable_id_${id}`);
+  if (timetableEl) timetableEl.style.display = '';
+  const mapEl = document.querySelector(`#coa_map_container_${id}`);
+  if (mapEl) mapEl.style.display = '';
   toggleMap(id);
 }
 
@@ -67,7 +93,7 @@ function getUrlParam(paramName) {
   return urlParams.get(paramName);
 }
 
-function hideTimepointColumns() {
+function hideNonTimepointColumns() {
   const timetables = document.querySelectorAll('.timetable');
 
   timetables.forEach((table) => {
@@ -118,7 +144,7 @@ function hideTimepointColumns() {
   });
 }
 
-function showAllTimepoints() {
+function showAllTimetableStops() {
   const timetables = document.querySelectorAll('.timetable');
 
   timetables.forEach((table) => {
@@ -153,7 +179,7 @@ function showAllTimepoints() {
   });
 }
 
-jQuery(() => {
+document.addEventListener('DOMContentLoaded', () => {
   const initialDirection = getUrlParam('direction_id');
   const initialDayList = getUrlParam('day_list');
   const initialTimepoints = getUrlParam('timepoints');
@@ -196,9 +222,7 @@ jQuery(() => {
 
   const this_route_direction_ids = [
     ...new Set(
-      jQuery('input[name="directionId"]')
-        .map((_, el) => jQuery(el).val())
-        .get(),
+      Array.from(document.querySelectorAll('input[name="directionId"]')).map((el) => el.value),
     ),
   ];
 
@@ -207,24 +231,34 @@ jQuery(() => {
   }
 
   if (initialDirection) {
-    jQuery('input[name="directionId"][value="' + initialDirection + '"]').prop('checked', true);
+    const dirEl = document.querySelector(
+      'input[name="directionId"][value="' + initialDirection + '"]',
+    );
+    if (dirEl) dirEl.checked = true;
   } else {
-    jQuery('input[name="directionId"][value="' + default_direction_id + '"]').prop('checked', true);
+    const dirEl = document.querySelector(
+      'input[name="directionId"][value="' + default_direction_id + '"]',
+    );
+    if (dirEl) dirEl.checked = true;
   }
 
   if (initialDayList) {
-    jQuery('input[name="dayList"][value="' + initialDayList + '"]').prop('checked', true);
+    const dayEl = document.querySelector('input[name="dayList"][value="' + initialDayList + '"]');
+    if (dayEl) dayEl.checked = true;
   } else {
-    jQuery(`input[name="dayList"][value="${default_timetable_day}"]`).prop('checked', true);
+    const dayEl = document.querySelector(`input[name="dayList"][value="${default_timetable_day}"]`);
+    if (dayEl) dayEl.checked = true;
   }
 
   if (
     initialTimepoints &&
     (initialTimepoints === 'timepoints_only' || initialTimepoints === 'all_stops')
   ) {
-    jQuery(`input[name="timepoints"][value="${initialTimepoints}"]`).prop('checked', true);
+    const tpEl = document.querySelector(`input[name="timepoints"][value="${initialTimepoints}"]`);
+    if (tpEl) tpEl.checked = true;
   } else {
-    jQuery(`input[name="timepoints"][value="timepoints_only"]`).prop('checked', true);
+    const tpEl = document.querySelector(`input[name="timepoints"][value="timepoints_only"]`);
+    if (tpEl) tpEl.checked = true;
   }
 
   showSelectedTimetable();
@@ -232,16 +266,16 @@ jQuery(() => {
   // Apply timepoints visibility based on initial state
   const initialTimepointMode = getUrlParam('timepoints') || 'timepoints_only';
   if (initialTimepointMode === 'all_stops') {
-    showAllTimepoints();
+    showAllTimetableStops();
   } else {
-    hideTimepointColumns();
+    hideNonTimepointColumns();
   }
 
   // If a stop_id was passed in URL, select it in the visible timetable
   if (initialStopId) {
-    const visibleTimetable = jQuery('.timetable:visible').first();
-    if (visibleTimetable.length) {
-      const timetableId = visibleTimetable.data('timetable-id');
+    const visibleTimetable = getVisibleTimetable();
+    if (visibleTimetable) {
+      const timetableId = visibleTimetable.dataset.timetableId;
       selectStop(initialStopId, timetableId, {
         fromDropdown: false,
         showPopup: false, // Don't show popup on page load to avoid capturing keyboard focus
@@ -250,49 +284,58 @@ jQuery(() => {
     }
   }
 
-  jQuery('#day_list_selector input[name="dayList"]').change(function () {
-    const dayLabel = jQuery(this).val() === 'Sun' ? 'Sunday / Holiday' : jQuery(this).val();
-    setUrlParam('day_list', jQuery(this).val());
-    const visibleTimetable = jQuery('.timetable:visible').first();
-    if (visibleTimetable.length) {
-      clearStopSelection(visibleTimetable.data('timetable-id'));
-    }
-    showSelectedTimetable();
-    announceStatus(`Showing ${dayLabel} schedule`);
+  document.querySelectorAll('#day_list_selector input[name="dayList"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      const dayLabel = this.value === 'Sun' ? 'Sunday / Holiday' : this.value;
+      setUrlParam('day_list', this.value);
+      const visibleTimetable = getVisibleTimetable();
+      if (visibleTimetable) {
+        clearStopSelection(visibleTimetable.dataset.timetableId);
+      }
+      showSelectedTimetable();
+      announceStatus(`Showing ${dayLabel} schedule`);
+    });
   });
 
-  jQuery('#direction_name_selector input[name="directionId"]').change(function () {
-    const directionLabel = jQuery(this).siblings('span').text();
-    setUrlParam('direction_id', jQuery(this).val());
-    const visibleTimetable = jQuery('.timetable:visible').first();
-    if (visibleTimetable.length) {
-      clearStopSelection(visibleTimetable.data('timetable-id'));
-    }
-    showSelectedTimetable();
-    announceStatus(`Showing ${directionLabel} direction`);
-  });
+  document
+    .querySelectorAll('#direction_name_selector input[name="directionId"]')
+    .forEach(function (input) {
+      input.addEventListener('change', function () {
+        const directionLabel = this.closest('label').querySelector('span').textContent;
+        setUrlParam('direction_id', this.value);
+        const visibleTimetable = getVisibleTimetable();
+        if (visibleTimetable) {
+          clearStopSelection(visibleTimetable.dataset.timetableId);
+        }
+        showSelectedTimetable();
+        announceStatus(`Showing ${directionLabel} direction`);
+      });
+    });
 
   // const isTimepoint = jQuery('#timepoint_selector input[name="timepoints"]:checked').val();
   // const timetableMain = jQuery('.timetable-main');
 
-  jQuery('#timepoint_selector input[name="timepoints"]').change(function () {
-    const selectedValue = jQuery(this).val();
-    setUrlParam('timepoints', selectedValue);
-    if (selectedValue === 'timepoints_only') {
-      showSelectedTimetable();
-      hideTimepointColumns();
-      announceStatus('Showing timepoints only');
-    } else {
-      showSelectedTimetable();
-      showAllTimepoints();
-      announceStatus('Showing all stops');
-    }
-  });
+  document
+    .querySelectorAll('#timepoint_selector input[name="timepoints"]')
+    .forEach(function (input) {
+      input.addEventListener('change', function () {
+        const selectedValue = this.value;
+        setUrlParam('timepoints', selectedValue);
+        if (selectedValue === 'timepoints_only') {
+          showSelectedTimetable();
+          hideNonTimepointColumns();
+          announceStatus('Showing timepoints only');
+        } else {
+          showSelectedTimetable();
+          showAllTimetableStops();
+          announceStatus('Showing all stops');
+        }
+      });
+    });
 
   // Initialize stop search dropdowns with Tom Select for accessibility
-  jQuery('.stop-search-dropdown').each(function () {
-    const selectEl = this;
-    const timetableId = jQuery(selectEl).data('timetable-id');
+  document.querySelectorAll('.stop-search-dropdown').forEach(function (selectEl) {
+    const timetableId = selectEl.dataset.timetableId;
 
     stopSearchSelects[timetableId] = createAccessibleTomSelect(selectEl, {
       dropdownParent: `#stop-search-dropdown-container-${timetableId}`,
@@ -429,13 +472,13 @@ function updateStopInfoContainer(stopId, timetableId) {
 
   if (!content) return;
 
-  // Build the stop info HTML
-  const html = jQuery('<div>');
+  // Build the stop info HTML using template literals
+  let htmlParts = [];
 
   const stop_heading = `${stop.stop_name}` + (stop.stop_code ? ` (${stop.stop_code})` : '');
 
   // Stop name
-  jQuery('<div>').addClass('font-semibold text-lg mb-2').text(stop_heading).appendTo(html);
+  htmlParts.push(`<div class="font-semibold text-lg mb-2">${escapeHtml(stop_heading)}</div>`);
 
   // Get route IDs for this stop from geojson
   let routeIds = [];
@@ -486,29 +529,21 @@ function updateStopInfoContainer(stopId, timetableId) {
     });
 
     if (stopTimeUpdates['0'].length > 0 || stopTimeUpdates['1'].length > 0) {
-      const departuresDiv = jQuery('<div>').addClass('mb-2');
-
       // Get route info from the timetable element's data-route-id and look up in routeData
-      const timetableEl = jQuery(`.timetable`).first();
-      const timetableRouteId = timetableEl.data('route-id');
-      // route_id may be a single ID or multiple IDs joined by '_'
+      const timetableEl = document.querySelector('.timetable');
+      const timetableRouteId = timetableEl ? timetableEl.dataset.routeId : null;
       const firstRouteId = timetableRouteId ? String(timetableRouteId).split('_')[0] : null;
       const route =
         firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
       const routeLabel = route ? ` ${route.route_short_name}` : '';
 
-      jQuery('<div>')
-        .addClass('text-gray-600 mb-1')
-        .html(
-          `Upcoming ${routeLabel ? `${routeLabel}` : ''} Departures ${rt_departures_link ? `<a class="underline hover:no-underline" href="${rt_departures_link}">View All</a>` : ''}:`,
-        )
-        .appendTo(departuresDiv);
+      let departuresHtml = `<div class="mb-2">`;
+      departuresHtml += `<div class="text-gray-600 mb-1">Upcoming ${routeLabel ? `${routeLabel}` : ''} Departures ${rt_departures_link ? `<a class="underline hover:no-underline" href="${rt_departures_link}">View All</a>` : ''}:</div>`;
 
       for (const direction of ['0', '1']) {
         if (stopTimeUpdates[direction].length > 0) {
-          const directionName = jQuery(`.timetable[data-direction-id="${direction}"]`).data(
-            'direction-name',
-          );
+          const dirEl = document.querySelector(`.timetable[data-direction-id="${direction}"]`);
+          const directionName = dirEl ? dirEl.dataset.directionName : '';
           const departureTimes = stopTimeUpdates[direction].map((stopTimeUpdate) =>
             Math.round(
               ((stopTimeUpdate.departure
@@ -524,46 +559,33 @@ function updateStopInfoContainer(stopId, timetableId) {
             type: 'conjunction',
           }).format(departureTimes.slice(0, 4).map((time) => `<b>${time}</b>`));
 
-          jQuery('<div>')
-            .html(`<b>${directionName}</b> in ${formattedDepartures} min`)
-            .appendTo(departuresDiv);
+          departuresHtml += `<div><b>${escapeHtml(directionName)}</b> in ${formattedDepartures} min</div>`;
         }
       }
 
-      departuresDiv.appendTo(html);
+      departuresHtml += `</div>`;
+      htmlParts.push(departuresHtml);
     }
   }
 
   // Routes served
   if (routeIds.length > 0 && typeof routeData !== 'undefined') {
-    jQuery('<div>')
-      .addClass('mb-2')
-      .html([
-        jQuery('<span>').addClass('text-gray-600').text('Routes Served: '),
-        jQuery('<span>')
-          .addClass('route-list')
-          .html(routeIds.map((routeId) => formatRoute(routeData[routeId]))),
-      ])
-      .appendTo(html);
+    const routeHtml = routeIds.map((routeId) => formatRoute(routeData[routeId])).join('');
+    htmlParts.push(
+      `<div class="mb-2"><span class="text-gray-600">Routes Served: </span><span class="route-list">${routeHtml}</span></div>`,
+    );
   }
 
   // Streetview link
   if (stop.stop_lat && stop.stop_lon) {
-    jQuery('<a>')
-      .addClass('btn-blue btn-sm inline-block mt-2')
-      .prop(
-        'href',
-        `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${stop.stop_lat},${stop.stop_lon}&heading=0&pitch=0&fov=90`,
-      )
-      .prop('target', '_blank')
-      .prop('rel', 'noopener noreferrer')
-      .html('View on Streetview')
-      .appendTo(html);
+    htmlParts.push(
+      `<a class="btn-blue btn-sm inline-block mt-2" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${stop.stop_lat},${stop.stop_lon}&heading=0&pitch=0&fov=90" target="_blank" rel="noopener noreferrer">View on Streetview</a>`,
+    );
   }
 
   // Update the container
   if (placeholder) placeholder.classList.add('hidden');
-  content.innerHTML = html.prop('outerHTML');
+  content.innerHTML = `<div>${htmlParts.join('')}</div>`;
   content.classList.remove('hidden');
 }
 
@@ -637,10 +659,13 @@ function selectStop(stopId, timetableId, options = {}) {
 
   if (!isTimepoint && isTimepointsOnlyMode) {
     // Switch to "all stops" view
-    jQuery('#timepoint_selector input[name="timepoints"][value="all_stops"]').prop('checked', true);
+    const allStopsInput = document.querySelector(
+      '#timepoint_selector input[name="timepoints"][value="all_stops"]',
+    );
+    if (allStopsInput) allStopsInput.checked = true;
     setUrlParam('timepoints', 'all_stops');
     showSelectedTimetable();
-    showAllTimepoints();
+    showAllTimetableStops();
   }
 
   // Remove existing highlights from this table
@@ -710,9 +735,9 @@ document.addEventListener('tripUpdatesReady', () => {
   const selectedStopId = getUrlParam('stop_id');
   if (!selectedStopId) return;
 
-  const visibleTimetable = jQuery('.timetable:visible').first();
-  if (visibleTimetable.length) {
-    updateStopInfoContainer(selectedStopId, visibleTimetable.data('timetable-id'));
+  const visibleTimetable = getVisibleTimetable();
+  if (visibleTimetable) {
+    updateStopInfoContainer(selectedStopId, visibleTimetable.dataset.timetableId);
   }
 });
 

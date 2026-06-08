@@ -1,4 +1,4 @@
-/* global document, jQuery, _, maplibregl, geojson, mapStyleUrl, loadMapStyleWithWorkingFonts */
+/* global document, _, maplibregl, geojson, mapStyleUrl, loadMapStyleWithWorkingFonts */
 /* eslint prefer-arrow-callback: "off", no-unused-vars: "off" */
 
 function formatRouteColor(route) {
@@ -10,97 +10,46 @@ function formatRouteTextColor(route) {
 }
 
 function formatRoute(route) {
-  // const html = route.route_url ? jQuery('<a>').attr('href', route.route_url) : jQuery('<div>');
-  const html = route.route_short_name
-    ? jQuery('<a>').attr('href', `/${route.route_short_name}`)
-    : jQuery('<div>');
+  const isLink = Boolean(route.route_short_name);
+  const tag = isLink ? 'a' : 'div';
+  const href = isLink ? `/${route.route_short_name}` : '';
 
-  html.addClass('map-route-item');
-
-  const routeItemDivs = [];
-
+  let swatchHtml = '';
   if (route.route_color) {
-    routeItemDivs.push(
-      jQuery('<div>')
-        .addClass('route-color-swatch')
-        .css('backgroundColor', formatRouteColor(route))
-        .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? ''),
-    );
+    swatchHtml = `<div class="route-color-swatch" style="background-color:${formatRouteColor(route)};color:${formatRouteTextColor(route)}">${route.route_short_name ?? ''}</div>`;
   }
-  routeItemDivs.push(
-    jQuery('<div>')
-      .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
-  );
 
-  html.append(routeItemDivs);
+  const nameHtml = `<div class="underline-hover">${route.route_long_name ?? `Route ${route.route_short_name}`}</div>`;
 
-  return html.prop('outerHTML');
+  return `<${tag}${href ? ` href="${href}"` : ''} class="map-route-item">${swatchHtml}${nameHtml}</${tag}>`;
 }
 
 function formatRoutePopup(features) {
-  const html = jQuery('<div>');
+  let html = '';
 
   if (features.length > 1) {
-    jQuery('<div>').addClass('popup-title').text('Routes').appendTo(html);
+    html += '<div class="popup-title">Routes</div>';
   }
 
-  jQuery(html).append(features.map((feature) => formatRoute(feature.properties)));
+  html += features.map((feature) => formatRoute(feature.properties)).join('');
 
-  return html.prop('outerHTML');
+  return `<div>${html}</div>`;
 }
 
 function formatStopPopup(feature) {
   const routes = JSON.parse(feature.properties.routes);
-  const html = jQuery('<div>');
 
-  jQuery('<div>')
-    .addClass('popup-title')
-    .text(
-      `${feature.properties.stop_name}${feature.properties.stop_code ? ` (${feature.properties.stop_code})` : ''}`,
-    )
-    .appendTo(html);
+  const titleText = `${feature.properties.stop_name}${feature.properties.stop_code ? ` (${feature.properties.stop_code})` : ''}`;
 
-  // if (feature.properties.stop_code ?? false) {
-  //   jQuery('<div>')
-  //     .html([
-  //       jQuery('<div>').addClass('popup-label').text('Stop Code:'),
-  //       jQuery('<strong>').text(feature.properties.stop_code),
-  //     ])
-  //     .appendTo(html);
-  // }
+  const routesHtml = routes.map((route) => formatRoute(route)).join('');
 
-  jQuery('<div>')
-    .html([
-      jQuery('<div>')
-        // .addClass('btn-gray btn-sm mb-2')
-        .html(
-          `<a class="mb-2 text-sm" href="/real-time-departures/?stop_id=${feature.properties.stop_id}">View Realtime Departures</a>`,
-        ),
-    ])
-    .appendTo(html);
-
-  jQuery('<div>').addClass('popup-label').text('Routes Served:').appendTo(html);
-
-  jQuery(html).append(
-    jQuery('<div>')
-      .addClass('route-list')
-      .html(routes.map((route) => formatRoute(route))),
-  );
-
-  jQuery('<a>')
-    .addClass('btn-blue btn-sm')
-    .prop(
-      'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
-    )
-    .prop('target', '_blank')
-    .prop('rel', 'noopener noreferrer')
-    .html('View on Streetview')
-    .appendTo(html);
-
-  return html.prop('outerHTML');
+  return `<div>
+    <div class="popup-title">${titleText}</div>
+    <div><div><a class="mb-2 text-sm" href="/real-time-departures/?stop_id=${feature.properties.stop_id}">View Realtime Departures</a></div></div>
+    <div class="popup-label">Routes Served:</div>
+    <div class="route-list">${routesHtml}</div>
+    <a class="btn-blue btn-sm" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90" target="_blank" rel="noopener noreferrer">View on Streetview</a>
+  </div>`;
 }
 
 function getBounds(geojson) {
@@ -132,7 +81,7 @@ async function createSystemMap() {
   };
 
   if (!geojson || geojson.features.length === 0) {
-    jQuery('#' + id).hide();
+    document.getElementById(id).style.display = 'none';
     return false;
   }
 
@@ -685,11 +634,11 @@ function unHighlightRoutes(map, zoom) {
 }
 
 function setupTableHoverListeners(map) {
-  jQuery(() => {
-    jQuery('.overview-list button.zoom-to').click((event) => {
+  document.querySelectorAll('.overview-list button.zoom-to').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const routeIdString = jQuery(event.currentTarget).data('route-ids');
+      const routeIdString = event.currentTarget.dataset.routeIds;
       if (routeIdString) {
         const routeIds = routeIdString.toString().split(',');
         unHighlightRoutes(map, true);
@@ -697,27 +646,19 @@ function setupTableHoverListeners(map) {
         highlightRoutes(map, routeIds, true);
       }
     });
+  });
 
-    jQuery(document).on('keydown', function (event) {
-      if (event.key === 'Escape') {
-        // First check for open popups and close them
-        const openPopups = jQuery('.maplibregl-popup');
-        if (openPopups.length > 0) {
-          openPopups.remove();
-          return;
-        }
-        // No popups open, so unhighlight routes
-        map._manualHighlight = false;
-        unHighlightRoutes(map, true);
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      // First check for open popups and close them
+      const openPopups = document.querySelectorAll('.maplibregl-popup');
+      if (openPopups.length > 0) {
+        openPopups.forEach((popup) => popup.remove());
+        return;
       }
-    });
-
-    jQuery('.overview-list').click(
-      () => {},
-      () => {
-        map._manualHighlight = false;
-        unHighlightRoutes(map, true);
-      },
-    );
+      // No popups open, so unhighlight routes
+      map._manualHighlight = false;
+      unHighlightRoutes(map, true);
+    }
   });
 }

@@ -1,0 +1,89 @@
+div(class="w-full min-h-96 bg-art-blue relative px-8 md:px-12 flex items-center justify-start overflow-hidden")
+  img(src="https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-blue-asheville-map-1600.jpg" class="z-[2] absolute w-full inset-0" alt="ART Blue Asheville Map backdrop")
+  img(src="https://www.ashevillenc.gov/wp-content/uploads/2026/03/ART-buswrap-graphic.png" class="z-[4] absolute w-full bottom-0 left-0" alt="ART Bus wrap Graphic")
+
+  div(class="z-[6] w-full max-w-screen-xl grid grid-cols-1 md:grid-cols-2 gap-12 py-16 mx-auto")
+    div(class="order-2 md:order-1 bg-white rounded-lg shadow-lg p-6 pb-12")
+      div(class="flex items-center gap-3 mb-6")
+        img(class="w-8 h-8", src=`${config.connect_icon_url}`, alt='ART Connect logo')
+        h2(class="text-3xl") Stay in the Loop!
+      div(class="flex flex-col gap-6")
+        p() Sign up to receive alerts for ART
+        a(href="/contact/#stay-in-the-loop" class="btn-blue") Sign Up for Alerts
+    div(class="order-1 md:order-2 flex items-end justify-center")
+      img(class="inline-block w-80 xl:w-96 h-auto", src=`${config.footer_logo_url}`, alt=`${config.webpageTitle || 'Asheville Transit System '} footer logo`)
+
+
+nav(id="footer-nav" class="bg-gray-800 text-white p-8 md:p-12" aria-label="Footer navigation")
+  div(class="max-w-screen-xl mx-auto")
+    div(class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8")
+      //- Column 1: Routes & Fares
+      div
+        h3(class="text-xl font-semibold mb-4 text-art-green") Routes and Fares
+        ul(class="space-y-2 list-none p-0 m-0")
+          li
+            a(href="/routes-and-schedules/" class="text-gray-300 hover:text-white hover:underline transition-colors") All Routes & Schedules
+          li
+            a(href="/holidays/" class="text-gray-300 hover:text-white hover:underline transition-colors") Holiday Schedule
+          li
+            a(href="/fares-and-passes/" class="text-gray-300 hover:text-white hover:underline transition-colors") Fares & Passes
+          li
+            a(href="/passport-program/" class="text-gray-300 hover:text-white hover:underline transition-colors") Passport Program
+          li
+            a(href="/service-alerts/" class="text-gray-300 hover:text-white hover:underline transition-colors") Service Alerts
+
+      //- Column 2: Rider Tools
+      div
+        h3(class="text-xl font-semibold mb-4 text-art-green") Rider Tools
+        ul(class="space-y-2 list-none p-0 m-0")
+          li
+            a(href="/how-to-ride/" class="text-gray-300 hover:text-white hover:underline transition-colors") How To Ride
+          li
+            a(href="/trip-planner/" class="text-gray-300 hover:text-white hover:underline transition-colors") Trip Planner
+          li
+            a(href="/real-time-departures/" class="text-gray-300 hover:text-white hover:underline transition-colors") Real-time Departures
+          li
+            a(href="/policies-and-tips/" class="text-gray-300 hover:text-white hover:underline transition-colors") Policies & Tips
+          li
+            a(href="/bikes-on-buses/" class="text-gray-300 hover:text-white hover:underline transition-colors") Bikes on Buses
+          li
+            a(href="/ada/" class="text-gray-300 hover:text-white hover:underline transition-colors") ADA & Accessibility
+
+      //- Column 3: About & Contact
+      div
+        h3(class="text-xl font-semibold mb-4 text-art-green") About ART
+        ul(class="space-y-2 list-none p-0 m-0")
+          li
+            a(href="/about/" class="text-gray-300 hover:text-white hover:underline transition-colors") About Us
+          li
+            a(href="/contact/" class="text-gray-300 hover:text-white hover:underline transition-colors") Contact
+          li
+            a(href="https://www.ashevillenc.gov/projects/#avl_department=transit" class="flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
+              span Projects
+              i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
+          li
+            a(href="https://www.buncombenc.gov/605/Transportation" class="flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer") 
+              span Paratransit
+              i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
+          li
+            a(
+              id="feedback-form-link-footer"
+              href="https://forms.ashevillenc.gov/form/art-website-feedback" 
+              class="feedback-form-link flex items-center gap-1 text-gray-300 hover:text-white hover:underline transition-colors" rel="noreferrer")
+              span Website Feedback
+              i(class="bi bi-box-arrow-up-right ml-1 text-xs" aria-hidden="true")
+
+    //- Footer bottom row
+    div(class="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between gap-4")
+      div(class="flex items-center gap-6")
+        img(src="https://www.ashevillenc.gov/wp-content/uploads/2018/09/city-of-asheville-logo-white.svg" class="w-48 h-auto" alt="City of Asheville footer logo")
+      div(class="text-center md:text-right text-gray-300 text-sm")
+        if config.webpageTitle
+          p(class="mb-1") &copy; #{new Date().getFullYear()} Asheville Rides Transit
+        p
+          span="Built with"
+          i(class="bi bi-heart-fill text-red-500 mx-1" aria-hidden="true")
+          span(class="sr-only")="love"
+          span()="and "
+          a(href="https://gtfstohtml.com/" class="text-gray-300 hover:text-white hover:underline transition-colors")="gtfs-to-html"
+

@@ -70,12 +70,38 @@ document.addEventListener('DOMContentLoaded', () => {
       hideAllDropdowns();
     }
   });
+});
 
-  // $('button#hamburger').on('click', function () {
-  //   if ($(this).attr('aria-expanded') === 'false') {
-  //     $('#top-menu-container').slideDown('slow');
-  //   } else {
-  //     $('#top-menu-container').slideUp('slow');
-  //   }
-  // });
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.feedback-form-link').forEach(function (feedbackLink) {
+    feedbackLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      var url =
+        'https://forms.ashevillenc.gov/form/art-website-feedback?referringpath=' +
+        encodeURIComponent(window.location.pathname + window.location.search);
+      window.open(url, this.target || '_self');
+    });
+  });
+  const trigger = document.getElementById('feedback-trigger');
+  const popup = document.getElementById('feedback-popup');
+  const close = document.getElementById('feedback-popup-close');
+  function toggle() {
+    const open = popup.classList.toggle('hidden');
+    trigger.setAttribute('aria-expanded', !open);
+  }
+  trigger.addEventListener('click', toggle);
+  close.addEventListener('click', toggle);
+  document.addEventListener('click', function (e) {
+    if (!document.getElementById('feedback-widget').contains(e.target)) {
+      popup.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+      popup.classList.add('hidden');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.focus();
+    }
+  });
 });

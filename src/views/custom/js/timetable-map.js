@@ -1,4 +1,4 @@
-/* global document, jQuery, maplibregl, Pbf, mapStyleUrl, stopData, routeData, routeIds, tripIds, geojsons, gtfsRealtimeUrls, loadMapStyleWithWorkingFonts */
+/* global document, maplibregl, Pbf, mapStyleUrl, stopData, routeData, routeIds, tripIds, geojsons, gtfsRealtimeUrls, loadMapStyleWithWorkingFonts */
 /* eslint prefer-arrow-callback: "off", no-unused-vars: "off" */
 
 const maps = {};
@@ -62,69 +62,34 @@ function formatSeconds(seconds) {
 }
 
 function formatRoute(route) {
-  // const html = route.route_url ? jQuery('<a>').attr('href', route.route_url) : jQuery('<div>');
-  const html = route.route_short_name
-    ? jQuery('<a>').attr('href', `/${route.route_short_name}`)
-    : jQuery('<div>');
+  const tag = route.route_short_name ? 'a' : 'div';
+  const href = route.route_short_name ? ` href="/${route.route_short_name}"` : '';
 
-  html.addClass('map-route-item');
-
-  // Only add color swatch if route has a color
-  const routeItemDivs = [];
-
+  let swatchHtml = '';
   if (route.route_color) {
-    routeItemDivs.push(
-      jQuery('<div>')
-        .addClass('route-color-swatch')
-        .css('backgroundColor', formatRouteColor(route))
-        .css('color', formatRouteTextColor(route))
-        .text(route.route_short_name ?? ''),
-    );
+    swatchHtml = `<div class="route-color-swatch" style="background-color:${formatRouteColor(route)};color:${formatRouteTextColor(route)}">${route.route_short_name ?? ''}</div>`;
   }
-  routeItemDivs.push(
-    jQuery('<div>')
-      .addClass('underline-hover')
-      .text(route.route_long_name ?? `Route ${route.route_short_name}`),
-  );
 
-  html.append(routeItemDivs);
+  const nameHtml = `<div class="underline-hover">${route.route_long_name ?? `Route ${route.route_short_name}`}</div>`;
 
-  return html.prop('outerHTML');
+  return `<${tag}${href} class="map-route-item">${swatchHtml}${nameHtml}</${tag}>`;
 }
 
 function getStopPopupHtml(feature, stop) {
   const routeIds = JSON.parse(feature.properties.route_ids);
-  const html = jQuery('<div>').attr('data-stop-id', stop.stop_id);
+  let html = `<div data-stop-id="${stop.stop_id}">`;
 
-  const timetableRouteId = jQuery('.timetable:visible').first().data('route-id');
+  const visibleTimetable = document.querySelector('.timetable:not([style*="display: none"])');
+  const timetableRouteId = visibleTimetable ? visibleTimetable.dataset.routeId : null;
   const firstRouteId = timetableRouteId ? String(timetableRouteId).split('_')[0] : null;
   const currentRoute =
     firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
   const routeLabel = currentRoute?.route_short_name ? `${currentRoute.route_short_name} ` : '';
 
-  jQuery('<div>')
-    .addClass('popup-title')
-    .text(`${stop.stop_name}${stop.stop_code ? ` (${stop.stop_code})` : ''}`)
-    .appendTo(html);
-
-  // Temporarily hide stop code and real-time departures link
-  // Upcoming departures still show for current route, but trying to reduce popup clutter
-  if (stop.stop_code && false) {
-    jQuery('<div>')
-      .html([
-        jQuery('<div>').addClass('popup-label')
-          .html(`Stop Code: <strong>${stop.stop_code}</strong><br />
-            <a class="underline hover:no-underline" href="/real-time-departures/?stop_id=${stop.stop_id}">View Real-Time Departures</a>
-          `),
-      ])
-      .appendTo(html);
-  }
+  html += `<div class="popup-title">${stop.stop_name}${stop.stop_code ? ` (${stop.stop_code})` : ''}</div>`;
 
   if (tripUpdates) {
-    const stopTimeUpdates = {
-      0: [],
-      1: [],
-    };
+    const stopTimeUpdates = { 0: [], 1: [] };
 
     for (const tripUpdate of tripUpdates) {
       const stopTimeUpdatesForStop = tripUpdate.trip_update.stop_time_update.filter(
@@ -151,16 +116,12 @@ function getStopPopupHtml(feature, stop) {
     });
 
     if (stopTimeUpdates['0'].length > 0 || stopTimeUpdates['1'].length > 0) {
-      jQuery('<div>')
-        .addClass('popup-label')
-        .text(`Upcoming ${routeLabel}Departures:`)
-        .appendTo(html);
+      html += `<div class="popup-label">Upcoming ${routeLabel}Departures:</div>`;
 
       for (const direction of ['0', '1']) {
         if (stopTimeUpdates[direction].length > 0) {
-          const directionName = jQuery(`.timetable[data-direction-id="${direction}"]`).data(
-            'direction-name',
-          );
+          const dirEl = document.querySelector(`.timetable[data-direction-id="${direction}"]`);
+          const directionName = dirEl ? dirEl.dataset.directionName : '';
           const departureTimes = stopTimeUpdates[direction].map((stopTimeUpdate) =>
             Math.round(
               ((stopTimeUpdate.departure
@@ -171,64 +132,32 @@ function getStopPopupHtml(feature, stop) {
             ),
           );
 
-          // Only use the next 4 departures
           const formattedDepartures = new Intl.ListFormat('en', {
             style: 'long',
             type: 'conjunction',
           }).format(departureTimes.slice(0, 4).map((time) => `<b>${time}</b>`));
 
-          jQuery('<div>')
-            .html(`<b>${directionName}</b> in ${formattedDepartures} min`)
-            .appendTo(html);
+          html += `<div><b>${directionName}</b> in ${formattedDepartures} min</div>`;
         }
       }
     }
   }
 
-  jQuery('<div>').addClass('popup-label').text('Routes Served:').appendTo(html);
-
-  const routeList = jQuery('<ul>').addClass('route-list flex flex-wrap gap-2 list-none p-0 my-2');
+  html += `<div class="popup-label">Routes Served:</div>`;
+  html += `<ul class="route-list flex flex-wrap gap-2 list-none p-0 my-2">`;
 
   routeIds.forEach((routeId) => {
     const route = routeData[routeId];
     if (!route) return;
-
-    const listItem = jQuery('<li>');
-    const link = jQuery('<a>')
-      .attr('href', `/${route.route_short_name}`)
-      .append(
-        jQuery('<span>')
-          .addClass('route-color-swatch')
-          .css('backgroundColor', formatRouteColor(route))
-          .css('color', formatRouteTextColor(route))
-          .attr('aria-hidden', 'true')
-          .text(route.route_short_name ?? ''),
-      )
-      .append(jQuery('<span>').addClass('sr-only').text(`Route ${route.route_short_name}`));
-
-    listItem.append(link);
-    routeList.append(listItem);
+    html += `<li><a href="/${route.route_short_name}"><span class="route-color-swatch" style="background-color:${formatRouteColor(route)};color:${formatRouteTextColor(route)}" aria-hidden="true">${route.route_short_name ?? ''}</span><span class="sr-only">Route ${route.route_short_name}</span></a></li>`;
   });
 
-  html.append(routeList);
+  html += `</ul>`;
 
-  jQuery('<a>')
-    .addClass('btn-blue btn-sm')
-    .prop(
-      'href',
-      `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90`,
-    )
-    .prop('target', '_blank')
-    .prop('rel', 'noopener noreferrer')
-    .html(
-      `View on Streetview
-      <i class="bi bi-box-arrow-up-right ml-2" aria-hidden="true"></i>    
-      <span class="sr-only">opens external site</span>
-    `,
-    )
-    .appendTo(html);
+  html += `<a class="btn-blue btn-sm" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}&heading=0&pitch=0&fov=90" target="_blank" rel="noopener noreferrer">View on Streetview <i class="bi bi-box-arrow-up-right ml-2" aria-hidden="true"></i> <span class="sr-only">opens external site</span></a>`;
 
-  return html.prop('outerHTML');
+  html += `</div>`;
+  return html;
 }
 
 function getBounds(geojson) {
@@ -299,28 +228,26 @@ function formatMovingText(vehiclePosition) {
 }
 
 function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
-  const html = jQuery('<div>', {
-    id: `vehicle-popup-${vehiclePosition.vehicle.vehicle.id}`,
-  });
+  let html = `<div id="vehicle-popup-${vehiclePosition.vehicle.vehicle.id}">`;
 
   const lastUpdated = new Date(vehiclePosition.vehicle.timestamp * 1000);
-  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
-    .parents('.timetable')
-    .data('direction-name');
+  const tripEl = document.querySelector(
+    '.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id,
+  );
+  const directionName = tripEl ? tripEl.closest('.timetable').dataset.directionName : null;
 
   if (directionName) {
-    jQuery('<div>').addClass('popup-title').text(`Vehicle: ${directionName}`).appendTo(html);
+    html += `<div class="popup-title">Vehicle: ${directionName}</div>`;
   }
 
   const movingText = formatMovingText(vehiclePosition);
 
   if (movingText) {
-    jQuery('<div>').text(movingText).appendTo(html);
+    html += `<div>${movingText}</div>`;
   }
 
   const numberOfArrivalsToShow = 5;
   const nextArrivals = [];
-  // Use fetch timestamp for consistent timing across UI elements
   const referenceTime = dataFetchTimestamp || Date.now() / 1000;
   if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
     for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
@@ -328,7 +255,6 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
         const secondsToArrival = stoptimeUpdate.arrival.time - referenceTime;
         const stopName = stopData[stoptimeUpdate.stop_id]?.stop_name;
 
-        // Don't show arrivals in the past or non-timepoints
         if (secondsToArrival > 0 && stopName) {
           nextArrivals.push({
             delay: stoptimeUpdate.arrival.delay,
@@ -345,56 +271,42 @@ function getVehiclePopupHtml(vehiclePosition, vehicleTripUpdate) {
   }
 
   if (nextArrivals.length > 0) {
-    jQuery('<div>')
-      .addClass('upcoming-stops')
-      .append([jQuery('<div>').text('Time'), jQuery('<div>').text('Upcoming Stop')])
-      .append(
-        nextArrivals.flatMap((arrival) => {
-          let delay = '';
-
-          if (arrival.delay > 0) {
-            delay = `(${formatSeconds(arrival.delay)} behind schedule)`;
-          } else if (arrival.delay < 0) {
-            delay = `(${formatSeconds(arrival.delay)} ahead of schedule)`;
-          }
-
-          return [
-            jQuery('<div>').text(formatSeconds(arrival.secondsToArrival)),
-            jQuery('<div>').text(`${arrival.stopName} ${delay}`),
-          ];
-        }),
-      )
-      .appendTo(html);
+    html += `<div class="upcoming-stops"><div>Time</div><div>Upcoming Stop</div>`;
+    for (const arrival of nextArrivals) {
+      let delay = '';
+      if (arrival.delay > 0) {
+        delay = `(${formatSeconds(arrival.delay)} behind schedule)`;
+      } else if (arrival.delay < 0) {
+        delay = `(${formatSeconds(arrival.delay)} ahead of schedule)`;
+      }
+      html += `<div>${formatSeconds(arrival.secondsToArrival)}</div><div>${arrival.stopName} ${delay}</div>`;
+    }
+    html += `</div>`;
   }
 
-  jQuery('<div>')
-    .addClass('vehicle-updated')
-    .text(`Updated: ${lastUpdated.toLocaleTimeString()}`)
-    .appendTo(html);
+  html += `<div class="vehicle-updated">Updated: ${lastUpdated.toLocaleTimeString()}</div>`;
+  html += `</div>`;
 
-  return html.prop('outerHTML');
+  return html;
 }
 
 function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
   const currentVehicleCount = vehiclePositions ? vehiclePositions.length : 0;
 
-  // Skip all updates if paused (status shows "updates paused" instead)
   if (rtPositionsPaused) {
     return;
   }
 
-  // Update the status with bus count and directions
-  const statusEl = jQuery('#rt_positions_status');
-  if (statusEl.length && previousVehicleCount !== currentVehicleCount) {
+  const statusEl = document.querySelector('#rt_positions_status');
+  if (statusEl && previousVehicleCount !== currentVehicleCount) {
     if (currentVehicleCount === 0) {
-      statusEl.removeClass('border-aux-green').text('No active buses');
+      statusEl.classList.remove('border-aux-green');
+      statusEl.textContent = 'No active buses';
     } else {
-      // Gather unique direction names from active vehicles
       const directions = new Set();
       for (const vp of vehiclePositions) {
-        const dirName = jQuery('.timetable #trip_id_' + vp.vehicle.trip.trip_id)
-          .parents('.timetable')
-          .data('direction-name');
+        const tripEl = document.querySelector('.timetable #trip_id_' + vp.vehicle.trip.trip_id);
+        const dirName = tripEl ? tripEl.closest('.timetable').dataset.directionName : null;
         if (dirName) {
           directions.add(dirName);
         }
@@ -406,31 +318,29 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
         const dirList = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }).format([
           ...directions,
         ]);
-        statusEl.addClass('border-aux-green').text(`${busText} – ${dirList}`);
+        statusEl.classList.add('border-aux-green');
+        statusEl.textContent = `${busText} – ${dirList}`;
       } else {
-        statusEl.addClass('border-aux-green').text(busText);
+        statusEl.classList.add('border-aux-green');
+        statusEl.textContent = busText;
       }
     }
     previousVehicleCount = currentVehicleCount;
   }
 
-  const container = jQuery('#rt_positions_list');
-  if (!container.length) {
+  const container = document.querySelector('#rt_positions_list');
+  if (!container) {
     return;
   }
 
-  container.empty();
+  container.innerHTML = '';
 
   if (!vehiclePositions || vehiclePositions.length === 0) {
-    container.append(
-      jQuery('<p>').addClass('p-4 text-gray-700').text('No active vehicles at this time.'),
-    );
+    container.innerHTML = '<p class="p-4 text-gray-700">No active vehicles at this time.</p>';
     return;
   }
 
-  const vehicleList = jQuery('<ul>').addClass(
-    'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 list-none m-0',
-  );
+  let listHtml = `<ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 list-none m-0">`;
 
   for (const vehiclePosition of vehiclePositions) {
     const vehicleId = vehiclePosition.vehicle.vehicle.id;
@@ -445,37 +355,27 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
       );
     }
 
-    const vehicleCard = jQuery('<li>').addClass('border rounded p-4 bg-white shadow-sm');
-
     const lastUpdated = new Date(vehiclePosition.vehicle.timestamp * 1000);
-    const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
-      .parents('.timetable')
-      .data('direction-name');
+    const tripEl = document.querySelector(
+      '.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id,
+    );
+    const directionName = tripEl ? tripEl.closest('.timetable').dataset.directionName : null;
 
-    // Use h3 for vehicle heading (h2 is the section heading)
+    listHtml += `<li class="border rounded p-4 bg-white shadow-sm">`;
+
     if (directionName) {
-      jQuery('<h3>')
-        .addClass('font-bold text-lg mb-2 mt-0')
-        .text(`Vehicle: ${directionName}`)
-        .appendTo(vehicleCard);
+      listHtml += `<h3 class="font-bold text-lg mb-2 mt-0">Vehicle: ${directionName}</h3>`;
     } else {
-      jQuery('<h3>')
-        .addClass('font-bold text-lg mb-2 mt-0')
-        .text(`Vehicle ${vehicleId}`)
-        .appendTo(vehicleCard);
+      listHtml += `<h3 class="font-bold text-lg mb-2 mt-0">Vehicle ${vehicleId}</h3>`;
     }
 
     const movingText = formatMovingText(vehiclePosition);
     if (movingText) {
-      jQuery('<p>')
-        .addClass('text-sm text-gray-600 mb-2 my-0')
-        .text(movingText)
-        .appendTo(vehicleCard);
+      listHtml += `<p class="text-sm text-gray-600 mb-2 my-0">${movingText}</p>`;
     }
 
     const numberOfArrivalsToShow = 5;
     const nextArrivals = [];
-    // Use fetch timestamp for consistent timing across UI elements
     const referenceTime = dataFetchTimestamp || Date.now() / 1000;
     if (vehicleTripUpdate && vehicleTripUpdate.trip_update.stop_time_update) {
       for (const stoptimeUpdate of vehicleTripUpdate.trip_update.stop_time_update) {
@@ -499,12 +399,8 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
     }
 
     if (nextArrivals.length > 0) {
-      jQuery('<h4>')
-        .addClass('font-semibold text-sm mb-1 mt-2')
-        .text('Upcoming Stops:')
-        .appendTo(vehicleCard);
-
-      const stopsList = jQuery('<ul>').addClass('list-none pl-0 text-sm m-0');
+      listHtml += `<h4 class="font-semibold text-sm mb-1 mt-2">Upcoming Stops:</h4>`;
+      listHtml += `<ul class="list-none pl-0 text-sm m-0">`;
 
       nextArrivals.forEach((arrival) => {
         let delayText = '';
@@ -514,55 +410,51 @@ function updateRtPositionsContainer(vehiclePositions, tripUpdates) {
           delayText = ` (${formatSeconds(Math.abs(arrival.delay))} ahead)`;
         }
 
-        jQuery('<li>')
-          .addClass('py-1 border-b border-gray-100 last:border-b-0')
-          .html(
-            `<span class="font-medium">${formatSeconds(arrival.secondsToArrival)}</span> - ${arrival.stopName}${delayText}`,
-          )
-          .appendTo(stopsList);
+        listHtml += `<li class="py-1 border-b border-gray-100 last:border-b-0"><span class="font-medium">${formatSeconds(arrival.secondsToArrival)}</span> - ${arrival.stopName}${delayText}</li>`;
       });
 
-      stopsList.appendTo(vehicleCard);
+      listHtml += `</ul>`;
     }
 
-    jQuery('<p>')
-      .addClass('text-xs text-gray-700 mt-2 mb-0')
-      .text(`Updated: ${lastUpdated.toLocaleTimeString()}`)
-      .appendTo(vehicleCard);
-
-    vehicleCard.appendTo(vehicleList);
+    listHtml += `<p class="text-xs text-gray-700 mt-2 mb-0">Updated: ${lastUpdated.toLocaleTimeString()}</p>`;
+    listHtml += `</li>`;
   }
 
-  vehicleList.appendTo(container);
+  listHtml += `</ul>`;
+  container.innerHTML = listHtml;
 }
 
 function initRtPositionsPauseButton() {
-  const pauseBtn = jQuery('#rt_positions_pause');
-  if (!pauseBtn.length) return;
+  const pauseBtn = document.querySelector('#rt_positions_pause');
+  if (!pauseBtn) return;
 
-  pauseBtn.on('click', function () {
+  pauseBtn.addEventListener('click', function () {
     rtPositionsPaused = !rtPositionsPaused;
 
-    const icon = pauseBtn.find('i');
-    const text = pauseBtn.find('span');
-    const statusEl = jQuery('#rt_positions_status');
+    const icon = pauseBtn.querySelector('i');
+    const text = pauseBtn.querySelector('span');
+    const statusEl = document.querySelector('#rt_positions_status');
 
     if (rtPositionsPaused) {
-      pauseBtn.attr('aria-pressed', 'true');
-      icon.removeClass('bi-pause-fill').addClass('bi-play-fill');
-      text.text('Resume Updates');
-      statusEl.removeClass('border-aux-green').text('Updates paused');
+      pauseBtn.setAttribute('aria-pressed', 'true');
+      icon.classList.remove('bi-pause-fill');
+      icon.classList.add('bi-play-fill');
+      text.textContent = 'Resume Updates';
+      statusEl.classList.remove('border-aux-green');
+      statusEl.textContent = 'Updates paused';
     } else {
-      pauseBtn.attr('aria-pressed', 'false');
-      icon.removeClass('bi-play-fill').addClass('bi-pause-fill');
-      text.text('Pause Updates');
-      // Immediately update when resuming
-      previousVehicleCount = null; // Reset to force status update
+      pauseBtn.setAttribute('aria-pressed', 'false');
+      icon.classList.remove('bi-play-fill');
+      icon.classList.add('bi-pause-fill');
+      text.textContent = 'Pause Updates';
+      previousVehicleCount = null;
       if (vehiclePositions && tripUpdates) {
         if (filterVehiclesByDirection) {
-          const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
-          const directionId = visibleMapContainer.length
-            ? String(visibleMapContainer.data('direction-id'))
+          const visibleMapContainer = document.querySelector(
+            '.coa-timetable-map-container:not([style*="display: none"])',
+          );
+          const directionId = visibleMapContainer
+            ? String(visibleMapContainer.dataset.directionId)
             : null;
           if (directionId !== null) {
             const filteredPositions = vehiclePositions.filter(
@@ -664,7 +556,8 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
     return;
   }
 
-  const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
+  const visibleTimetableId = document.querySelector('.timetable:not([style*="display: none"])')
+    ?.dataset?.timetableId;
 
   const vehicleDirectionArrow = getVehicleDirectionArrow(vehiclePosition, vehicleTripUpdate);
 
@@ -675,9 +568,10 @@ function addVehicleMarker(vehiclePosition, vehicleTripUpdate) {
   el.style.height = '25px';
   el.setAttribute('role', 'img');
 
-  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
-    .parents('.timetable')
-    .data('direction-name');
+  const tripEl = document.querySelector(
+    '.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id,
+  );
+  const directionName = tripEl ? tripEl.closest('.timetable').dataset.directionName : null;
   const movingText = formatMovingText(vehiclePosition);
   const labelParts = ['Bus'];
   if (directionName) labelParts.push(directionName);
@@ -756,9 +650,10 @@ function updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTrip
   }
 
   // Update aria-label with current movement info
-  const directionName = jQuery('.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id)
-    .parents('.timetable')
-    .data('direction-name');
+  const tripEl = document.querySelector(
+    '.timetable #trip_id_' + vehiclePosition.vehicle.trip.trip_id,
+  );
+  const directionName = tripEl ? tripEl.closest('.timetable').dataset.directionName : null;
   const movingText = formatMovingText(vehiclePosition);
   const labelParts = ['Bus'];
   if (directionName) labelParts.push(directionName);
@@ -805,11 +700,13 @@ async function updateArrivals({ withMap = true } = {}) {
     dataFetchTimestamp = Date.now() / 1000;
 
     if (!latestVehiclePositions?.length) {
-      jQuery('.vehicle-legend-item').hide();
+      document
+        .querySelectorAll('.vehicle-legend-item')
+        .forEach((el) => (el.style.display = 'none'));
       return;
     }
 
-    jQuery('.vehicle-legend-item').show();
+    document.querySelectorAll('.vehicle-legend-item').forEach((el) => (el.style.display = ''));
 
     vehiclePositions = latestVehiclePositions.filter((vehiclePosition) => {
       if (
@@ -850,10 +747,16 @@ async function updateArrivals({ withMap = true } = {}) {
 
     if (withMap) {
       // Get the direction_id from the visible map container for filtering
-      const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
-      const mapDirectionId = visibleMapContainer.length
-        ? String(visibleMapContainer.data('direction-id'))
+      const visibleMapContainer = document.querySelector(
+        '.coa-timetable-map-container:not([style*="display: none"])',
+      );
+      const mapDirectionId = visibleMapContainer
+        ? String(visibleMapContainer.dataset.directionId)
         : null;
+
+      const visibleTimetableId = document.querySelector(
+        '.timetable:not([style*="display: none"])',
+      )?.dataset?.timetableId;
 
       for (const vehiclePosition of vehiclePositions) {
         const vehicleId = vehiclePosition.vehicle.vehicle.id;
@@ -900,7 +803,6 @@ async function updateArrivals({ withMap = true } = {}) {
           updateVehicleMarkerLocation(vehicleMarker, vehiclePosition, vehicleTripUpdate);
         }
 
-        const visibleTimetableId = jQuery('.timetable:visible').data('timetable-id');
         attachVehicleMarkerClickHandler(
           vehiclePosition,
           vehicleTripUpdate,
@@ -923,9 +825,11 @@ async function updateArrivals({ withMap = true } = {}) {
 
     // Update the text-based vehicle positions container, applying direction filter
     if (filterVehiclesByDirection) {
-      const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
-      const directionId = visibleMapContainer.length
-        ? String(visibleMapContainer.data('direction-id'))
+      const visibleMapContainer = document.querySelector(
+        '.coa-timetable-map-container:not([style*="display: none"])',
+      );
+      const directionId = visibleMapContainer
+        ? String(visibleMapContainer.dataset.directionId)
         : null;
 
       if (directionId !== null) {
@@ -959,21 +863,25 @@ function toggleMap(id) {
     fitMapToBounds(maps[id], bounds);
 
     // Get the direction_id for the new visible map container
-    const visibleMapContainer = jQuery('.coa-timetable-map-container:visible');
-    const mapDirectionId = visibleMapContainer.length
-      ? String(visibleMapContainer.data('direction-id'))
+    const visibleMapContainer = document.querySelector(
+      '.coa-timetable-map-container:not([style*="display: none"])',
+    );
+    const mapDirectionId = visibleMapContainer
+      ? String(visibleMapContainer.dataset.directionId)
       : null;
 
     // Update the RT positions heading with the current direction name
     if (filterVehiclesByDirection) {
-      const visibleTimetable = jQuery('.timetable:visible');
-      const directionNameForHeading = visibleTimetable.data('direction-name');
-      const headingEl = jQuery('#rt_positions_heading');
-      if (headingEl.length && headingEl.data('base-label')) {
-        const baseLabel = headingEl.data('base-label');
-        headingEl.text(
-          directionNameForHeading ? `${baseLabel} (${directionNameForHeading})` : baseLabel,
-        );
+      const visibleTimetable = document.querySelector('.timetable:not([style*="display: none"])');
+      const directionNameForHeading = visibleTimetable
+        ? visibleTimetable.dataset.directionName
+        : null;
+      const headingEl = document.querySelector('#rt_positions_heading');
+      if (headingEl && headingEl.dataset.baseLabel) {
+        const baseLabel = headingEl.dataset.baseLabel;
+        headingEl.textContent = directionNameForHeading
+          ? `${baseLabel} (${directionNameForHeading})`
+          : baseLabel;
       }
     }
 
@@ -1079,7 +987,8 @@ async function createMap(id) {
   const geojson = geojsons[id];
 
   if (!geojson || geojson.features.length === 0) {
-    jQuery(`#map_timetable_id_${id}`).hide();
+    const mapEl = document.querySelector(`#map_timetable_id_${id}`);
+    if (mapEl) mapEl.style.display = 'none';
     return false;
   }
 
@@ -1107,8 +1016,8 @@ async function createMap(id) {
       const canvas = map.getCanvas();
       canvas.setAttribute('role', 'img');
       // Get route info from timetable element for descriptive label
-      const timetableEl = jQuery(`.timetable`).first();
-      const routeId = timetableEl.data('route-id');
+      const timetableEl = document.querySelector('.timetable');
+      const routeId = timetableEl ? timetableEl.dataset.routeId : null;
       const firstRouteId = routeId ? String(routeId).split('_')[0] : null;
       const route =
         firstRouteId && typeof routeData !== 'undefined' ? routeData[firstRouteId] : null;
@@ -1446,8 +1355,9 @@ function unHighlightStop(map, id) {
 }
 
 function highlightTimetableStops(id, stopIds) {
-  const table = jQuery(`#timetable_id_${id} table`);
-  const isVertical = table.data('orientation') === 'vertical';
+  const table = document.querySelector(`#timetable_id_${id} table`);
+  if (!table) return;
+  const isVertical = table.dataset.orientation === 'vertical';
 
   if (isVertical) {
     highlightVerticalTimetableStops(id, stopIds);
@@ -1457,145 +1367,153 @@ function highlightTimetableStops(id, stopIds) {
 }
 
 function highlightVerticalTimetableStops(id, stopIds) {
-  const table = jQuery(`#timetable_id_${id} table`);
+  const table = document.querySelector(`#timetable_id_${id} table`);
+  if (!table) return;
   const columnIndexes = [];
   const stopIdSelectors = stopIds
     .map((stopId) => `#timetable_id_${id} table colgroup col[data-stop-id="${stopId}"]`)
     .join(',');
 
-  jQuery(stopIdSelectors).each((index, col) => {
-    columnIndexes.push(jQuery(`#timetable_id_${id} table colgroup col`).index(col));
+  document.querySelectorAll(stopIdSelectors).forEach((col) => {
+    const allCols = table.querySelectorAll('colgroup col');
+    columnIndexes.push(Array.from(allCols).indexOf(col));
   });
 
-  table.find('.stop-time, thead .stop-header').removeClass('highlighted');
-  table.find('.trip-row').each((index, row) => {
-    jQuery('.stop-time', row).each((index, el) => {
+  table
+    .querySelectorAll('.stop-time, thead .stop-header')
+    .forEach((el) => el.classList.remove('highlighted'));
+  table.querySelectorAll('.trip-row').forEach((row) => {
+    row.querySelectorAll('.stop-time').forEach((el, index) => {
       if (columnIndexes.includes(index)) {
-        jQuery(el).addClass('highlighted');
+        el.classList.add('highlighted');
       }
     });
   });
 
-  table.find('thead').each((index, thead) => {
-    jQuery('.stop-header', thead).each((index, el) => {
+  table.querySelectorAll('thead').forEach((thead) => {
+    thead.querySelectorAll('.stop-header').forEach((el, index) => {
       if (columnIndexes.includes(index)) {
-        jQuery(el).addClass('highlighted');
+        el.classList.add('highlighted');
       }
     });
   });
 }
 
 function highlightHorizontalTimetableStops(id, stopIds) {
-  const table = jQuery(`#timetable_id_${id} table`);
-  table.find('.stop-row').removeClass('highlighted');
+  const table = document.querySelector(`#timetable_id_${id} table`);
+  if (!table) return;
+  table.querySelectorAll('.stop-row').forEach((el) => el.classList.remove('highlighted'));
   const stopIdSelectors = stopIds
     .map((stopId) => `#timetable_id_${id} table #stop_id_${stopId}`)
     .join(',');
-  jQuery(stopIdSelectors).addClass('highlighted');
+  document.querySelectorAll(stopIdSelectors).forEach((el) => el.classList.add('highlighted'));
 }
 
 function unHighlightTimetableStops(id) {
-  const table = jQuery(`#timetable_id_${id} table`);
-  const isVertical = table.data('orientation') === 'vertical';
+  const table = document.querySelector(`#timetable_id_${id} table`);
+  if (!table) return;
+  const isVertical = table.dataset.orientation === 'vertical';
 
   if (isVertical) {
-    table.find('.stop-time, thead .stop-header').removeClass('highlighted');
+    table
+      .querySelectorAll('.stop-time, thead .stop-header')
+      .forEach((el) => el.classList.remove('highlighted'));
   } else {
-    table.find('.stop-row').removeClass('highlighted');
+    table.querySelectorAll('.stop-row').forEach((el) => el.classList.remove('highlighted'));
   }
 }
 
 function setupTableHoverListeners(id, map) {
-  const table = jQuery(`#timetable_id_${id} table`);
-  const stopHeaders = jQuery('th.stop-header:not(.continues-from):not(.continues-as)', table);
+  const table = document.querySelector(`#timetable_id_${id} table`);
+  if (!table) return;
+  const stopHeaders = table.querySelectorAll(
+    'th.stop-header:not(.continues-from):not(.continues-as)',
+  );
 
   // Make stop headers keyboard accessible
-  stopHeaders.each(function () {
-    const header = jQuery(this);
-    header.attr({
-      tabindex: '0',
-      role: 'button',
-      'aria-pressed': 'false',
-    });
+  stopHeaders.forEach(function (header) {
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('role', 'button');
+    header.setAttribute('aria-pressed', 'false');
   });
 
   // Shared handler for both click and keyboard activation
   function handleStopCellActivation(event) {
-    const actualCell = jQuery(event.target).closest('td, th');
-    const stopId = getStopIdFromTableCell(actualCell);
+    const actualCell = event.target.closest('td, th');
+    if (!actualCell) return;
+    const stopId = getStopIdFromTableCell(actualCell, table);
 
     if (stopId !== undefined) {
-      const isAlreadyHighlighted = actualCell.hasClass('highlighted');
+      const isAlreadyHighlighted = actualCell.classList.contains('highlighted');
 
       if (isAlreadyHighlighted) {
-        // Clear highlights using unified function
         if (typeof clearStopSelection === 'function') {
           clearStopSelection(id);
         } else {
           unHighlightTimetableStops(id);
           unHighlightStop(map, id);
         }
-        // Update aria-pressed for all headers
-        stopHeaders.attr('aria-pressed', 'false');
+        stopHeaders.forEach((h) => h.setAttribute('aria-pressed', 'false'));
       } else {
-        // Use unified selectStop function to highlight everything
         if (typeof selectStop === 'function') {
           selectStop(stopId.toString(), id, { fromTable: true, showPopup: false });
         } else {
           highlightStop(map, id, [stopId.toString()]);
           highlightTimetableStops(id, [stopId.toString()]);
         }
-        // Update aria-pressed
-        stopHeaders.attr('aria-pressed', 'false');
-        actualCell.attr('aria-pressed', 'true');
+        stopHeaders.forEach((h) => h.setAttribute('aria-pressed', 'false'));
+        actualCell.setAttribute('aria-pressed', 'true');
       }
     }
   }
 
   // Click handler for mouse users
-  jQuery('th.stop-header, td.stop-time', table).on('click', handleStopCellActivation);
+  table.querySelectorAll('th.stop-header, td.stop-time').forEach((el) => {
+    el.addEventListener('click', handleStopCellActivation);
+  });
 
   // Keyboard handler for Enter/Space on stop headers
-  stopHeaders.on('keydown', function (event) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleStopCellActivation(event);
-    }
+  stopHeaders.forEach((header) => {
+    header.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleStopCellActivation(event);
+      }
+    });
   });
 }
 
-function getStopIdFromTableCell(cell) {
-  // Ensure we're working with the actual td or th, not a child element
-  const actualCell = jQuery(cell).closest('td, th');
-  if (!actualCell.length) return undefined;
+function getStopIdFromTableCell(cell, tableOverride) {
+  const actualCell = cell.closest('td, th');
+  if (!actualCell) return undefined;
 
-  const table = actualCell.closest('table');
-  if (table.data('orientation') === 'vertical') {
-    // For vertical tables, get index among only stop-related cells (not prefix columns)
+  const table = tableOverride || actualCell.closest('table');
+  if (table.dataset.orientation === 'vertical') {
     let index;
-    if (actualCell.is('th.stop-header')) {
-      // For header cells, get index among stop-header cells (excluding continues-from/continues-as)
-      index = actualCell
-        .parent()
-        .find('th.stop-header:not(.continues-from):not(.continues-as)')
-        .index(actualCell);
-    } else if (actualCell.is('td.stop-time')) {
-      // For body cells, get index among stop-time cells
-      index = actualCell.parent().find('td.stop-time').index(actualCell);
+    if (actualCell.matches('th.stop-header')) {
+      const headers = actualCell.parentElement.querySelectorAll(
+        'th.stop-header:not(.continues-from):not(.continues-as)',
+      );
+      index = Array.from(headers).indexOf(actualCell);
+    } else if (actualCell.matches('td.stop-time')) {
+      const cells = actualCell.parentElement.querySelectorAll('td.stop-time');
+      index = Array.from(cells).indexOf(actualCell);
     } else {
       return undefined;
     }
-    return jQuery('colgroup col', table).eq(index).data('stop-id');
+    const col = table.querySelectorAll('colgroup col')[index];
+    return col ? col.dataset.stopId : undefined;
   } else {
-    return actualCell.closest('tr').data('stop-id');
+    const row = actualCell.closest('tr');
+    return row ? row.dataset.stopId : undefined;
   }
 }
 
 async function createMaps() {
   // Store the base heading text so we can append direction names later
-  const headingEl = jQuery('#rt_positions_heading');
-  if (headingEl.length && !headingEl.data('base-label')) {
-    headingEl.data('base-label', headingEl.text().trim());
+  const headingEl = document.querySelector('#rt_positions_heading');
+  if (headingEl && !headingEl.dataset.baseLabel) {
+    headingEl.dataset.baseLabel = headingEl.textContent.trim();
   }
 
   for (const id of Object.keys(geojsons)) {
@@ -1605,9 +1523,9 @@ async function createMaps() {
   // If a stop was already selected before maps loaded (e.g. from URL param), apply the map highlight now
   const initialStopId = new URLSearchParams(window.location.search).get('stop_id');
   if (initialStopId) {
-    const visibleTimetable = jQuery('.timetable:visible').first();
-    if (visibleTimetable.length) {
-      const timetableId = visibleTimetable.data('timetable-id');
+    const visibleTimetable = document.querySelector('.timetable:not([style*="display: none"])');
+    if (visibleTimetable) {
+      const timetableId = visibleTimetable.dataset.timetableId;
       if (maps[timetableId]) {
         maps[timetableId].setFilter('stops-highlighted', [
           'any',
@@ -1620,10 +1538,10 @@ async function createMaps() {
 
   // Set initial heading with current direction name
   if (filterVehiclesByDirection) {
-    const visibleTimetable = jQuery('.timetable:visible');
-    const initialDirectionName = visibleTimetable.data('direction-name');
-    if (headingEl.length && headingEl.data('base-label') && initialDirectionName) {
-      headingEl.text(`${headingEl.data('base-label')} (${initialDirectionName})`);
+    const visibleTimetable = document.querySelector('.timetable:not([style*="display: none"])');
+    const initialDirectionName = visibleTimetable ? visibleTimetable.dataset.directionName : null;
+    if (headingEl && headingEl.dataset.baseLabel && initialDirectionName) {
+      headingEl.textContent = `${headingEl.dataset.baseLabel} (${initialDirectionName})`;
     }
   }
 
@@ -1681,7 +1599,7 @@ async function createMaps() {
   });
 
   // Add document-level escape key handler to close popups
-  jQuery(document).on('keydown.timetableMap', function (event) {
+  document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       let closedPopup = false;
 
