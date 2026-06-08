@@ -653,6 +653,15 @@ details[open] summary span.bi {
   line-height: 1.25rem;
 }
 
+.btn {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
 .btn-art-green {
   display: flex;
   align-items: center;
@@ -1171,10 +1180,6 @@ fieldset.radio-group:has(input:focus) {
   z-index: 10;
 }
 
-.z-40 {
-  z-index: 40;
-}
-
 .z-50 {
   z-index: 50;
 }
@@ -1189,6 +1194,10 @@ fieldset.radio-group:has(input:focus) {
 
 .z-\[6\] {
   z-index: 6;
+}
+
+.z-\[999999\] {
+  z-index: 999999;
 }
 
 .order-1 {
@@ -1529,6 +1538,10 @@ fieldset.radio-group:has(input:focus) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .flex-row {
   flex-direction: row;
 }
@@ -1630,16 +1643,6 @@ fieldset.radio-group:has(input:focus) {
 .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-opacity: 1;
   border-color: rgb(226 232 240 / var(--tw-divide-opacity, 1));
-}
-
-.divide-purple-800 > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(107 33 168 / var(--tw-divide-opacity, 1));
-}
-
-.divide-slate-400 > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(148 163 184 / var(--tw-divide-opacity, 1));
 }
 
 .self-stretch {
@@ -2384,11 +2387,6 @@ fieldset.radio-group:has(input:focus) {
   background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-aux-gray:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:text-aux-black:hover {
   --tw-text-opacity: 1;
   color: rgb(28 38 52 / var(--tw-text-opacity, 1));
@@ -2489,19 +2487,9 @@ fieldset.radio-group:has(input:focus) {
   border-color: rgb(0 93 170 / var(--tw-border-opacity, 1));
 }
 
-.hocus\:bg-art-green:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
-}
-
 .hocus\:bg-aux-gray:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(226 236 246 / var(--tw-bg-opacity, 1));
-}
-
-.hocus\:bg-art-green:focus {
-  --tw-bg-opacity: 1;
-  background-color: rgb(74 169 30 / var(--tw-bg-opacity, 1));
 }
 
 .hocus\:bg-aux-gray:focus {
