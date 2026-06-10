@@ -96,7 +96,10 @@ export const handler = async (event) => {
     //Authenticate request
     const secretName = process.env.API_KEY_SECRET_NAME;
     const apiKey = await getApiKey(secretName);
-    if (!authenticate(event, apiKey)) {
+    // To accommodate Bedrock run_lambda triggers
+    const payload = event.JobType === "run_lambda" ? event.ETLJob.etl_tasks : event;
+    console.log(payload);
+    if (!authenticate(payload, apiKey)) {
       return respond(401, { message: "Unauthorized" });
     }
 
@@ -104,7 +107,7 @@ export const handler = async (event) => {
     const branchName = process.env.branch;
     const cloudfrontId = process.env.cloudfrontId;
 
-    const segments = event.rawPath.split("/");
+    const segments = payload.rawPath.split("/");
     const route = segments[1];
     let jobId;
 
