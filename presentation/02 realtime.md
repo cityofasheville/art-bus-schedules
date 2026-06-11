@@ -59,8 +59,6 @@ script.
   const gtfsRealtimeUrls     = !{JSON.stringify(gtfsRealtimeUrls)};
 ```
 
-The `!{ }` syntax is Pug's unescaped interpolation — it writes the raw JSON string directly into the script block.
-
 ---
 
 ### 3. Using the Data in the Widget Template (`realtimedepartures_widget.pug`)
