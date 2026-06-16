@@ -93,6 +93,7 @@
   "outputFormat": "html",
   "showMap": true,
   "showOnlyTimepoint": false,
+  "showCalendarExceptions": false,
   "useParentStation": true,
   "verbose": true,
   "sqlitePath": "src/tmp/gtfs.db",
