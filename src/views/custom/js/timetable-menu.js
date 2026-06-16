@@ -204,12 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let default_timetable_day;
   let default_direction_id = 0;
 
-  // For testing purposes, you can uncomment the line below to simulate a holiday
-  // window.holidayDates.push(+todayStr);
-  console.log('Holiday dates:', window.holidayDates);
-  console.log('Today string:', todayStr);
-  console.log('Is today a holiday?', window.holidayDates.includes(+todayStr));
-
   const isClosedForHoliday = tday_xmas_dates_closed.includes(+todayStr);
 
   if (isClosedForHoliday) {
