@@ -185,6 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const initialTimepoints = getUrlParam('timepoints');
   const initialStopId = getUrlParam('stop_id');
 
+  const tday_xmas_dates_closed = [
+    20261126, 20271125, 20281123, 20291122, 20301128, 20311127, 20321125, 20331124, 20341123,
+    20351122, 20361127, 20261225, 20271225, 20281225, 20291225, 20301225, 20311225, 20321225,
+    20331225, 20341225, 20351225, 20361225,
+  ];
+
   const today = new Date();
   const today_day_of_week = today.getDay();
   const todayStr =
@@ -192,31 +198,44 @@ document.addEventListener('DOMContentLoaded', () => {
     (today.getMonth() + 1).toString().padStart(2, '0') +
     today.getDate().toString().padStart(2, '0');
 
+  // manually override for testing holidays - uncomment the line below to simulate that today is a holiday (e.g., Christmas)
+  // const todayStr = '20261126';
+
   let default_timetable_day;
   let default_direction_id = 0;
 
-  // For testing purposes, you can uncomment the line below to simulate a holiday
-  // window.holidayDates.push(todayStr);
+  const isClosedForHoliday = tday_xmas_dates_closed.includes(+todayStr);
 
-  const isHoliday =
-    typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(+todayStr);
-
-  if (isHoliday || today_day_of_week === 0) {
-    default_timetable_day = 'Sun';
-  } else if (today_day_of_week === 6) {
-    default_timetable_day = 'Sat';
-  } else {
-    default_timetable_day = 'Mon-Fri';
-  }
-
-  if (isHoliday) {
+  if (isClosedForHoliday) {
     const holidayNoteEl = document.getElementById('holiday_note');
     if (holidayNoteEl) {
       holidayNoteEl.className =
-        'p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 rounded text-art-black';
+        'p-4 mb-6 border-l-4 border-red-500 bg-red-50 rounded text-art-black';
       holidayNoteEl.innerHTML =
-        '<div class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-yellow-600" aria-hidden="true"></i><strong>Holiday Schedule in Effect Today</strong></div>' +
-        '<p class="mt-1 mb-0 text-sm">Today is an ART system holiday. Buses are operating on a Sunday/Holiday schedule.</p>';
+        '<div class="flex items-center gap-2"><i class="bi bi-x-circle-fill text-red-600" aria-hidden="true"></i><strong>Service Not Provided Today</strong></div>' +
+        '<p class="mt-1 mb-0 text-sm">Today is a major holiday. ART bus service is not provided.</p>';
+    }
+  } else {
+    const isHolidaySundaySchedule =
+      typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(+todayStr);
+
+    if (isHolidaySundaySchedule || today_day_of_week === 0) {
+      default_timetable_day = 'Sun';
+    } else if (today_day_of_week === 6) {
+      default_timetable_day = 'Sat';
+    } else {
+      default_timetable_day = 'Mon-Fri';
+    }
+
+    if (isHolidaySundaySchedule) {
+      const holidayNoteEl = document.getElementById('holiday_note');
+      if (holidayNoteEl) {
+        holidayNoteEl.className =
+          'p-4 mb-6 border-l-4 border-yellow-500 bg-yellow-50 rounded text-art-black';
+        holidayNoteEl.innerHTML =
+          '<div class="flex items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-yellow-600" aria-hidden="true"></i><strong>Holiday Schedule in Effect Today</strong></div>' +
+          '<p class="mt-1 mb-0 text-sm">Today is an ART system holiday. Buses are operating on a Sunday/Holiday schedule.</p>';
+      }
     }
   }
 

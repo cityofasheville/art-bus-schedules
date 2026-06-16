@@ -136,6 +136,9 @@ div(class="w-full max-w-screen-lg mx-auto px-6 py-8")
             if config.showCalendarExceptions && timetable.calendarDates.excludedDates.length
               .excluded-dates= `${config.serviceNotProvidedOnText}: ${timetable.calendarDates.excludedDates.join(', ')}`
 
+            if !config.showCalendarExceptions
+              div= `Service not provided on: Thanksgiving Day, Christmas Day.`
+
       
   script.
     window.holidayDates = !{JSON.stringify(config.holidayDates || [])};
