@@ -215,8 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
         '<div class="flex items-center gap-2"><i class="bi bi-x-circle-fill text-red-600" aria-hidden="true"></i><strong>Service Not Provided Today</strong></div>' +
         '<p class="mt-1 mb-0 text-sm">Today is a major holiday. ART bus service is not provided.</p>';
     }
-    // If service is not provided, we can default to showing the Sunday/Holiday schedule for informational purposes
-    default_timetable_day = 'Sun';
   } else {
     const isHolidaySundaySchedule =
       typeof window.holidayDates !== 'undefined' && window.holidayDates.includes(+todayStr);
