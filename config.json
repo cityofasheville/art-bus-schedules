@@ -2,7 +2,7 @@
   "agencies": [
     {
       "agencyKey": "ARTtransit",
-      "url": "https://drive.google.com/uc?export=download&id=1-VUXKCA7WmXrlQ1LJE0EjCuhce0w7-jJ",
+      "url": "https://data.trilliumtransit.com/gtfs/asheville-nc-us/asheville-nc-us.zip",
       "realtimeAlerts": {
         "url": "https://art-realtime-api.ashevillenc.gov/alerts"
       },
