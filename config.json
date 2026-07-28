@@ -83,7 +83,7 @@
     {
       "template": "wifi_full.pug",
       "output": "wifi/index.html",
-      "title": "Wi-Fi and Fare-free Days"
+      "title": "Wi-Fi on ART buses"
     }
   ],
   "webpageTitle": "Asheville Rides Transit",
