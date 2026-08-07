@@ -66,6 +66,33 @@ async function getJobStatus(appId, branchName, jobId) {
   return status;
 }
 
+// Amplify job statuses that mean the build is no longer in progress.
+const TERMINAL_STATUSES = ["SUCCEED", "FAILED", "CANCELLED"];
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Lambda execution time to leave over so we can still return a response
+// instead of being killed mid-poll.
+const TIMEOUT_BUFFER_MS = 10_000;
+const POLL_INTERVAL_MS = 15_000;
+
+// Poll until the job reaches a terminal status or we run out of execution time.
+// Returns { status, timedOut } - timedOut is true when the build is still running.
+async function waitForJob(appId, branchName, jobId, remainingTimeMs) {
+  let status = await getJobStatus(appId, branchName, jobId);
+
+  while (!TERMINAL_STATUSES.includes(status)) {
+    if (remainingTimeMs() < POLL_INTERVAL_MS + TIMEOUT_BUFFER_MS) {
+      console.log(`Ran out of time waiting on job ${jobId}, last status: ${status}`);
+      return { status, timedOut: true };
+    }
+    await sleep(POLL_INTERVAL_MS);
+    status = await getJobStatus(appId, branchName, jobId);
+  }
+
+  return { status, timedOut: false };
+}
+
 async function invalidateCache(distributionId) {
   const paths = ["/*"]; // Invalidate all paths. Adjust as needed.
   const input = {
@@ -80,24 +107,22 @@ async function invalidateCache(distributionId) {
     },
   };
 
-  try {
-    const command = new CreateInvalidationCommand(input);
-    const response = await cloudfrontClient.send(command);
-    console.log("Invalidation created successfully:", response.Invalidation.Id);
-    return response;
-  } catch (error) {
-    console.error("Error creating invalidation:", error);
-  }
+  // Errors propagate to the caller so it can decide whether a failed purge is fatal.
+  const command = new CreateInvalidationCommand(input);
+  const response = await cloudfrontClient.send(command);
+  console.log("Invalidation created successfully:", response.Invalidation.Id);
+  return response.Invalidation.Id;
 }
 
-export const handler = async (event) => {
+export const handler = async (event, context) => {
   try {
 
     //Authenticate request
     const secretName = process.env.API_KEY_SECRET_NAME;
     const apiKey = await getApiKey(secretName);
     // To accommodate Bedrock run_lambda triggers
-    const payload = event.JobType === "run_lambda" ? event.ETLJob.etl_tasks : event;
+    const isRunLambda = event.JobType === "run_lambda";
+    const payload = isRunLambda ? event.ETLJob.etl_tasks[0] : event;
     console.log(payload);
     if (!authenticate(payload, apiKey)) {
       return respond(401, { message: "Unauthorized" });
@@ -128,6 +153,61 @@ export const handler = async (event) => {
       }
     }
 
+    // Start-and-wait route - trigger a new build (or pick up the existing running
+    // job), then poll until it finishes before responding. Intended for Bedrock
+    // run_lambda, which invokes this function directly and so is not subject to the
+    // ~30s API Gateway integration timeout that would kill this over HTTP.
+    if (route === "start-and-wait") {
+      let jobExists = false;
+      try {
+        jobId = await startBuild(amplifyId, branchName);
+      } catch (error) {
+        if (error.name !== "LimitExceededException") throw error;
+        jobId = await getRunningJob(amplifyId, branchName);
+        if (!jobId) {
+          return respond(409, { message: "A build is already running but could not retrieve its ID." });
+        }
+        jobExists = true;
+        console.log("A build is already pending or running, waiting on jobId:", jobId);
+      }
+
+      // Bound polling by the Lambda's own remaining execution time.
+      // Falls back to a fixed window for local testing.
+      const localDeadline = Date.now() + 15 * 60 * 1000;
+      const remainingTimeMs = context?.getRemainingTimeInMillis
+        ? () => context.getRemainingTimeInMillis()
+        : () => localDeadline - Date.now();
+
+      const { status, timedOut } = await waitForJob(amplifyId, branchName, jobId, remainingTimeMs);
+
+      // Still building - hand the jobId back so the caller can poll /status/{jobId}
+      if (timedOut) {
+        return respond(202, { message: "Build is still in progress.", jobId, status, jobExists });
+      }
+
+      if (status !== "SUCCEED") {
+        return respond(500, { message: "Build did not succeed.", jobId, status, jobExists });
+      }
+      
+      // The build already succeeded, so a failed purge must not fail the request -
+      // a stale cache is far cheaper than the caller retrying the whole rebuild.
+      let invalidationId = null;
+      try {
+        invalidationId = await invalidateCache(cloudfrontId);
+      } catch (error) {
+        console.error("Build succeeded but cache invalidation failed:", error);
+      }
+
+      return respond(200, {
+        message: "Build completed successfully.",
+        jobId,
+        status,
+        jobExists,
+        invalidated: Boolean(invalidationId),
+        invalidationId,
+      });
+    }
+
     // Status route - check status of running job
     if (route === "status") {
       jobId = segments[2];
@@ -139,8 +219,8 @@ export const handler = async (event) => {
     // Invalidate route - trigger a CloudFront cache invalidation
     if (route === "invalidate") {
       try {
-        const result = await invalidateCache(cloudfrontId);
-        return respond(200, { message: "Cache invalidation started", invalidationId: result.Invalidation.Id });
+        const invalidationId = await invalidateCache(cloudfrontId);
+        return respond(200, { message: "Cache invalidation started", invalidationId });
       } catch (error) {
         console.error("Cache invalidation failed:", error);
         return respond(500, { message: "Cache invalidation failed" });
