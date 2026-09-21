@@ -103,5 +103,6 @@
   "cssPath": "/css/",
   "jsPath": "/js/",
   "customHomePagePath": "customhome/",
-  "customMapPagePath": "routes-and-schedules/"
+  "customMapPagePath": "routes-and-schedules/",
+  "systemMapUrl": "https://drive.google.com/file/d/1orE768cKEMdb2J1uIVwMULzq3r4B1uuL/view"
 }
