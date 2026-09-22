@@ -1,10 +1,13 @@
 // Populate the gtfs-to-html schema from the imported GTFS feed;
-export const INSERT_TIMETABLES_QUERY = `INSERT INTO timetables
+export const INSERT_TIMETABLES_QUERY = `INSERT INTO timetables(timetable_id, route_id, direction_id, start_date, end_date, 
+                monday, tuesday, wednesday, thursday, friday, saturday, sunday, 
+                start_time, end_time, timetable_label, service_notes, orientation, 
+                timetable_page_id, timetable_sequence, direction_name, 
+                include_exceptions, show_trip_continuation)
                 SELECT ROW_NUMBER() OVER (ORDER BY route_id,direction_id,service_description) AS timetable_id
                       ,ttbls.route_id,ttbls.direction_id,ttbls.start_date,ttbls.end_date,ttbls.monday,ttbls.tuesday,ttbls.wednesday,ttbls.thursday
-                      ,ttbls.friday,ttbls.saturday,ttbls.sunday,ttbls.start_time,ttbls.start_timestamp,ttbls.end_time,ttbls.end_timestamp
-                      ,ttbls.timetable_label,ttbls.service_notes,ttbls.orientation,ttbls.timetable_page_id,ttbls.timetable_sequence,ttbls.direction_name
-                      ,ttbls.include_exceptions,ttbls.show_trip_continuation
+                      ,ttbls.friday,ttbls.saturday,ttbls.sunday,ttbls.start_time,ttbls.end_time,ttbls.timetable_label,ttbls.service_notes
+                      ,ttbls.orientation,ttbls.timetable_page_id,ttbls.timetable_sequence,ttbls.direction_name,ttbls.include_exceptions,ttbls.show_trip_continuation
                 FROM
                     (
                       SELECT DISTINCT ca.service_description,r.route_id,d.direction_id,c.start_date,c.end_date,c.monday,c.tuesday,c.wednesday,c.thursday
