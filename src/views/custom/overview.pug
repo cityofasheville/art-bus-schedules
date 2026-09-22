@@ -16,6 +16,8 @@ div(class="w-full max-w-screen-xl mx-auto px-4 py-8")
         label(class="relative btn-gray text-center cursor-pointer" for="radio_view_map")
           input(class="opacity-0 absolute top-0 left-0" type="radio" name="viewMode" value="map" id="radio_view_map")
           span Map View
+  div(class="w-full max-w-screen-xl mx-auto py-2 entry-content")
+    a(href=config.systemMapUrl target="_blank" class="text-sm py-2") Printable System Map (PDF)
 
 div(id="all_routes_table" class="w-full max-w-screen-xl mx-auto px-4 mb-12")
   table(class="w-full border border-collapse")
